@@ -1,1 +1,1 @@
--- Default command registrations are composed from server/modules/commands/*.
+-- Default command registrations are composed from server/modules/commands/registrations/*.
