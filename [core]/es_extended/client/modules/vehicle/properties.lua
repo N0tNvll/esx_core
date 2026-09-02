@@ -27,9 +27,9 @@ AddStateBagChangeHandler("VehicleProperties", nil, function(bagName, _, value)
         return
     end
 
-    ESX.Game.SetVehicleProperties(vehicle, value)
+    xLib.game.setVehicleProperties(vehicle, value)
 end)
 
-ESX.RegisterClientCallback("esx:GetVehicleType", function(cb, model)
+xLib.callback.registerCompat("esx:GetVehicleType", function(cb, model)
     cb(ESX.GetVehicleTypeClient(model))
 end)

@@ -4,21 +4,22 @@ function Core.PlayerClass.AttachAccounts(self)
     function self.setMoney(money)
         assert(type(money) == "number", "money should be number!")
         money = ESX.Math.Round(money)
-        self.setAccountMoney("money", money)
+        return self.setAccountMoney("money", money)
     end
 
     function self.getMoney()
-        return self.getAccount("money").money
+        local account = self.getAccount("money")
+        return account and account.money or 0
     end
 
     function self.addMoney(money, reason)
         money = ESX.Math.Round(money)
-        self.addAccountMoney("money", money, reason)
+        return self.addAccountMoney("money", money, reason)
     end
 
     function self.removeMoney(money, reason)
         money = ESX.Math.Round(money)
-        self.removeAccountMoney("money", money, reason)
+        return self.removeAccountMoney("money", money, reason)
     end
 
 
@@ -62,6 +63,7 @@ function Core.PlayerClass.AttachAccounts(self)
 
                 self.triggerEvent("esx:setAccountMoney", account)
                 TriggerEvent("esx:setAccountMoney", self.source, accountName, money, reason)
+                return true
             else
                 error(("Tried To Set Invalid Account ^5%s^1 For Player ^5%s^1!"):format(accountName, self.playerId))
             end
@@ -84,6 +86,7 @@ function Core.PlayerClass.AttachAccounts(self)
 
                 self.triggerEvent("esx:setAccountMoney", account)
                 TriggerEvent("esx:addAccountMoney", self.source, accountName, money, reason)
+                return true
             else
                 error(("Tried To Set Add To Invalid Account ^5%s^1 For Player ^5%s^1!"):format(accountName, self.playerId))
             end
@@ -111,6 +114,7 @@ function Core.PlayerClass.AttachAccounts(self)
 
                 self.triggerEvent("esx:setAccountMoney", account)
                 TriggerEvent("esx:removeAccountMoney", self.source, accountName, money, reason)
+                return true
             else
                 error(("Tried To Set Add To Invalid Account ^5%s^1 For Player ^5%s^1!"):format(accountName, self.playerId))
             end

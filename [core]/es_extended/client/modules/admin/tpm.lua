@@ -7,7 +7,7 @@ RegisterNetEvent("esx:tpm", function()
     local GetBlipInfoIdCoord = GetBlipInfoIdCoord
     local GetVehiclePedIsIn = GetVehiclePedIsIn
 
-    ESX.TriggerServerCallback("esx:isUserAdmin", function(admin)
+    xLib.callback("esx:isUserAdmin", false, function(admin)
         if not admin then
             return
         end

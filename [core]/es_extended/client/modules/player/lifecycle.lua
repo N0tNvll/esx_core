@@ -1,5 +1,5 @@
 RegisterNetEvent("esx:requestModel", function(model)
-    ESX.Streaming.RequestModel(model)
+    xLib.streaming.requestModel(model)
 end)
 
 RegisterNetEvent("esx:playerLoaded", function(xPlayer, _, skin)
@@ -39,7 +39,7 @@ RegisterNetEvent("esx:playerLoaded", function(xPlayer, _, skin)
     end
 
     Actions:Init()
-    StartPointsLoop()
+    xLib.points.startLoop()
     StartServerSyncLoops()
     NetworkSetLocalPlayerSyncLookAt(true)
 end)
@@ -106,6 +106,10 @@ ESX.SecureNetEvent("esx:setAccountMoney", function(account)
 end)
 
 ESX.SecureNetEvent("esx:setJob", function(Job)
+    ESX.SetPlayerData("job", Job)
+end)
+
+ESX.SecureNetEvent("esx:jobDataRefreshed", function(Job)
     ESX.SetPlayerData("job", Job)
 end)
 

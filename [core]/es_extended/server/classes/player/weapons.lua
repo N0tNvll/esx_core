@@ -46,7 +46,10 @@ function Core.PlayerClass.AttachWeapons(self)
             GiveWeaponToPed(GetPlayerPed(self.source), joaat(weaponName), ammo, false, false)
             self.triggerEvent("esx:addInventoryItem", weaponLabel, false, true)
             self.triggerEvent("esx:addLoadoutItem", weaponName, weaponLabel, ammo)
+            return true
         end
+
+        return false
     end
 
     function self.addWeaponComponent(weaponName, weaponComponent)
@@ -61,9 +64,12 @@ function Core.PlayerClass.AttachWeapons(self)
                     local componentHash = ESX.GetWeaponComponent(weaponName, weaponComponent).hash
                     GiveWeaponComponentToPed(GetPlayerPed(self.source), joaat(weaponName), componentHash)
                     self.triggerEvent("esx:addInventoryItem", component.label, false, true)
+                    return true
                 end
             end
         end
+
+        return false
     end
 
     function self.addWeaponAmmo(weaponName, ammoCount)
@@ -72,14 +78,17 @@ function Core.PlayerClass.AttachWeapons(self)
         if weapon then
             weapon.ammo = weapon.ammo + ammoCount
             SetPedAmmo(GetPlayerPed(self.source), joaat(weaponName), weapon.ammo)
+            return true
         end
+
+        return false
     end
 
     function self.updateWeaponAmmo(weaponName, ammoCount)
         local _, weapon = self.getWeapon(weaponName)
 
         if not weapon then
-            return
+            return false
         end
 
         weapon.ammo = ammoCount
@@ -90,6 +99,8 @@ function Core.PlayerClass.AttachWeapons(self)
                 self.removeWeapon(weaponName)
             end
         end
+
+        return true
     end
 
     function self.setWeaponTint(weaponName, weaponTintIndex)
@@ -102,8 +113,11 @@ function Core.PlayerClass.AttachWeapons(self)
                 self.loadout[loadoutNum].tintIndex = weaponTintIndex
                 self.triggerEvent("esx:setWeaponTint", weaponName, weaponTintIndex)
                 self.triggerEvent("esx:addInventoryItem", weaponObject.tints[weaponTintIndex], false, true)
+                return true
             end
         end
+
+        return false
     end
 
     function self.getWeaponTint(weaponName)
@@ -120,7 +134,7 @@ function Core.PlayerClass.AttachWeapons(self)
         local weaponLabel, playerPed <const> = nil, GetPlayerPed(self.source)
 
         if not playerPed then
-            return error("xPlayer.removeWeapon ^5invalid^1 player ped!")
+            error("xPlayer.removeWeapon ^5invalid^1 player ped!")
         end
 
         for k, v in ipairs(self.loadout) do
@@ -143,7 +157,10 @@ function Core.PlayerClass.AttachWeapons(self)
         if weaponLabel then
             self.triggerEvent("esx:removeInventoryItem", weaponLabel, false, true)
             self.triggerEvent("esx:removeLoadoutItem", weaponName, weaponLabel)
+            return true
         end
+
+        return false
     end
 
     function self.removeWeaponComponent(weaponName, weaponComponent)
@@ -163,9 +180,12 @@ function Core.PlayerClass.AttachWeapons(self)
 
                     self.triggerEvent("esx:removeWeaponComponent", weaponName, weaponComponent)
                     self.triggerEvent("esx:removeInventoryItem", component.label, false, true)
+                    return true
                 end
             end
         end
+
+        return false
     end
 
     function self.removeWeaponAmmo(weaponName, ammoCount)
@@ -174,7 +194,10 @@ function Core.PlayerClass.AttachWeapons(self)
         if weapon then
             weapon.ammo = weapon.ammo - ammoCount
             SetPedAmmo(GetPlayerPed(self.source), joaat(weaponName), weapon.ammo)
+            return true
         end
+
+        return false
     end
 
     function self.hasWeaponComponent(weaponName, weaponComponent)

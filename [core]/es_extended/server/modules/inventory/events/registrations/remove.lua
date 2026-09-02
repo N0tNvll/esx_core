@@ -68,7 +68,7 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
 
         local _, weaponObject = ESX.GetWeapon(itemName)
         local weaponPickupLabel = ""
-        local components = ESX.Table.Clone(weapon.components)
+        local components = xLib.table.clone(weapon.components)
 
         xPlayer.removeWeapon(itemName)
 

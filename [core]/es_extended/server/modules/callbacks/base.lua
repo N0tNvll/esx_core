@@ -1,4 +1,4 @@
-local function buildPlayerData(xPlayer)
+local function getPlayerData(xPlayer)
     return {
         identifier = xPlayer.identifier,
         accounts = xPlayer.getAccounts(),
@@ -11,35 +11,39 @@ local function buildPlayerData(xPlayer)
     }
 end
 
-ESX.RegisterServerCallback("esx:getPlayerData", function(source, cb)
+xLib.callback.registerCompat("esx:getPlayerData", function(source, cb)
     local xPlayer = ESX.GetPlayerFromId(source)
 
     if not xPlayer then
         return
     end
 
-    cb(buildPlayerData(xPlayer))
+    cb(getPlayerData(xPlayer))
 end)
 
-ESX.RegisterServerCallback("esx:isUserAdmin", function(source, cb)
+xLib.callback.registerCompat("esx:isUserAdmin", function(source, cb)
     cb(Core.IsPlayerAdmin(source))
 end)
 
-ESX.RegisterServerCallback("esx:getGameBuild", function(_, cb)
+xLib.callback.registerCompat("esx:getGameBuild", function(_, cb)
     cb(tonumber(GetConvar("sv_enforceGameBuild", "1604")))
 end)
 
-ESX.RegisterServerCallback("esx:getOtherPlayerData", function(_, cb, target)
+xLib.callback.registerCompat("esx:getOtherPlayerData", function(source, cb, target)
+    if not Core.IsPlayerAdmin(source) then
+        return cb(nil)
+    end
+
     local xPlayer = ESX.GetPlayerFromId(target)
 
     if not xPlayer then
-        return
+        return cb(nil)
     end
 
-    cb(buildPlayerData(xPlayer))
+    cb(getPlayerData(xPlayer))
 end)
 
-ESX.RegisterServerCallback("esx:getPlayerNames", function(source, cb, players)
+xLib.callback.registerCompat("esx:getPlayerNames", function(source, cb, players)
     if type(players) ~= "table" then
         return cb({})
     end
@@ -54,7 +58,9 @@ ESX.RegisterServerCallback("esx:getPlayerNames", function(source, cb, players)
     cb(players)
 end)
 
-ESX.RegisterServerCallback("esx:spawnVehicle", function(source, cb, vehData)
+xLib.callback.registerCompat("esx:spawnVehicle", function(source, cb, vehData)
+    print('[^3WARNING^7] esx:spawnVehicle callback is deprecated and will be removed in a future update.')
+
     vehData = type(vehData) == "table" and vehData or {}
 
     local ped = GetPlayerPed(source)

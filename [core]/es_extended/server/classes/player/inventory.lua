@@ -36,7 +36,10 @@ function Core.PlayerClass.AttachInventory(self)
 
             TriggerEvent("esx:onAddInventoryItem", self.source, item.name, item.count)
             self.triggerEvent("esx:addInventoryItem", item.name, item.count)
+            return true
         end
+
+        return false
     end
 
     function self.removeInventoryItem(itemName, count)
@@ -53,11 +56,16 @@ function Core.PlayerClass.AttachInventory(self)
 
                     TriggerEvent("esx:onRemoveInventoryItem", self.source, item.name, item.count)
                     self.triggerEvent("esx:removeInventoryItem", item.name, item.count)
+                    return true
                 end
+
+                return false
             else
                 error(("Player ID:^5%s Tried remove a Invalid count -> %s of %s"):format(self.playerId, count, itemName))
             end
         end
+
+        return false
     end
 
     function self.setInventoryItem(itemName, count)
@@ -71,11 +79,13 @@ function Core.PlayerClass.AttachInventory(self)
             end
 
             if count > item.count then
-                self.addInventoryItem(item.name, count - item.count)
+                return self.addInventoryItem(item.name, count - item.count)
             else
-                self.removeInventoryItem(item.name, item.count - count)
+                return self.removeInventoryItem(item.name, item.count - count)
             end
         end
+
+        return false
     end
 
     function self.getWeight()

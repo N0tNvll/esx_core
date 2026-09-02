@@ -1,3 +1,20 @@
+local function decodeJsonObject(value, fallback)
+    if type(value) == "table" then
+        return value
+    end
+
+    if type(value) ~= "string" or value == "" then
+        return fallback
+    end
+
+    local ok, decoded = pcall(json.decode, value)
+    if not ok or type(decoded) ~= "table" then
+        return fallback
+    end
+
+    return decoded
+end
+
 function loadESXPlayer(identifier, playerId, isNew)
     local userData = {
         accounts = {},
@@ -16,7 +33,8 @@ function loadESXPlayer(identifier, playerId, isNew)
     local result = MySQL.prepare.await(Core.PlayerSession.loadPlayerQuery, { identifier })
 
     if not result then
-        return DropPlayer(playerId, "there was an error loading your character!\nError code: user-data-missing\n\nYour character data could not be loaded. Please come back later or report this problem to the server administration team.")
+        print(("[^1ERROR^7] esx_core could not load data for identifier ^5%s^7"):format(identifier))
+        return DropPlayer(playerId --[[@as string]], "There was an error loading your character!\nError code: data-load-failed\n\nYour character data could not be retrieved. Please reconnect, and contact the server administration team if this keeps happening.")
     end
 
     local accounts = (result.accounts and result.accounts ~= "") and json.decode(result.accounts) or {}
@@ -56,8 +74,8 @@ function loadESXPlayer(identifier, playerId, isNew)
         grade_label = gradeObject.label,
         grade_salary = gradeObject.salary,
 
-        skin_male = gradeObject.skin_male and json.decode(gradeObject.skin_male) or {},
-        skin_female = gradeObject.skin_female and json.decode(gradeObject.skin_female) or {},
+        skin_male = decodeJsonObject(gradeObject.skin_male, {}),
+        skin_female = decodeJsonObject(gradeObject.skin_female, {}),
     }
 
     if not Config.CustomInventory then
@@ -114,7 +132,7 @@ function loadESXPlayer(identifier, playerId, isNew)
     end
 
     userData.coords = (result.position and result.position ~= "") and json.decode(result.position) or Config.DefaultSpawns[ESX.Math.Random(1, #Config.DefaultSpawns)]
-    userData.skin = (result.skin and result.skin ~= "") and json.decode(result.skin) or { sex = result.sex == "f" and 1 or 0 }
+    userData.skin = decodeJsonObject(result.skin, { sex = result.sex == "f" and 1 or 0 })
     userData.metadata = (result.metadata and result.metadata ~= "") and json.decode(result.metadata) or {}
 
     local xPlayer = CreateExtendedPlayer(playerId, identifier, userData.ssn, userData.group, userData.accounts, userData.inventory, userData.weight, userData.job, userData.loadout, GetPlayerName(playerId), userData.coords, userData.metadata)

@@ -70,7 +70,7 @@ RegisterNetEvent("esx:giveInventoryItem", function(target, itemType, itemName, i
 
         local _, weaponObject = ESX.GetWeapon(itemName)
         local ammoCount = weapon.ammo
-        local weaponComponents = ESX.Table.Clone(weapon.components)
+        local weaponComponents = xLib.table.clone(weapon.components)
         local weaponTint = weapon.tintIndex
 
         sourceXPlayer.removeWeapon(itemName)

@@ -44,7 +44,7 @@ local function noclipThread()
 end
 
 RegisterNetEvent("esx:noclip", function()
-    ESX.TriggerServerCallback("esx:isUserAdmin", function(admin)
+    xLib.callback("esx:isUserAdmin", false, function(admin)
         if not admin then
             return
         end

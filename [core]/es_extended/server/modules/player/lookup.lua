@@ -20,7 +20,7 @@ function ESX.GetExtendedPlayers(key, val, minimal)
 
     if not key then
         if not minimal then
-            return ESX.Table.ToArray(players)
+            return xLib.table.toArray(players)
         end
 
         local xPlayers = {}

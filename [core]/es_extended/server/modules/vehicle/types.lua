@@ -25,7 +25,7 @@ function ESX.GetVehicleType(model, player, cb)
         return resolve(Core.vehicleTypesByModel[model])
     end
 
-    ESX.TriggerClientCallback(player, "esx:GetVehicleType", function(vehicleType)
+    xLib.callback("esx:GetVehicleType", player, function(vehicleType)
         Core.vehicleTypesByModel[model] = vehicleType
         resolve(vehicleType)
     end, model)

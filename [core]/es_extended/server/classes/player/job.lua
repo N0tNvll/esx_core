@@ -1,5 +1,32 @@
 Core.PlayerClass = Core.PlayerClass or {}
 
+local function copyJob(job)
+    local copiedJob = {}
+
+    for key, value in pairs(job) do
+        copiedJob[key] = value
+    end
+
+    return copiedJob
+end
+
+local function decodeJobSkin(value)
+    if type(value) == "table" then
+        return value
+    end
+
+    if type(value) ~= "string" or value == "" then
+        return {}
+    end
+
+    local ok, decoded = pcall(json.decode, value)
+    if not ok or type(decoded) ~= "table" then
+        return {}
+    end
+
+    return decoded
+end
+
 function Core.PlayerClass.AttachJob(self)
     function self.getJob()
         return self.job
@@ -35,14 +62,48 @@ function Core.PlayerClass.AttachJob(self)
             grade_label = gradeObject.label,
             grade_salary = gradeObject.salary,
 
-            skin_male = gradeObject.skin_male and json.decode(gradeObject.skin_male) or {},
-            skin_female = gradeObject.skin_female and json.decode(gradeObject.skin_female) or {},
+            skin_male = decodeJobSkin(gradeObject.skin_male),
+            skin_female = decodeJobSkin(gradeObject.skin_female),
         }
 
         self.metadata.jobDuty = onDuty
         TriggerEvent("esx:setJob", self.source, self.job, lastJob)
         self.triggerEvent("esx:setJob", self.job, lastJob)
         Player(self.source).state:set("job", self.job, true)
+    end
+
+    function self.refreshJob()
+        local jobObject = ESX.Jobs[self.job.name]
+        local gradeObject = jobObject and jobObject.grades[tostring(self.job.grade)]
+
+        if not gradeObject then
+            self.setJob("unemployed", 0, false)
+            return false
+        end
+
+        local lastJob = copyJob(self.job)
+
+        self.job = {
+            id = jobObject.id,
+            name = jobObject.name,
+            label = jobObject.label,
+            type = jobObject.type,
+            onDuty = lastJob.onDuty,
+
+            grade = lastJob.grade,
+            grade_name = gradeObject.name,
+            grade_label = gradeObject.label,
+            grade_salary = gradeObject.salary,
+
+            skin_male = decodeJobSkin(gradeObject.skin_male),
+            skin_female = decodeJobSkin(gradeObject.skin_female),
+        }
+
+        TriggerEvent("esx:jobDataRefreshed", self.source, self.job, lastJob)
+        self.triggerEvent("esx:jobDataRefreshed", self.job, lastJob)
+        Player(self.source).state:set("job", self.job, true)
+
+        return true
     end
 
 end

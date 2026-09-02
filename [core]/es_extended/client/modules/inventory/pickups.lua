@@ -21,7 +21,7 @@ ESX.SecureNetEvent("esx:createPickup", function(pickupId, label, coords, itemTyp
 
     if itemType == "item_weapon" then
         local weaponHash = joaat(name)
-        ESX.Streaming.RequestWeaponAsset(weaponHash)
+        xLib.streaming.requestWeaponAsset(weaponHash)
         local pickupObject = CreateWeaponObject(weaponHash, 50, coords.x, coords.y, coords.z, true, 1.0, 0)
         SetWeaponObjectTintIndex(pickupObject, tintIndex)
 
@@ -34,7 +34,7 @@ ESX.SecureNetEvent("esx:createPickup", function(pickupId, label, coords, itemTyp
 
         setObjectProperties(pickupObject)
     else
-        ESX.Game.SpawnLocalObject("prop_money_bag_01", coords, setObjectProperties)
+        xLib.game.spawnLocalObject("prop_money_bag_01", coords, setObjectProperties)
     end
 end)
 
@@ -46,7 +46,7 @@ end)
 
 ESX.SecureNetEvent("esx:removePickup", function(pickupId)
     if pickups[pickupId] and pickups[pickupId].obj then
-        ESX.Game.DeleteObject(pickups[pickupId].obj)
+        xLib.game.deleteObject(pickups[pickupId].obj)
         pickups[pickupId] = nil
     end
 end)
@@ -67,13 +67,13 @@ CreateThread(function()
 
                     if distance < 1 then
                         if IsControlJustReleased(0, 38) then
-                            local _, closestDistance = ESX.Game.GetClosestPlayer(playerCoords)
+                            local _, closestDistance = xLib.game.getClosestPlayer(playerCoords)
 
                             if IsPedOnFoot(ESX.PlayerData.ped) and (closestDistance == -1 or closestDistance > 3) and not pickup.inRange then
                                 pickup.inRange = true
 
                                 local dict, anim = "weapons@first_person@aim_rng@generic@projectile@sticky_bomb@", "plant_floor"
-                                ESX.Streaming.RequestAnimDict(dict)
+                                xLib.streaming.requestAnimDict(dict)
                                 TaskPlayAnim(ESX.PlayerData.ped, dict, anim, 8.0, 1.0, 1000, 16, 0.0, false, false, false)
                                 RemoveAnimDict(dict)
                                 Wait(1000)
