@@ -1,0 +1,1 @@
+Core.PlayerSession = Core.PlayerSession or {}

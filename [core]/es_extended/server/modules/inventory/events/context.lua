@@ -1,0 +1,54 @@
+if Config.CustomInventory then
+    return
+end
+
+Core.InventoryEvents = Core.InventoryEvents or {}
+
+function Core.InventoryEvents.GetPositiveCount(count)
+    count = tonumber(count)
+
+    if not count then
+        return nil
+    end
+
+    count = ESX.Math.Round(count)
+
+    if count < 1 then
+        return nil
+    end
+
+    return count
+end
+
+function Core.InventoryEvents.WarnInvalidTransfer(playerId)
+    print(("[^3WARNING^7] Player Detected Cheating: ^5%s^7"):format(GetPlayerName(playerId)))
+end
+
+function Core.InventoryEvents.GetTransferPlayers(playerId, target)
+    target = tonumber(target)
+
+    if not target then
+        return nil, nil
+    end
+
+    local sourceXPlayer = ESX.GetPlayerFromId(playerId)
+    local targetXPlayer = ESX.GetPlayerFromId(target)
+
+    if not sourceXPlayer or not targetXPlayer then
+        return nil, nil
+    end
+
+    local sourcePed = GetPlayerPed(playerId)
+    local targetPed = GetPlayerPed(target)
+
+    if sourcePed == 0 or targetPed == 0 then
+        return nil, nil
+    end
+
+    local distance = #(GetEntityCoords(sourcePed) - GetEntityCoords(targetPed))
+    if distance > Config.DistanceGive then
+        return nil, nil
+    end
+
+    return sourceXPlayer, targetXPlayer
+end

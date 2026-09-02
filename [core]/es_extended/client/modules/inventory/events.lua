@@ -1,0 +1,102 @@
+if Config.CustomInventory then
+    return
+end
+
+ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotification)
+    for k, v in ipairs(ESX.PlayerData.inventory) do
+        if v.name == item then
+            ESX.UI.ShowInventoryItemNotification(true, v.label, count - v.count)
+            ESX.PlayerData.inventory[k].count = count
+            break
+        end
+    end
+
+    if showNotification then
+        ESX.UI.ShowInventoryItemNotification(true, item, count)
+    end
+end)
+
+ESX.SecureNetEvent("esx:removeInventoryItem", function(item, count, showNotification)
+    for i = 1, #ESX.PlayerData.inventory do
+        if ESX.PlayerData.inventory[i].name == item then
+            ESX.UI.ShowInventoryItemNotification(false, ESX.PlayerData.inventory[i].label, ESX.PlayerData.inventory[i].count - count)
+            ESX.PlayerData.inventory[i].count = count
+            break
+        end
+    end
+
+    if showNotification then
+        ESX.UI.ShowInventoryItemNotification(false, item, count)
+    end
+end)
+
+ESX.SecureNetEvent("esx:addLoadoutItem", function(weaponName, weaponLabel, ammo)
+    ESX.PlayerData.loadout[#ESX.PlayerData.loadout + 1] = {
+        name = weaponName,
+        ammo = ammo,
+        label = weaponLabel,
+        components = {},
+        tintIndex = 0,
+    }
+end)
+
+ESX.SecureNetEvent("esx:removeLoadoutItem", function(weaponName)
+    for i = 1, #ESX.PlayerData.loadout do
+        if ESX.PlayerData.loadout[i].name == weaponName then
+            table.remove(ESX.PlayerData.loadout, i)
+            break
+        end
+    end
+end)
+
+RegisterNetEvent("esx:addWeapon", function()
+    error("event ^5'esx:addWeapon'^1 Has Been Removed. Please use ^5xPlayer.addWeapon^1 Instead!")
+end)
+
+RegisterNetEvent("esx:addWeaponComponent", function()
+    error("event ^5'esx:addWeaponComponent'^1 Has Been Removed. Please use ^5xPlayer.addWeaponComponent^1 Instead!")
+end)
+
+RegisterNetEvent("esx:setWeaponAmmo", function()
+    error("event ^5'esx:setWeaponAmmo'^1 Has Been Removed. Please use ^5xPlayer.addWeaponAmmo^1 Instead!")
+end)
+
+ESX.SecureNetEvent("esx:setWeaponTint", function(weapon, weaponTintIndex)
+    SetPedWeaponTintIndex(ESX.PlayerData.ped, joaat(weapon), weaponTintIndex)
+end)
+
+RegisterNetEvent("esx:removeWeapon", function()
+    error("event ^5'esx:removeWeapon'^1 Has Been Removed. Please use ^5xPlayer.removeWeapon^1 Instead!")
+end)
+
+ESX.SecureNetEvent("esx:removeWeaponComponent", function(weapon, weaponComponent)
+    local componentHash = ESX.GetWeaponComponent(weapon, weaponComponent).hash
+    RemoveWeaponComponentFromPed(ESX.PlayerData.ped, joaat(weapon), componentHash)
+end)
+
+AddEventHandler("esx:restoreLoadout", function()
+    ESX.SetPlayerData("ped", PlayerPedId())
+
+    local ammoTypes = {}
+    RemoveAllPedWeapons(ESX.PlayerData.ped, true)
+
+    for _, v in ipairs(ESX.PlayerData.loadout) do
+        local weaponName = v.name
+        local weaponHash = joaat(weaponName)
+
+        GiveWeaponToPed(ESX.PlayerData.ped, weaponHash, 0, false, false)
+        SetPedWeaponTintIndex(ESX.PlayerData.ped, weaponHash, v.tintIndex)
+
+        local ammoType = GetPedAmmoTypeFromWeapon(ESX.PlayerData.ped, weaponHash)
+
+        for _, componentName in ipairs(v.components) do
+            local componentHash = ESX.GetWeaponComponent(weaponName, componentName).hash
+            GiveWeaponComponentToPed(ESX.PlayerData.ped, weaponHash, componentHash)
+        end
+
+        if not ammoTypes[ammoType] then
+            AddAmmoToPed(ESX.PlayerData.ped, weaponHash, v.ammo)
+            ammoTypes[ammoType] = true
+        end
+    end
+end)

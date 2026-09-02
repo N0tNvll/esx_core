@@ -1,0 +1,1 @@
+-- Server inventory events are composed from server/modules/inventory/events/*.
