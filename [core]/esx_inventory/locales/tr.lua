@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Envanter Dolu, Alınamaz!",
     ["threw_pickup_prompt"] = "Almak İçin E'ye Basın",
     ["keymap_showinventory"] = "Envanteri Göster",
+    ["player_inventory"] = "Envanter",
+    ["storage"] = "Depo",
+    ["weight"] = "Ağırlık",
+    ["take"] = "Al",
+    ["nearby_players"] = "Yakındaki oyuncular",
+    ["added_to_inventory"] = "Envantere eklendi",
+    ["removed_from_inventory"] = "Envanterden çıkarıldı",
+    ["keymap_hotbar"] = "Hızlı slot %s kullan",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

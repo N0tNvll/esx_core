@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Inventaris penuh, Tidak dapat mengambil!",
     ["threw_pickup_prompt"] = "Tekan E untuk Mengambil",
     ["keymap_showinventory"] = "Buka Inventaris",
+    ["player_inventory"] = "Inventaris",
+    ["storage"] = "Penyimpanan",
+    ["weight"] = "Berat",
+    ["take"] = "Ambil",
+    ["nearby_players"] = "Pemain terdekat",
+    ["added_to_inventory"] = "Ditambahkan ke inventaris",
+    ["removed_from_inventory"] = "Dihapus dari inventaris",
+    ["keymap_hotbar"] = "Gunakan slot cepat %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

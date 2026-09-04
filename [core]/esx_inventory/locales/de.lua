@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Inventar ist voll! Du kannst dies nicht aufheben",
     ["threw_pickup_prompt"] = "Drücke [E] zum aufheben",
     ["keymap_showinventory"] = "Inventar Anzeigen",
+    ["player_inventory"] = "Inventar",
+    ["storage"] = "Lager",
+    ["weight"] = "Gewicht",
+    ["take"] = "Nehmen",
+    ["nearby_players"] = "Spieler in der Nähe",
+    ["added_to_inventory"] = "Zum Inventar hinzugefügt",
+    ["removed_from_inventory"] = "Aus dem Inventar entfernt",
+    ["keymap_hotbar"] = "Schnellzugriff-Slot %s verwenden",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

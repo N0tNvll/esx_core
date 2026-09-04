@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "¡Inventario lleno, no se puede recoger!",
     ["threw_pickup_prompt"] = "Pulsa E para recoger",
     ["keymap_showinventory"] = "Mostrar inventario",
+    ["player_inventory"] = "Inventario",
+    ["storage"] = "Almacenamiento",
+    ["weight"] = "Peso",
+    ["take"] = "Coger",
+    ["nearby_players"] = "Jugadores cercanos",
+    ["added_to_inventory"] = "Añadido al inventario",
+    ["removed_from_inventory"] = "Retirado del inventario",
+    ["keymap_hotbar"] = "Usar ranura rápida %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

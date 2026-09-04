@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Inventaris is vol, je kan dit niet oppakken!",
     ["threw_pickup_prompt"] = "Druk op E om op te pakken",
     ["keymap_showinventory"] = "Laat inventaris zien",
+    ["player_inventory"] = "Inventaris",
+    ["storage"] = "Opslag",
+    ["weight"] = "Gewicht",
+    ["take"] = "Pakken",
+    ["nearby_players"] = "Spelers in de buurt",
+    ["added_to_inventory"] = "Toegevoegd aan inventaris",
+    ["removed_from_inventory"] = "Verwijderd uit inventaris",
+    ["keymap_hotbar"] = "Sneltoets-slot %s gebruiken",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

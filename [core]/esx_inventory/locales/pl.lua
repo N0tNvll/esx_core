@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "nie możesz tego podnieść, gdyż masz pełny ekwipunek!",
     ["threw_pickup_prompt"] = "naciśnij E aby podnieść",
     ["keymap_showinventory"] = "pokaż ekwipunek",
+    ["player_inventory"] = "Ekwipunek",
+    ["storage"] = "Magazyn",
+    ["weight"] = "Waga",
+    ["take"] = "Weź",
+    ["nearby_players"] = "Gracze w pobliżu",
+    ["added_to_inventory"] = "Dodano do ekwipunku",
+    ["removed_from_inventory"] = "Usunięto z ekwipunku",
+    ["keymap_hotbar"] = "Użyj slotu szybkiego dostępu %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

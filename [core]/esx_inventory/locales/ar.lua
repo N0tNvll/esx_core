@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "الحقيبة ممتلئ، لا يمكنك الالتقاط!",
     ["threw_pickup_prompt"] = "اضغط E للالتقاط",
     ["keymap_showinventory"] = "فتح الحقيبة",
+    ["player_inventory"] = "المخزون",
+    ["storage"] = "التخزين",
+    ["weight"] = "الوزن",
+    ["take"] = "خذ",
+    ["nearby_players"] = "اللاعبون القريبون",
+    ["added_to_inventory"] = "أضيف إلى المخزون",
+    ["removed_from_inventory"] = "أزيل من المخزون",
+    ["keymap_hotbar"] = "استخدام الخانة السريعة %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "طلقات"
 }

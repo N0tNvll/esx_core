@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Nincsen elég szabad helyed",
     ["threw_pickup_prompt"] = "E hogy felvedd",
     ["keymap_showinventory"] = "Leltár mutatása",
+    ["player_inventory"] = "Leltár",
+    ["storage"] = "Tároló",
+    ["weight"] = "Súly",
+    ["take"] = "Elvesz",
+    ["nearby_players"] = "Közeli játékosok",
+    ["added_to_inventory"] = "Hozzáadva a leltárhoz",
+    ["removed_from_inventory"] = "Eltávolítva a leltárból",
+    ["keymap_hotbar"] = "Gyorsslot %s használata",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }
