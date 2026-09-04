@@ -174,9 +174,7 @@ function loadESXPlayer(identifier, playerId, isNew)
     userData.variables = xPlayer.variables or {}
     xPlayer.triggerEvent("esx:playerLoaded", userData, isNew, userData.skin)
 
-    if not Config.CustomInventory then
-        xPlayer.triggerEvent("esx:createMissingPickups", Core.Pickups)
-    elseif setPlayerInventory then
+    if Config.CustomInventory and setPlayerInventory then
         setPlayerInventory(playerId, xPlayer, userData.inventory, isNew)
     end
 

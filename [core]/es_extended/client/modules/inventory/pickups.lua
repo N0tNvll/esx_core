@@ -2,9 +2,36 @@ if Config.CustomInventory then
     return
 end
 
+local STREAM_DISTANCE <const> = 150.0
+local REQUEST_DISTANCE <const> = 75.0
+
 local pickups = {}
+local lastRequestCoords
+
+local function removePickup(pickupId)
+    local pickup = pickups[pickupId]
+
+    if not pickup then
+        return
+    end
+
+    if pickup.obj then
+        xLib.game.deleteObject(pickup.obj)
+    end
+
+    pickups[pickupId] = nil
+end
+
+local function requestPickups(playerCoords)
+    lastRequestCoords = playerCoords
+    TriggerServerEvent("esx:requestPickups")
+end
 
 ESX.SecureNetEvent("esx:createPickup", function(pickupId, label, coords, itemType, name, components, tintIndex)
+    if pickups[pickupId] then
+        return
+    end
+
     local function setObjectProperties(object)
         SetEntityAsMissionEntity(object, true, false)
         PlaceObjectOnGroundProperly(object)
@@ -40,15 +67,16 @@ end)
 
 ESX.SecureNetEvent("esx:createMissingPickups", function(missingPickups)
     for pickupId, pickup in pairs(missingPickups) do
-        TriggerEvent("esx:createPickup", pickupId, pickup.label, vector3(pickup.coords.x, pickup.coords.y, pickup.coords.z - 1.0), pickup.type, pickup.name, pickup.components, pickup.tintIndex)
+        if not pickups[pickupId] then
+            TriggerEvent("esx:createPickup", pickupId, pickup.label, vector3(pickup.coords.x, pickup.coords.y, pickup.coords.z - 1.0), pickup.type, pickup.name, pickup.components, pickup.tintIndex)
+        end
     end
 end)
 
-ESX.SecureNetEvent("esx:removePickup", function(pickupId)
-    if pickups[pickupId] and pickups[pickupId].obj then
-        xLib.game.deleteObject(pickups[pickupId].obj)
-        pickups[pickupId] = nil
-    end
+ESX.SecureNetEvent("esx:removePickup", removePickup)
+
+RegisterNetEvent("esx:playerLoaded", function()
+    lastRequestCoords = nil
 end)
 
 CreateThread(function()
@@ -58,10 +86,16 @@ CreateThread(function()
         if ESX.PlayerData.ped then
             local playerCoords = GetEntityCoords(ESX.PlayerData.ped)
 
+            if not lastRequestCoords or #(playerCoords - lastRequestCoords) > REQUEST_DISTANCE then
+                requestPickups(playerCoords)
+            end
+
             for pickupId, pickup in pairs(pickups) do
                 local distance = #(playerCoords - pickup.coords)
 
-                if distance < 5 then
+                if distance > STREAM_DISTANCE then
+                    removePickup(pickupId)
+                elseif distance < 5 then
                     sleep = 0
                     local label = pickup.label
 

@@ -52,3 +52,31 @@ function Core.InventoryEvents.GetTransferPlayers(playerId, target)
 
     return sourceXPlayer, targetXPlayer
 end
+
+local RATE_LIMITS <const> = {
+    give = { capacity = 3, refill = 3, interval = 1000 },
+    remove = { capacity = 3, refill = 3, interval = 1000 },
+    use = { capacity = 5, refill = 5, interval = 1000 },
+    pickup = { capacity = 5, refill = 5, interval = 1000 },
+}
+
+local limiters = {}
+
+for name, options in pairs(RATE_LIMITS) do
+    limiters[name] = xLib.rateLimiter(options)
+end
+
+---@param name "give" | "remove" | "use" | "pickup"
+---@param playerId number
+---@return boolean
+function Core.InventoryEvents.ConsumeRate(name, playerId)
+    return limiters[name]:consume(playerId)
+end
+
+---@param accountName string
+---@return boolean
+function Core.InventoryEvents.IsAccountTransferable(accountName)
+    local account = Config.Accounts[accountName]
+
+    return account ~= nil and account.transferable ~= false
+end

@@ -16,6 +16,7 @@ Config.Accounts = {
     bank = {
         label = TranslateCap("account_bank"),
         round = true,
+        transferable = false,
     },
     black_money = {
         label = TranslateCap("account_black_money"),

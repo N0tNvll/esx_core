@@ -4,6 +4,11 @@ end
 
 RegisterNetEvent("esx:useItem", function(itemName)
     local playerId = source
+
+    if not Core.InventoryEvents.ConsumeRate("use", playerId) then
+        return
+    end
+
     local xPlayer = ESX.GetPlayerFromId(playerId)
 
     if not xPlayer or type(itemName) ~= "string" then

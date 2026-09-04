@@ -4,6 +4,11 @@ end
 
 RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCount)
     local playerId = source
+
+    if not Core.InventoryEvents.ConsumeRate("remove", playerId) then
+        return
+    end
+
     local xPlayer = ESX.GetPlayerFromId(playerId)
 
     if not xPlayer then
@@ -18,7 +23,7 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
         end
 
         local xItem = xPlayer.getInventoryItem(itemName)
-        if not xItem then
+        if not xItem or xItem.canRemove == false then
             return
         end
 
@@ -38,7 +43,7 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
         end
 
         local account = xPlayer.getAccount(itemName)
-        if not account then
+        if not account or not Core.InventoryEvents.IsAccountTransferable(itemName) then
             return
         end
 
