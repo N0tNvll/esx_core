@@ -13,11 +13,40 @@ local MAX_TRANSFER_COUNT <const> = 1000000
 
 local storages = {} ---@type table<string, InventoryStorageDefinition>
 local openedStorage = {} ---@type table<number, string>
-local lastActionAt = {} ---@type table<number, number>
+local storageViewers = {} ---@type table<string, table<number, boolean>>
+local transferLimiter = xLib.rateLimiter({
+    capacity = Config.StorageBurst,
+    refill = Config.StorageBurst,
+    interval = Config.StorageRefillInterval,
+})
 
 ---@param playerId number
 ---@param definition InventoryStorageDefinition
 ---@return boolean
+---@param playerId number
+---@return nil
+local function clearViewer(playerId)
+    local storageId = openedStorage[playerId]
+
+    if not storageId then
+        return
+    end
+
+    openedStorage[playerId] = nil
+
+    local viewers = storageViewers[storageId]
+
+    if not viewers then
+        return
+    end
+
+    viewers[playerId] = nil
+
+    if not next(viewers) then
+        storageViewers[storageId] = nil
+    end
+end
+
 local function isPlayerInRange(playerId, definition)
     if not definition.coords then
         return true
@@ -30,19 +59,6 @@ local function isPlayerInRange(playerId, definition)
     end
 
     return #(GetEntityCoords(ped) - definition.coords) <= definition.distance
-end
-
----@param source number
----@return boolean
-local function isRateLimited(source)
-    local now = GetGameTimer()
-
-    if now - (lastActionAt[source] or 0) < Config.StorageActionCooldown then
-        return true
-    end
-
-    lastActionAt[source] = now
-    return false
 end
 
 ---@param count any
@@ -136,11 +152,15 @@ local function unregisterStorage(storageId)
 
     storages[storageId] = nil
 
-    for playerId, openedId in pairs(openedStorage) do
-        if openedId == storageId then
+    local viewers = storageViewers[storageId]
+
+    if viewers then
+        for playerId in pairs(viewers) do
             openedStorage[playerId] = nil
             TriggerClientEvent("esx_inventory:closeStorage", playerId)
         end
+
+        storageViewers[storageId] = nil
     end
 
     return true
@@ -161,6 +181,15 @@ local function openStorage(playerId, storageId)
 
     openedStorage[playerId] = storageId
 
+    local viewers = storageViewers[storageId]
+
+    if not viewers then
+        viewers = {}
+        storageViewers[storageId] = viewers
+    end
+
+    viewers[playerId] = true
+
     TriggerClientEvent("esx_inventory:openStorage", playerId, {
         id = storageId,
         label = definition.label,
@@ -178,19 +207,23 @@ AddEventHandler("esx_inventory:openStorage", openStorage)
 ---@param storageId string
 ---@param definition InventoryStorageDefinition
 local function refreshStorageViewers(storageId, definition)
-    for playerId, openedId in pairs(openedStorage) do
-        if openedId == storageId then
-            local viewer = ESX.GetPlayerFromId(playerId)
+    local viewers = storageViewers[storageId]
 
-            if viewer then
-                TriggerClientEvent("esx_inventory:refreshStorage", playerId, {
-                    id = storageId,
-                    label = definition.label,
-                    slots = definition.slots,
-                    maxWeight = definition.maxWeight,
-                    items = buildStorageItems(definition, viewer),
-                })
-            end
+    if not viewers then
+        return
+    end
+
+    for playerId in pairs(viewers) do
+        local viewer = ESX.GetPlayerFromId(playerId)
+
+        if viewer then
+            TriggerClientEvent("esx_inventory:refreshStorage", playerId, {
+                id = storageId,
+                label = definition.label,
+                slots = definition.slots,
+                maxWeight = definition.maxWeight,
+                items = buildStorageItems(definition, viewer),
+            })
         end
     end
 end
@@ -200,7 +233,7 @@ end
 ---@param count any
 ---@return table?, string?, InventoryStorageDefinition?, number?
 local function validateStorageAction(source, itemName, count)
-    if isRateLimited(source) then
+    if not transferLimiter:consume(source) then
         return nil
     end
 
@@ -236,7 +269,7 @@ RegisterNetEvent("esx_inventory:storagePut", function(itemName, count)
 
     local item = xPlayer.getInventoryItem(itemName)
 
-    if not item or item.count < count then
+    if not item or item.count < count or item.canRemove == false then
         return
     end
 
@@ -276,10 +309,9 @@ RegisterNetEvent("esx_inventory:storageTake", function(itemName, count)
 end)
 
 RegisterNetEvent("esx_inventory:storageClosed", function()
-    openedStorage[source] = nil
+    clearViewer(source)
 end)
 
 AddEventHandler("playerDropped", function()
-    openedStorage[source] = nil
-    lastActionAt[source] = nil
+    clearViewer(source)
 end)

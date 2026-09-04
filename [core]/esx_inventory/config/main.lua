@@ -7,5 +7,6 @@ Config = {
     ItemImageUrl = "nui://esx_inventory/web/images/%s.png",
 
     NearbyPlayerDistance = 3.0,
-    StorageActionCooldown = 300,
+    StorageBurst = 5,
+    StorageRefillInterval = 1000,
 }
