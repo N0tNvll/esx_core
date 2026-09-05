@@ -37,26 +37,6 @@ if not Config.CustomInventory then
     Core.PickupStreamDistance = STREAM_DISTANCE
     Core.GetPickupTargets = getPlayersInStreamRange
 
-    ---@param pickupId number
-    ---@param notify? boolean | number[]
-    Core.RemovePickup = function(pickupId, notify)
-        local pickup = Core.Pickups[pickupId]
-
-        if not pickup then
-            return
-        end
-
-        local targets
-
-        if type(notify) == "table" then
-            targets = notify
-        elseif notify then
-            targets = getPlayersInStreamRange(pickup.coords, pickup.bucket)
-        end
-
-        destroyPickup(pickupId, targets)
-    end
-
     ---@param coords vector3|table
     ---@return string
     local function getCellKey(coords)
@@ -169,6 +149,26 @@ if not Config.CustomInventory then
         end
     end
 
+    ---@param pickupId number
+    ---@param notify? boolean | number[]
+    Core.RemovePickup = function(pickupId, notify)
+        local pickup = Core.Pickups[pickupId]
+
+        if not pickup then
+            return
+        end
+
+        local targets
+
+        if type(notify) == "table" then
+            targets = notify
+        elseif notify then
+            targets = getPlayersInStreamRange(pickup.coords, pickup.bucket)
+        end
+
+        destroyPickup(pickupId, targets)
+    end
+
     ---@param playerId number
     local function destroyOldestPlayerPickup(playerId)
         local playerIds = playerPickups[playerId]
@@ -193,32 +193,6 @@ if not Config.CustomInventory then
         end
     end
 
-    ---@param bucket number
-    ---@param cellKey string
-    local function destroyOldestCellPickup(bucket, cellKey)
-        local bucketGrid = pickupGrid[bucket]
-        local cell = bucketGrid and bucketGrid[cellKey] or nil
-
-        if not cell then
-            return
-        end
-
-        local oldestId, oldestAt
-
-        for pickupId in pairs(cell.entries) do
-            local pickup = Core.Pickups[pickupId]
-            local createdAt = pickup and pickup.createdAt or math.huge
-
-            if not oldestAt or createdAt < oldestAt then
-                oldestId, oldestAt = pickupId, createdAt
-            end
-        end
-
-        if oldestId then
-            destroyPickup(oldestId)
-        end
-    end
-
     ---@param itemType string
     ---@param name string
     ---@param count integer
@@ -227,17 +201,12 @@ if not Config.CustomInventory then
     ---@param components? string | table
     ---@param tintIndex? integer
     ---@param coords? table | vector3
-    ---@return nil
+    ---@return number? pickupId
     function ESX.CreatePickup(itemType, name, count, label, playerId, components, tintIndex, coords)
-        if activePickupCount >= MAX_ACTIVE_GLOBAL then
-            return
-        end
-
-        local pickupId = (Core.PickupId == 65635 and 0 or Core.PickupId + 1)
         local xPlayer = ESX.GetPlayerFromId(playerId)
 
         if not xPlayer then
-            return
+            return nil
         end
 
         coords = ((type(coords) == "vector3" or type(coords) == "vector4") and coords.xyz or xPlayer.getCoords(true))
@@ -245,16 +214,24 @@ if not Config.CustomInventory then
         local cellKey = getCellKey(coords)
         local bucket = GetPlayerRoutingBucket(playerId)
 
-        if playerPickupCounts[playerId] and playerPickupCounts[playerId] >= MAX_ACTIVE_PER_PLAYER then
-            destroyOldestPlayerPickup(playerId)
-        end
-
         local bucketGrid = pickupGrid[bucket]
         local cell = bucketGrid and bucketGrid[cellKey] or nil
 
         if cell and cell.count >= MAX_ACTIVE_PER_CELL then
-            destroyOldestCellPickup(bucket, cellKey)
+            return nil
         end
+
+        if activePickupCount >= MAX_ACTIVE_GLOBAL then
+            return nil
+        end
+
+        local playerCount = playerPickupCounts[playerId] or 0
+
+        if playerCount >= MAX_ACTIVE_PER_PLAYER then
+            destroyOldestPlayerPickup(playerId)
+        end
+
+        local pickupId = (Core.PickupId == 65635 and 0 or Core.PickupId + 1)
 
         Core.Pickups[pickupId] = {
             type = itemType,
@@ -288,6 +265,8 @@ if not Config.CustomInventory then
 
         xLib.triggerClientEvent("esx:createPickup", getPlayersInStreamRange(coords, bucket), pickupId, label, coords, itemType, name, components, tintIndex)
         Core.PickupId = pickupId
+
+        return pickupId
     end
 
     RegisterNetEvent("esx:requestPickups", function()

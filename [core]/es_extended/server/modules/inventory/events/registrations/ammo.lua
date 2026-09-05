@@ -29,7 +29,13 @@ RegisterNetEvent("esx:updateWeaponAmmo", function(weaponName, ammoCount)
         return
     end
 
-    if not xPlayer.hasWeapon(weaponName) then
+    local _, weapon = xPlayer.getWeapon(weaponName)
+
+    if not weapon then
+        return
+    end
+
+    if ammoCount > weapon.ammo then
         return
     end
 

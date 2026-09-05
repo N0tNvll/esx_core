@@ -72,7 +72,7 @@ function Core.PlayerClass.AttachInventory(self)
         self.weight = self.weight + (item.weight * count)
 
         TriggerEvent("esx:onAddInventoryItem", self.source, itemName, item.count)
-        self.triggerEvent("esx:addInventoryItem", itemName, item.count)
+        self.triggerEvent("esx:addInventoryItem", itemName, item.count, false, item)
         return true
     end
 

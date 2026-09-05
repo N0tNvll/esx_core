@@ -29,6 +29,7 @@ if not Config.CustomInventory then
             end
 
             xPlayer.inventory = {}
+            xPlayer.weight = 0
 
             for itemName, count in pairs(minimalInv) do
                 local itemData = ESX.Items[itemName]
@@ -42,6 +43,8 @@ if not Config.CustomInventory then
                     rare = itemData.rare,
                     canRemove = itemData.canRemove,
                 }
+
+                xPlayer.weight = xPlayer.weight + (itemData.weight * count)
             end
 
             TriggerClientEvent("esx:setInventory", xPlayer.source, xPlayer.getInventory())

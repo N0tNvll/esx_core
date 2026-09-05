@@ -37,7 +37,13 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
 
         xPlayer.removeInventoryItem(itemName, count)
         local pickupLabel = ("%s [%s]"):format(xItem.label, count)
-        ESX.CreatePickup("item_standard", itemName, count, pickupLabel, playerId)
+        local ok = ESX.CreatePickup("item_standard", itemName, count, pickupLabel, playerId)
+
+        if not ok then
+            xPlayer.addInventoryItem(itemName, count)
+            return xPlayer.showNotification(TranslateCap("threw_cannot_pickup"))
+        end
+
         xPlayer.showNotification(TranslateCap("threw_standard", count, xItem.label))
     elseif itemType == "item_account" then
         local count = Core.InventoryEvents.GetPositiveCount(itemCount)
@@ -57,7 +63,13 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
 
         xPlayer.removeAccountMoney(itemName, count, "Threw away")
         local pickupLabel = ("%s [%s]"):format(account.label, TranslateCap("locale_currency", ESX.Math.GroupDigits(count)))
-        ESX.CreatePickup("item_account", itemName, count, pickupLabel, playerId)
+        local ok = ESX.CreatePickup("item_account", itemName, count, pickupLabel, playerId)
+
+        if not ok then
+            xPlayer.addAccountMoney(itemName, count, "Threw away")
+            return xPlayer.showNotification(TranslateCap("threw_cannot_pickup"))
+        end
+
         xPlayer.showNotification(TranslateCap("threw_account", ESX.Math.GroupDigits(count), string.lower(account.label)))
     elseif itemType == "item_weapon" then
         if type(itemName) ~= "string" then
@@ -77,19 +89,32 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
 
         local _, weaponObject = ESX.GetWeapon(itemName)
         local weaponPickupLabel = ""
-        local components = xLib.table.clone(weapon.components)
+        local weaponCount = weapon.ammo
+        local weaponComponents = xLib.table.clone(weapon.components)
+        local weaponTint = weapon.tintIndex
 
         xPlayer.removeWeapon(itemName)
 
-        if weaponObject.ammo and weapon.ammo > 0 then
+        if weaponObject.ammo and weaponCount > 0 then
             local ammoLabel = weaponObject.ammo.label
-            weaponPickupLabel = ("%s [%s %s]"):format(weapon.label, weapon.ammo, ammoLabel)
-            xPlayer.showNotification(TranslateCap("threw_weapon_ammo", weapon.label, weapon.ammo, ammoLabel))
+            weaponPickupLabel = ("%s [%s %s]"):format(weapon.label, weaponCount, ammoLabel)
+            xPlayer.showNotification(TranslateCap("threw_weapon_ammo", weapon.label, weaponCount, ammoLabel))
         else
             weaponPickupLabel = ("%s"):format(weapon.label)
             xPlayer.showNotification(TranslateCap("threw_weapon", weapon.label))
         end
 
-        ESX.CreatePickup("item_weapon", itemName, weapon.ammo, weaponPickupLabel, playerId, components, weapon.tintIndex)
+        local ok = ESX.CreatePickup("item_weapon", itemName, weaponCount, weaponPickupLabel, playerId, weaponComponents, weaponTint)
+
+        if not ok then
+            xPlayer.addWeapon(itemName, weaponCount)
+            xPlayer.setWeaponTint(itemName, weaponTint)
+
+            for _, component in ipairs(weaponComponents) do
+                xPlayer.addWeaponComponent(itemName, component)
+            end
+
+            return xPlayer.showNotification(TranslateCap("threw_cannot_pickup"))
+        end
     end
 end)

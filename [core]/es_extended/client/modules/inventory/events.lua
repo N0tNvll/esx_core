@@ -2,7 +2,7 @@ if Config.CustomInventory then
     return
 end
 
-ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotification)
+ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotification, itemData)
     if type(item) ~= "string" then
         return
     end
@@ -18,15 +18,31 @@ ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotificatio
     end
 
     if not found then
-        ESX.PlayerData.inventory[#ESX.PlayerData.inventory + 1] = {
-            name = item,
-            count = count,
-            label = item,
-            weight = 0,
-            usable = false,
-            rare = false,
-            canRemove = true,
-        }
+        local entry
+
+        if type(itemData) == "table" then
+            entry = {
+                name = item,
+                count = count,
+                label = itemData.label or item,
+                weight = itemData.weight or 0,
+                usable = itemData.usable,
+                rare = itemData.rare,
+                canRemove = itemData.canRemove,
+            }
+        else
+            entry = {
+                name = item,
+                count = count,
+                label = item,
+                weight = 0,
+                usable = false,
+                rare = false,
+                canRemove = true,
+            }
+        end
+
+        ESX.PlayerData.inventory[#ESX.PlayerData.inventory + 1] = entry
     end
 
     if showNotification then
