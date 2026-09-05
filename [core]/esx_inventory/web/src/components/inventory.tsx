@@ -86,11 +86,10 @@ export default function Inventory({
         </div>
 
         <div
-          className={`grid grid-cols-5 gap-2 pt-2 pl-2 ${needsScrolling ? "max-h-80 overflow-y-auto pr-2 pb-2" : ""}`}
+          className={`grid grid-cols-5 gap-2 pt-2 pl-2 ${needsScrolling ? "max-h-80 overflow-y-auto pr-2 pb-2 inventory-scroll" : ""}`}
           style={needsScrolling ? {
             maxHeight: `${maxVisibleRows * 80 + (maxVisibleRows - 1) * 8 + 16}px`,
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(251, 155, 4, 0.4) rgba(37, 37, 37, 0.2)"
+            scrollbarWidth: "none"
           } : {}}
         >
           {slots.map((item, index) => (
