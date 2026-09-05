@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Shramba je poln, nemorem pobrati!",
     ["threw_pickup_prompt"] = "Pritisni E da poberes",
     ["keymap_showinventory"] = "Pokazi Shrambo",
+    ["player_inventory"] = "Inventar",
+    ["storage"] = "Skladišče",
+    ["weight"] = "Teža",
+    ["take"] = "Vzemi",
+    ["nearby_players"] = "Bližnji igralci",
+    ["added_to_inventory"] = "Dodano v inventar",
+    ["removed_from_inventory"] = "Odstranjeno iz inventarja",
+    ["keymap_hotbar"] = "Uporabi hitri slot %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

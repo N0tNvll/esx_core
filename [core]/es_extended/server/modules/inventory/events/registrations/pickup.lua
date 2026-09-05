@@ -3,6 +3,10 @@ if Config.CustomInventory then
 end
 
 RegisterNetEvent("esx:onPickup", function(pickupId)
+    if not Core.InventoryEvents.ConsumeRate("pickup", source) then
+        return
+    end
+
     local pickup = Core.Pickups[pickupId]
 
     if not pickup then
@@ -49,7 +53,9 @@ RegisterNetEvent("esx:onPickup", function(pickupId)
     end
 
     if success then
+        local targets = Core.GetPickupTargets(pickup.coords)
+
         Core.Pickups[pickupId] = nil
-        TriggerClientEvent("esx:removePickup", -1, pickupId)
+        xLib.triggerClientEvent("esx:removePickup", targets, pickupId)
     end
 end)

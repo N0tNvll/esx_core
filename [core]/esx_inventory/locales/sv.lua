@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Inventoryt är fullt, kan inte plocka upp!",
     ["threw_pickup_prompt"] = "Tryck E för att plocka upp",
     ["keymap_showinventory"] = "Öppna inventory",
+    ["player_inventory"] = "Inventarie",
+    ["storage"] = "Förvaring",
+    ["weight"] = "Vikt",
+    ["take"] = "Ta",
+    ["nearby_players"] = "Spelare i närheten",
+    ["added_to_inventory"] = "Tillagd i inventariet",
+    ["removed_from_inventory"] = "Borttagen från inventariet",
+    ["keymap_hotbar"] = "Använd snabbplats %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

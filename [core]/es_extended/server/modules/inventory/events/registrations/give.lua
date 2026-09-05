@@ -4,6 +4,10 @@ end
 
 RegisterNetEvent("esx:giveInventoryItem", function(target, itemType, itemName, itemCount)
     local playerId = source
+
+    if not Core.InventoryEvents.ConsumeRate("give", playerId) then
+        return
+    end
     local sourceXPlayer, targetXPlayer = Core.InventoryEvents.GetTransferPlayers(playerId, target)
 
     if not sourceXPlayer or not targetXPlayer then
@@ -36,7 +40,7 @@ RegisterNetEvent("esx:giveInventoryItem", function(target, itemType, itemName, i
         local count = Core.InventoryEvents.GetPositiveCount(itemCount)
         local account = sourceXPlayer.getAccount(itemName)
 
-        if not count or not account or account.money < count then
+        if not count or not account or account.money < count or not Core.InventoryEvents.IsAccountTransferable(itemName) then
             return sourceXPlayer.showNotification(TranslateCap("imp_invalid_amount"))
         end
 

@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "המלאי מלא, לא ניתן לאסוף!",
     ["threw_pickup_prompt"] = "לחץ E כדי לאסוף",
     ["keymap_showinventory"] = "הצג מלאי",
+    ["player_inventory"] = "מלאי",
+    ["storage"] = "אחסון",
+    ["weight"] = "משקל",
+    ["take"] = "קח",
+    ["nearby_players"] = "שחקנים קרובים",
+    ["added_to_inventory"] = "נוסף למלאי",
+    ["removed_from_inventory"] = "הוסר מהמלאי",
+    ["keymap_hotbar"] = "שימוש בחריץ מהיר %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

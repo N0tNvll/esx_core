@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Inventario pieno, non puoi raccogliere!",
     ["threw_pickup_prompt"] = "Premi E per raccogliere",
     ["keymap_showinventory"] = "Apri inventario",
+    ["player_inventory"] = "Inventario",
+    ["storage"] = "Deposito",
+    ["weight"] = "Peso",
+    ["take"] = "Prendi",
+    ["nearby_players"] = "Giocatori vicini",
+    ["added_to_inventory"] = "Aggiunto all’inventario",
+    ["removed_from_inventory"] = "Rimosso dall’inventario",
+    ["keymap_hotbar"] = "Usa slot rapido %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }

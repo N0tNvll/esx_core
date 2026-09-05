@@ -36,6 +36,14 @@ return {
     ["threw_cannot_pickup"] = "Kapsy máš plné, nemůžeš sebrat!",
     ["threw_pickup_prompt"] = "Zmáčkni E pro sebrání!",
     ["keymap_showinventory"] = "Otevřít inventář",
+    ["player_inventory"] = "Inventář",
+    ["storage"] = "Sklad",
+    ["weight"] = "Váha",
+    ["take"] = "Vzít",
+    ["nearby_players"] = "Hráči poblíž",
+    ["added_to_inventory"] = "Přidáno do inventáře",
+    ["removed_from_inventory"] = "Odebráno z inventáře",
+    ["keymap_hotbar"] = "Použít rychlý slot %s",
     ["locale_currency"] = "$%s",
     ["ammo_rounds"] = "Rounds"
 }
