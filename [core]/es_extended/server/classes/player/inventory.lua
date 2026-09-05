@@ -44,7 +44,27 @@ function Core.PlayerClass.AttachInventory(self)
     end
 
     function self.getInventoryItem(itemName)
-        return self.inventory[itemName]
+        local item = self.inventory[itemName]
+
+        if item then
+            return item
+        end
+
+        local itemData = ESX.Items[itemName]
+
+        if not itemData then
+            return nil
+        end
+
+        return {
+            name = itemName,
+            count = 0,
+            label = itemData.label,
+            weight = itemData.weight,
+            usable = Core.UsableItemsCallbacks[itemName] ~= nil,
+            rare = itemData.rare,
+            canRemove = itemData.canRemove,
+        }
     end
 
     function self.addInventoryItem(itemName, count)

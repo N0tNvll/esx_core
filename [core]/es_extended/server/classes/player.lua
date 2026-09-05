@@ -56,7 +56,7 @@
 ---@field getAccounts fun(minimal?: boolean): ESXAccount[]|table<string,number>  # Get all accounts, optionally minimal.
 --- Inventory Functions
 ---@field getInventory fun(minimal?: boolean): ESXInventoryItem[]|table<string,number>  # Get inventory, optionally minimal.
----@field getInventoryItem fun(itemName: string): ESXInventoryItem? # Get a specific item from inventory.
+---@field getInventoryItem fun(itemName: string): ESXInventoryItem? # Get a specific item. Returns a zero-count entry for known items, nil for unknown items.
 ---@field addInventoryItem fun(itemName: string, count: number)     # Add items to inventory.
 ---@field removeInventoryItem fun(itemName: string, count: number)  # Remove items from inventory.
 ---@field setInventoryItem fun(itemName: string, count: number)     # Set item count in inventory.
@@ -121,7 +121,7 @@
 ---@field group string              # Player permission group.
 ---@field identifier string         # Unique identifier (usually Steam or license).
 ---@field license string            # Player license string.
----@field inventory ESXInventoryItem[] # Player's inventory items.
+---@field inventory table<string, ESXInventoryItem> # SPARSE map keyed by item name. Do not access directly; use getInventory()/getInventoryItem().
 ---@field job ESXJob                # Player's current job.
 ---@field loadout ESXInventoryWeapon[] # Player's current weapons.
 ---@field name string               # Player's display name.

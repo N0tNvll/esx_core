@@ -169,30 +169,6 @@ if not Config.CustomInventory then
         destroyPickup(pickupId, targets)
     end
 
-    ---@param playerId number
-    local function destroyOldestPlayerPickup(playerId)
-        local playerIds = playerPickups[playerId]
-
-        if not playerIds then
-            return
-        end
-
-        local oldestId, oldestAt
-
-        for pickupId in pairs(playerIds) do
-            local pickup = Core.Pickups[pickupId]
-            local createdAt = pickup and pickup.createdAt or math.huge
-
-            if not oldestAt or createdAt < oldestAt then
-                oldestId, oldestAt = pickupId, createdAt
-            end
-        end
-
-        if oldestId then
-            destroyPickup(oldestId)
-        end
-    end
-
     ---@param itemType string
     ---@param name string
     ---@param count integer
@@ -228,7 +204,7 @@ if not Config.CustomInventory then
         local playerCount = playerPickupCounts[playerId] or 0
 
         if playerCount >= MAX_ACTIVE_PER_PLAYER then
-            destroyOldestPlayerPickup(playerId)
+            return nil
         end
 
         local pickupId = (Core.PickupId == 65635 and 0 or Core.PickupId + 1)
