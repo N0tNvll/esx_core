@@ -26,9 +26,21 @@ const replaceColors = (str, obj) => {
     return strToReplace;
 };
 
+const escapeHtml = (str) => {
+    const map = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+    };
+    return str.replace(/[&<>"']/g, (m) => map[m]);
+};
+
 window.addEventListener("message", function ({ data }) {
     if (data.type === "Progressbar") {
         let { message } = data;
+        message = escapeHtml(message);
 
         for (color in codes) {
             if (message.includes(color)) {

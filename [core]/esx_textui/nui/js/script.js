@@ -69,7 +69,20 @@ const replaceColors = (str, obj) => {
     return strToReplace;
 };
 
+const escapeHtml = (str) => {
+    const map = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+    };
+    return str.replace(/[&<>"']/g, (m) => map[m]);
+};
+
 notification = (data) => {
+    data["message"] = escapeHtml(data["message"]);
+
     for (color in codes) {
         if (data["message"].includes(color)) {
             let objArr = {};

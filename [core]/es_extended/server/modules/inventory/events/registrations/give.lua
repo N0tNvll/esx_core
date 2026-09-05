@@ -8,6 +8,15 @@ RegisterNetEvent("esx:giveInventoryItem", function(target, itemType, itemName, i
     if not Core.InventoryEvents.ConsumeRate("give", playerId) then
         return
     end
+
+    if itemType ~= "item_standard" and itemType ~= "item_account" and itemType ~= "item_weapon" and itemType ~= "item_ammo" then
+        return
+    end
+
+    if type(itemName) ~= "string" then
+        return
+    end
+
     local sourceXPlayer, targetXPlayer = Core.InventoryEvents.GetTransferPlayers(playerId, target)
 
     if not sourceXPlayer or not targetXPlayer then
@@ -19,7 +28,7 @@ RegisterNetEvent("esx:giveInventoryItem", function(target, itemType, itemName, i
         local count = Core.InventoryEvents.GetPositiveCount(itemCount)
         local sourceItem = sourceXPlayer.getInventoryItem(itemName)
 
-        if not sourceItem then
+        if not sourceItem or sourceItem.canRemove == false then
             return
         end
 

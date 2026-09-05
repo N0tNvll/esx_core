@@ -14,11 +14,59 @@ local MAX_TRANSFER_COUNT <const> = 1000000
 local storages = {} ---@type table<string, InventoryStorageDefinition>
 local openedStorage = {} ---@type table<number, string>
 local storageViewers = {} ---@type table<string, table<number, boolean>>
+local storageSnapshots = {} ---@type table<string, table<number, table[]>>
 local transferLimiter = xLib.rateLimiter({
     capacity = Config.StorageBurst,
     refill = Config.StorageBurst,
     interval = Config.StorageRefillInterval,
 })
+
+---@param items table[]
+---@return table<string, table>
+local function buildItemMap(items)
+    local map = {}
+
+    for i = 1, #items do
+        map[items[i].name] = items[i]
+    end
+
+    return map
+end
+
+---@param lastItems table[]
+---@param newItems table[]
+---@return table[] ops
+local function buildStorageDelta(lastItems, newItems)
+    local lastMap = buildItemMap(lastItems)
+    local newMap = buildItemMap(newItems)
+    local ops = {}
+
+    for name, item in pairs(newMap) do
+        local lastItem = lastMap[name]
+
+        if not lastItem or lastItem.count ~= item.count then
+            ops[#ops + 1] = {
+                op = "set",
+                name = name,
+                count = item.count,
+                label = item.label,
+                weight = item.weight,
+                image = item.image,
+            }
+        end
+
+        lastMap[name] = nil
+    end
+
+    for name in pairs(lastMap) do
+        ops[#ops + 1] = {
+            op = "remove",
+            name = name,
+        }
+    end
+
+    return ops
+end
 
 ---@param playerId number
 ---@param definition InventoryStorageDefinition
@@ -41,6 +89,16 @@ local function clearViewer(playerId)
     end
 
     viewers[playerId] = nil
+
+    local snapshots = storageSnapshots[storageId]
+
+    if snapshots then
+        snapshots[playerId] = nil
+
+        if not next(snapshots) then
+            storageSnapshots[storageId] = nil
+        end
+    end
 
     if not next(viewers) then
         storageViewers[storageId] = nil
@@ -150,6 +208,7 @@ local function unregisterStorage(storageId)
         return false
     end
 
+    local isRegistered = storages[storageId] ~= nil
     storages[storageId] = nil
 
     local viewers = storageViewers[storageId]
@@ -163,7 +222,9 @@ local function unregisterStorage(storageId)
         storageViewers[storageId] = nil
     end
 
-    return true
+    storageSnapshots[storageId] = nil
+
+    return isRegistered
 end
 
 exports("UnregisterStorage", unregisterStorage)
@@ -179,6 +240,8 @@ local function openStorage(playerId, storageId)
         return false
     end
 
+    clearViewer(playerId)
+
     openedStorage[playerId] = storageId
 
     local viewers = storageViewers[storageId]
@@ -190,12 +253,23 @@ local function openStorage(playerId, storageId)
 
     viewers[playerId] = true
 
+    local items = buildStorageItems(definition, xPlayer)
+
+    local snapshots = storageSnapshots[storageId]
+
+    if not snapshots then
+        snapshots = {}
+        storageSnapshots[storageId] = snapshots
+    end
+
+    snapshots[playerId] = items
+
     TriggerClientEvent("esx_inventory:openStorage", playerId, {
         id = storageId,
         label = definition.label,
         slots = definition.slots,
         maxWeight = definition.maxWeight,
-        items = buildStorageItems(definition, xPlayer),
+        items = items,
     })
 
     return true
@@ -216,14 +290,40 @@ local function refreshStorageViewers(storageId, definition)
     for playerId in pairs(viewers) do
         local viewer = ESX.GetPlayerFromId(playerId)
 
-        if viewer then
-            TriggerClientEvent("esx_inventory:refreshStorage", playerId, {
-                id = storageId,
-                label = definition.label,
-                slots = definition.slots,
-                maxWeight = definition.maxWeight,
-                items = buildStorageItems(definition, viewer),
-            })
+        if viewer and isPlayerInRange(playerId, definition) and definition.canAccess(viewer) then
+            local newItems = buildStorageItems(definition, viewer)
+            local snapshots = storageSnapshots[storageId]
+
+            if not snapshots then
+                snapshots = {}
+                storageSnapshots[storageId] = snapshots
+            end
+
+            local lastItems = snapshots[playerId] or nil
+
+            if lastItems then
+                local ops = buildStorageDelta(lastItems, newItems)
+
+                if #ops > 0 then
+                    TriggerClientEvent("esx_inventory:refreshStorage", playerId, {
+                        id = storageId,
+                        ops = ops,
+                    })
+                end
+            else
+                TriggerClientEvent("esx_inventory:refreshStorage", playerId, {
+                    id = storageId,
+                    label = definition.label,
+                    slots = definition.slots,
+                    maxWeight = definition.maxWeight,
+                    items = newItems,
+                })
+            end
+
+            snapshots[playerId] = newItems
+        else
+            clearViewer(playerId)
+            TriggerClientEvent("esx_inventory:closeStorage", playerId)
         end
     end
 end

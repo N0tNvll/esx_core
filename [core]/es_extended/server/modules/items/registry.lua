@@ -29,21 +29,22 @@ if not Config.CustomInventory then
             end
 
             xPlayer.inventory = {}
-            local playerInvIndex = 1
-            for itemName, itemData in pairs(ESX.Items) do
-                xPlayer.inventory[playerInvIndex] = {
+
+            for itemName, count in pairs(minimalInv) do
+                local itemData = ESX.Items[itemName]
+
+                xPlayer.inventory[itemName] = {
                     name = itemName,
-                    count = minimalInv[itemName] or 0,
+                    count = count,
                     label = itemData.label,
                     weight = itemData.weight,
                     usable = Core.UsableItemsCallbacks[itemName] ~= nil,
                     rare = itemData.rare,
                     canRemove = itemData.canRemove,
                 }
-                playerInvIndex += 1
             end
 
-            TriggerClientEvent("esx:setInventory", xPlayer.source, xPlayer.inventory)
+            TriggerClientEvent("esx:setInventory", xPlayer.source, xPlayer.getInventory())
         end
     end
 

@@ -148,9 +148,9 @@ if not Config.CustomInventory then
         "clearinventory",
         FilterGroups(CommandPermissions.clearinventory),
         function(xPlayer, args)
-            for _, v in ipairs(args.playerId.inventory) do
-                if v.count > 0 then
-                    args.playerId.setInventoryItem(v.name, 0)
+            for itemName, item in pairs(args.playerId.inventory) do
+                if item.count > 0 then
+                    args.playerId.setInventoryItem(itemName, 0)
                 end
             end
             TriggerEvent("esx:playerInventoryCleared", args.playerId)

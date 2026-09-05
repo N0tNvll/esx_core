@@ -1,14 +1,69 @@
 local Inventory = ESXInventory
 
----@param storage table
-local function applyStorageSlots(storage)
-    local items = storage.items or {}
-
+---@param items table[]
+---@return table[]
+local function applyStorageSlots(items)
     for i = 1, #items do
         items[i].slot = i - 1
     end
 
-    storage.items = items
+    return items
+end
+
+---@param storage table
+---@param ops table[]
+---@return table[]
+local function applyStorageOps(storage, ops)
+    local items = storage.items or {}
+
+    for i = 1, #ops do
+        local op = ops[i]
+
+        if type(op) ~= "table" or type(op.name) ~= "string" then
+            goto continue
+        end
+
+        if op.op == "set" then
+            local found
+
+            for j = 1, #items do
+                if items[j].name == op.name then
+                    items[j].count = op.count
+
+                    if type(op.label) == "string" then
+                        items[j].label = op.label
+                    end
+
+                    found = true
+                    break
+                end
+            end
+
+            if not found then
+                items[#items + 1] = {
+                    type = "item_standard",
+                    name = op.name,
+                    label = type(op.label) == "string" and op.label or op.name,
+                    count = op.count,
+                    weight = type(op.weight) == "number" and op.weight or 0,
+                    usable = false,
+                    canRemove = true,
+                    image = type(op.image) == "string" and op.image or Config.ItemImageUrl:format(op.name),
+                }
+            end
+        elseif op.op == "remove" then
+            for j = 1, #items do
+                if items[j].name == op.name then
+                    table.remove(items, j)
+                    break
+                end
+            end
+        end
+
+        ::continue::
+    end
+
+    return applyStorageSlots(items)
 end
 
 RegisterNetEvent("esx_inventory:openStorage", function(storage)
@@ -16,7 +71,7 @@ RegisterNetEvent("esx_inventory:openStorage", function(storage)
         return
     end
 
-    applyStorageSlots(storage)
+    applyStorageSlots(storage.items or {})
     Inventory.currentStorage = storage
 
     if Inventory.isOpen then
@@ -36,8 +91,13 @@ RegisterNetEvent("esx_inventory:refreshStorage", function(storage)
         return
     end
 
-    applyStorageSlots(storage)
-    Inventory.currentStorage = storage
+    if type(storage.ops) == "table" then
+        Inventory.currentStorage.items = applyStorageOps(Inventory.currentStorage, storage.ops)
+    else
+        applyStorageSlots(storage.items or {})
+        Inventory.currentStorage = storage
+    end
+
     Inventory.pushState()
 end)
 

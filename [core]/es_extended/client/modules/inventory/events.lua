@@ -3,12 +3,30 @@ if Config.CustomInventory then
 end
 
 ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotification)
+    if type(item) ~= "string" then
+        return
+    end
+
+    local found
     for k, v in ipairs(ESX.PlayerData.inventory) do
         if v.name == item then
             ESX.UI.ShowInventoryItemNotification(true, v.label, count - v.count)
             ESX.PlayerData.inventory[k].count = count
+            found = true
             break
         end
+    end
+
+    if not found then
+        ESX.PlayerData.inventory[#ESX.PlayerData.inventory + 1] = {
+            name = item,
+            count = count,
+            label = item,
+            weight = 0,
+            usable = false,
+            rare = false,
+            canRemove = true,
+        }
     end
 
     if showNotification then
@@ -17,10 +35,20 @@ ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotificatio
 end)
 
 ESX.SecureNetEvent("esx:removeInventoryItem", function(item, count, showNotification)
+    if type(item) ~= "string" then
+        return
+    end
+
     for i = 1, #ESX.PlayerData.inventory do
         if ESX.PlayerData.inventory[i].name == item then
             ESX.UI.ShowInventoryItemNotification(false, ESX.PlayerData.inventory[i].label, ESX.PlayerData.inventory[i].count - count)
-            ESX.PlayerData.inventory[i].count = count
+
+            if count > 0 then
+                ESX.PlayerData.inventory[i].count = count
+            else
+                table.remove(ESX.PlayerData.inventory, i)
+            end
+
             break
         end
     end

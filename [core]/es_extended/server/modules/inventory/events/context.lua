@@ -45,6 +45,10 @@ function Core.InventoryEvents.GetTransferPlayers(playerId, target)
         return nil, nil
     end
 
+    if GetPlayerRoutingBucket(playerId) ~= GetPlayerRoutingBucket(target) then
+        return nil, nil
+    end
+
     local distance = #(GetEntityCoords(sourcePed) - GetEntityCoords(targetPed))
     if distance > Config.DistanceGive then
         return nil, nil

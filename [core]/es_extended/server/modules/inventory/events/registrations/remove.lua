@@ -9,6 +9,10 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
         return
     end
 
+    if itemType ~= "item_standard" and itemType ~= "item_account" and itemType ~= "item_weapon" then
+        return
+    end
+
     local xPlayer = ESX.GetPlayerFromId(playerId)
 
     if not xPlayer then

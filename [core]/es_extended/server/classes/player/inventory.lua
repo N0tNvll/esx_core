@@ -1,52 +1,87 @@
 Core.PlayerClass = Core.PlayerClass or {}
 
+local function buildItemEntry(itemName, count)
+    local itemData = ESX.Items[itemName]
+
+    if not itemData then
+        return nil
+    end
+
+    return {
+        name = itemName,
+        count = count,
+        label = itemData.label,
+        weight = itemData.weight,
+        usable = Core.UsableItemsCallbacks[itemName] ~= nil,
+        rare = itemData.rare,
+        canRemove = itemData.canRemove,
+    }
+end
+
 function Core.PlayerClass.AttachInventory(self)
     function self.getInventory(minimal)
         if minimal then
             local minimalInventory = {}
 
-            for _, v in ipairs(self.inventory) do
-                if v.count > 0 then
-                    minimalInventory[v.name] = v.count
-                end
+            for itemName, item in pairs(self.inventory) do
+                minimalInventory[itemName] = item.count
             end
 
             return minimalInventory
         end
 
-        return self.inventory
+        local items = {}
+
+        for _, item in pairs(self.inventory) do
+            items[#items + 1] = item
+        end
+
+        table.sort(items, function(a, b)
+            return a.label < b.label
+        end)
+
+        return items
     end
 
     function self.getInventoryItem(itemName)
-        for _, v in ipairs(self.inventory) do
-            if v.name == itemName then
-                return v
-            end
-        end
-        return nil
+        return self.inventory[itemName]
     end
 
     function self.addInventoryItem(itemName, count)
-        local item = self.getInventoryItem(itemName)
+        count = ESX.Math.Round(count)
 
-        if item then
-            count = ESX.Math.Round(count)
-            item.count = item.count + count
-            self.weight = self.weight + (item.weight * count)
-
-            TriggerEvent("esx:onAddInventoryItem", self.source, item.name, item.count)
-            self.triggerEvent("esx:addInventoryItem", item.name, item.count)
-            return true
+        if count <= 0 then
+            return false
         end
 
-        return false
+        local item = self.inventory[itemName]
+
+        if item then
+            item.count = item.count + count
+        else
+            item = buildItemEntry(itemName, count)
+
+            if not item then
+                print(('[^3WARNING^7] Item ^5"%s"^7 was used but does not exist!'):format(itemName))
+                return false
+            end
+
+            self.inventory[itemName] = item
+        end
+
+        self.weight = self.weight + (item.weight * count)
+
+        TriggerEvent("esx:onAddInventoryItem", self.source, itemName, item.count)
+        self.triggerEvent("esx:addInventoryItem", itemName, item.count)
+        return true
     end
 
     function self.removeInventoryItem(itemName, count)
-        local item = self.getInventoryItem(itemName)
+        local item = self.inventory[itemName]
 
         if item then
             count = ESX.Math.Round(count)
+
             if count > 0 then
                 local newCount = item.count - count
 
@@ -54,8 +89,12 @@ function Core.PlayerClass.AttachInventory(self)
                     item.count = newCount
                     self.weight = self.weight - (item.weight * count)
 
-                    TriggerEvent("esx:onRemoveInventoryItem", self.source, item.name, item.count)
-                    self.triggerEvent("esx:removeInventoryItem", item.name, item.count)
+                    if newCount == 0 then
+                        self.inventory[itemName] = nil
+                    end
+
+                    TriggerEvent("esx:onRemoveInventoryItem", self.source, itemName, item.count)
+                    self.triggerEvent("esx:removeInventoryItem", itemName, item.count)
                     return true
                 end
 
@@ -69,19 +108,19 @@ function Core.PlayerClass.AttachInventory(self)
     end
 
     function self.setInventoryItem(itemName, count)
-        local item = self.getInventoryItem(itemName)
+        local item = self.inventory[itemName]
 
-        if item and count >= 0 then
+        if (item or ESX.Items[itemName]) and count >= 0 then
             count = ESX.Math.Round(count)
 
-            if count == item.count then
+            if item and count == item.count then
                 return
             end
 
-            if count > item.count then
-                return self.addInventoryItem(item.name, count - item.count)
+            if count > (item and item.count or 0) then
+                return self.addInventoryItem(itemName, count - (item and item.count or 0))
             else
-                return self.removeInventoryItem(item.name, item.count - count)
+                return self.removeInventoryItem(itemName, (item and item.count or 0) - count)
             end
         end
 
@@ -135,10 +174,10 @@ function Core.PlayerClass.AttachInventory(self)
     end
 
     function self.hasItem(item)
-        for _, v in ipairs(self.inventory) do
-            if v.name == item and v.count >= 1 then
-                return v, v.count
-            end
+        local entry = self.inventory[item]
+
+        if entry and entry.count >= 1 then
+            return entry, entry.count
         end
 
         return false

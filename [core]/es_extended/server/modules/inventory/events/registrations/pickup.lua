@@ -13,6 +13,10 @@ RegisterNetEvent("esx:onPickup", function(pickupId)
         return
     end
 
+    if GetPlayerRoutingBucket(source) ~= pickup.bucket then
+        return
+    end
+
     local xPlayer = ESX.GetPlayerFromId(source)
 
     if not xPlayer then
@@ -53,9 +57,8 @@ RegisterNetEvent("esx:onPickup", function(pickupId)
     end
 
     if success then
-        local targets = Core.GetPickupTargets(pickup.coords)
+        local targets = Core.GetPickupTargets(pickup.coords, pickup.bucket)
 
-        Core.Pickups[pickupId] = nil
-        xLib.triggerClientEvent("esx:removePickup", targets, pickupId)
+        Core.RemovePickup(pickupId, targets)
     end
 end)

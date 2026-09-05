@@ -81,24 +81,23 @@ function loadESXPlayer(identifier, playerId, isNew)
     if not Config.CustomInventory then
         local inventory = (result.inventory and result.inventory ~= "") and json.decode(result.inventory) or {}
 
-        for name, item in pairs(ESX.Items) do
-            local count = inventory[name] or 0
-            userData.weight += (count * item.weight)
+        for name, count in pairs(inventory) do
+            local item = ESX.Items[name]
 
-            userData.inventory[#userData.inventory + 1] = {
-                name = name,
-                count = count,
-                label = item.label,
-                weight = item.weight,
-                usable = Core.UsableItemsCallbacks[name] ~= nil,
-                rare = item.rare,
-                canRemove = item.canRemove,
-            }
+            if item and count > 0 then
+                userData.weight += (count * item.weight)
+
+                userData.inventory[name] = {
+                    name = name,
+                    count = count,
+                    label = item.label,
+                    weight = item.weight,
+                    usable = Core.UsableItemsCallbacks[name] ~= nil,
+                    rare = item.rare,
+                    canRemove = item.canRemove,
+                }
+            end
         end
-
-        table.sort(userData.inventory, function(a, b)
-            return a.label < b.label
-        end)
     elseif result.inventory and result.inventory ~= "" then
         userData.inventory = json.decode(result.inventory)
     end
@@ -172,6 +171,21 @@ function loadESXPlayer(identifier, playerId, isNew)
     userData.money = xPlayer.getMoney()
     userData.maxWeight = xPlayer.getMaxWeight()
     userData.variables = xPlayer.variables or {}
+
+    if not Config.CustomInventory then
+        local clientInventory = {}
+
+        for _, item in pairs(userData.inventory) do
+            clientInventory[#clientInventory + 1] = item
+        end
+
+        table.sort(clientInventory, function(a, b)
+            return a.label < b.label
+        end)
+
+        userData.inventory = clientInventory
+    end
+
     xPlayer.triggerEvent("esx:playerLoaded", userData, isNew, userData.skin)
 
     if Config.CustomInventory and setPlayerInventory then

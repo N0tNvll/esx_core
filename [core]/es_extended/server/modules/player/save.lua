@@ -1,8 +1,28 @@
+local SAVE_QUERY <const> = "UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ? WHERE `identifier` = ?"
+local SAVE_BATCH_SIZE <const> = 25
+local SAVE_BATCH_INTERVAL <const> = 50
+
 local function updateHealthAndArmorInMetadata(xPlayer)
     local ped = GetPlayerPed(xPlayer.source)
     xPlayer.setMeta("health", GetEntityHealth(ped))
     xPlayer.setMeta("armor", GetPedArmour(ped))
     xPlayer.setMeta("lastPlaytime", xPlayer.getPlayTime())
+end
+
+---@param xPlayer table
+---@return table
+local function buildSaveParameters(xPlayer)
+    return {
+        json.encode(xPlayer.getAccounts(true)),
+        xPlayer.job.name,
+        xPlayer.job.grade,
+        xPlayer.group,
+        json.encode(xPlayer.getCoords(false, true)),
+        json.encode(xPlayer.getInventory(true)),
+        json.encode(xPlayer.getLoadout(true)),
+        json.encode(xPlayer.getMeta()),
+        xPlayer.identifier,
+    }
 end
 
 ---@param xPlayer table
@@ -14,21 +34,10 @@ function Core.SavePlayer(xPlayer, cb)
     end
 
     updateHealthAndArmorInMetadata(xPlayer)
-    local parameters <const> = {
-        json.encode(xPlayer.getAccounts(true)),
-        xPlayer.job.name,
-        xPlayer.job.grade,
-        xPlayer.group,
-        json.encode(xPlayer.getCoords(false, true)),
-        json.encode(xPlayer.getInventory(true)),
-        json.encode(xPlayer.getLoadout(true)),
-        json.encode(xPlayer.getMeta()),
-        xPlayer.identifier,
-    }
 
     MySQL.prepare(
-        "UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ? WHERE `identifier` = ?",
-        parameters,
+        SAVE_QUERY,
+        buildSaveParameters(xPlayer),
         function(affectedRows)
             if affectedRows == 1 then
                 print(('[^2INFO^7] Saved player ^5"%s^7"'):format(xPlayer.name))
@@ -46,51 +55,59 @@ end
 ---@return nil
 function Core.SavePlayers(cb)
     local xPlayers <const> = ESX.Players or {}
-    if not next(xPlayers) then
+    local players = {}
+
+    for _, xPlayer in pairs(xPlayers) do
+        if xPlayer.spawned then
+            players[#players + 1] = xPlayer
+        end
+    end
+
+    if #players == 0 then
         return cb and cb()
     end
 
     local startTime <const> = GetGameTimer()
-    local parameters = {}
+    local savedCount = 0
+    local totalCount = #players
+    local done = false
 
-    for _, xPlayer in pairs(xPlayers) do
-        if xPlayer.spawned then
+    local function saveBatch(index)
+        if done then
+            return
+        end
+
+        local last = math.min(index + SAVE_BATCH_SIZE - 1, totalCount)
+        local parameters = {}
+
+        for i = index, last do
+            local xPlayer = players[i]
             updateHealthAndArmorInMetadata(xPlayer)
-            parameters[#parameters + 1] = {
-                json.encode(xPlayer.getAccounts(true)),
-                xPlayer.job.name,
-                xPlayer.job.grade,
-                xPlayer.group,
-                json.encode(xPlayer.getCoords(false, true)),
-                json.encode(xPlayer.getInventory(true)),
-                json.encode(xPlayer.getLoadout(true)),
-                json.encode(xPlayer.getMeta()),
-                xPlayer.identifier,
-            }
+            parameters[#parameters + 1] = buildSaveParameters(xPlayer)
         end
-    end
 
-    if not parameters[1] then
-        return cb and cb()
-    end
+        MySQL.prepare(
+            SAVE_QUERY,
+            parameters,
+            function()
+                savedCount = savedCount + #parameters
 
-    MySQL.prepare(
-        "UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ? WHERE `identifier` = ?",
-        parameters,
-        function(results)
-            if not results then
-                if type(cb) == "function" then
-                    cb()
+                if last < totalCount then
+                    SetTimeout(SAVE_BATCH_INTERVAL, function()
+                        saveBatch(last + 1)
+                    end)
+                else
+                    done = true
+
+                    if type(cb) == "function" then
+                        return cb()
+                    end
+
+                    print(("[^2INFO^7] Saved ^5%s^7 %s over ^5%s^7 ms"):format(totalCount, totalCount > 1 and "players" or "player", GetGameTimer() - startTime))
                 end
-
-                return
             end
+        )
+    end
 
-            if type(cb) == "function" then
-                return cb()
-            end
-
-            print(("[^2INFO^7] Saved ^5%s^7 %s over ^5%s^7 ms"):format(#parameters, #parameters > 1 and "players" or "player", GetGameTimer() - startTime))
-        end
-    )
+    saveBatch(1)
 end
