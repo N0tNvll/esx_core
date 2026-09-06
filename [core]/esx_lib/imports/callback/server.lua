@@ -8,6 +8,7 @@
 
 local pendingCallbacks = {}
 local registeredCallbackNames = {}
+local compatCallbacks = {}
 local cbEvent = '__xLib_cb_%s'
 local callbackTimeout = GetConvarInt('xLib:callbackTimeout', 300000)
 local resource_name = GetCurrentResourceName() --TODO: Add cache
@@ -38,11 +39,14 @@ AddEventHandler('onResourceStart', function(resource)
     end
 end)
 
--- Compat callbacks may belong to another resource while their handlers live here.
+-- Compat callbacks (via ESX.Register*) belong to another resource while their
+-- handlers live here, so they must be removed manually when that resource stops.
 AddEventHandler('onResourceStop', function(resource)
-    for name, registration in pairs(registeredCallbackNames) do
+    for name, registration in pairs(compatCallbacks) do
         if registration.owner == resource then
             RemoveEventHandler(registration.handler)
+
+            compatCallbacks[name] = nil
             registeredCallbackNames[name] = nil
 
             if GetResourceState('esx_lib') == 'started' then
@@ -153,35 +157,30 @@ local pcall = pcall
 
 ---@param name string
 ---@param cb function
----@param owner? string Resource whose lifetime owns the callback.
 ---Registers an event handler and callback function to respond to client requests.
+---The handler is owned by the importing resource's runtime, so FiveM removes
+---it automatically when that resource stops.
 ---@diagnostic disable-next-line: duplicate-set-field
-function xLib.callback.register(name, cb, owner)
+function xLib.callback.register(name, cb)
     local event = cbEvent:format(name)
 
-    local previous = registeredCallbackNames[name]
-    if previous then
-        RemoveEventHandler(previous.handler)
-    end
+    registeredCallbackNames[name] = true
+    publishValidCallback(name)
 
-    RegisterNetEvent(event)
-    local handler = AddEventHandler(event, function(resource, key, ...)
+    RegisterNetEvent(event, function(resource, key, ...)
         TriggerClientEvent(cbEvent:format(resource), source, key, callbackResponse(pcall(cb, source, ...)))
     end)
-
-    registeredCallbackNames[name] = {
-        owner = owner or resource_name,
-        handler = handler
-    }
-    publishValidCallback(name)
 end
 
 ---@param name string
 ---@param cb function
 ---@param owner? string Resource whose lifetime owns the callback.
 ---Registers a callback using the old ESX server callback signature: function(source, cb, ...).
+---The handler is created here so it can be removed when the owner resource stops.
 function xLib.callback.registerCompat(name, cb, owner)
-    return xLib.callback.register(name, function(source, ...)
+    local event = cbEvent:format(name)
+
+    local function compatCb(source, ...)
         local response = promise.new()
         local responded = false
 
@@ -199,7 +198,24 @@ function xLib.callback.registerCompat(name, cb, owner)
         cb(source, reply, ...)
 
         return table.unpack(Citizen.Await(response))
-    end, owner)
+    end
+
+    local previous = compatCallbacks[name]
+    if previous then
+        RemoveEventHandler(previous.handler)
+    end
+
+    RegisterNetEvent(event)
+    local handler = AddEventHandler(event, function(resource, key, ...)
+        TriggerClientEvent(cbEvent:format(resource), source, key, callbackResponse(pcall(compatCb, source, ...)))
+    end)
+
+    registeredCallbackNames[name] = true
+    compatCallbacks[name] = {
+        owner = owner or resource_name,
+        handler = handler
+    }
+    publishValidCallback(name)
 end
 
 return xLib.callback
