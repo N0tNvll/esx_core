@@ -38,6 +38,20 @@ AddEventHandler('onResourceStart', function(resource)
     end
 end)
 
+-- Compat callbacks may belong to another resource while their handlers live here.
+AddEventHandler('onResourceStop', function(resource)
+    for name, registration in pairs(registeredCallbackNames) do
+        if registration.owner == resource then
+            RemoveEventHandler(registration.handler)
+            registeredCallbackNames[name] = nil
+
+            if GetResourceState('esx_lib') == 'started' then
+                xLib.setValidCallback(name, false)
+            end
+        end
+    end
+end)
+
 RegisterNetEvent(cbEvent:format(resource_name), function(key, ...)
     local cb = pendingCallbacks[key]
 
@@ -139,23 +153,34 @@ local pcall = pcall
 
 ---@param name string
 ---@param cb function
+---@param owner? string Resource whose lifetime owns the callback.
 ---Registers an event handler and callback function to respond to client requests.
 ---@diagnostic disable-next-line: duplicate-set-field
-function xLib.callback.register(name, cb)
+function xLib.callback.register(name, cb, owner)
     local event = cbEvent:format(name)
 
-    registeredCallbackNames[name] = true
-    publishValidCallback(name)
+    local previous = registeredCallbackNames[name]
+    if previous then
+        RemoveEventHandler(previous.handler)
+    end
 
-    RegisterNetEvent(event, function(resource, key, ...)
+    RegisterNetEvent(event)
+    local handler = AddEventHandler(event, function(resource, key, ...)
         TriggerClientEvent(cbEvent:format(resource), source, key, callbackResponse(pcall(cb, source, ...)))
     end)
+
+    registeredCallbackNames[name] = {
+        owner = owner or resource_name,
+        handler = handler
+    }
+    publishValidCallback(name)
 end
 
 ---@param name string
 ---@param cb function
+---@param owner? string Resource whose lifetime owns the callback.
 ---Registers a callback using the old ESX server callback signature: function(source, cb, ...).
-function xLib.callback.registerCompat(name, cb)
+function xLib.callback.registerCompat(name, cb, owner)
     return xLib.callback.register(name, function(source, ...)
         local response = promise.new()
         local responded = false
@@ -174,7 +199,7 @@ function xLib.callback.registerCompat(name, cb)
         cb(source, reply, ...)
 
         return table.unpack(Citizen.Await(response))
-    end)
+    end, owner)
 end
 
 return xLib.callback
