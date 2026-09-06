@@ -31,12 +31,14 @@ function xLib.setValidCallback(callbackName, isValid)
     local resourceName = GetInvokingResource() or resource_name
     local callbackResource = registeredCallbacks[callbackName]
 
-    if callbackResource then
-        if not isValid then
+    if not isValid then
+        if callbackResource == resourceName then
             registeredCallbacks[callbackName] = nil
-            return
         end
+        return
+    end
 
+    if callbackResource then
         if callbackResource == resourceName then return end
 
         if IS_DEBUG then
