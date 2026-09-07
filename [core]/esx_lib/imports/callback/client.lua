@@ -8,6 +8,7 @@
 
 local pendingCallbacks = {}
 local registeredCallbackNames = {}
+local compatCallbacks = {}
 local timers = {}
 local cbEvent = '__xLib_cb_%s'
 local callbackTimeout = GetConvarInt('xLib:callbackTimeout', 300000)
@@ -36,6 +37,23 @@ end
 AddEventHandler('onClientResourceStart', function(resource)
     if resource == 'esx_lib' then
         SetTimeout(0, republishValidCallbacks)
+    end
+end)
+
+-- Compat callbacks (via ESX.Register*) belong to another resource while their
+-- handlers live here, so they must be removed manually when that resource stops.
+AddEventHandler('onClientResourceStop', function(resource)
+    for name, registration in pairs(compatCallbacks) do
+        if registration.owner == resource then
+            RemoveEventHandler(registration.handler)
+
+            compatCallbacks[name] = nil
+            registeredCallbackNames[name] = nil
+
+            if GetResourceState('esx_lib') == 'started' then
+                xLib.setValidCallback(name, false)
+            end
+        end
     end
 end)
 
@@ -161,6 +179,8 @@ local pcall = pcall
 ---@param name string
 ---@param cb function
 ---Registers an event handler and callback function to respond to server requests.
+---The handler is owned by the importing resource's runtime, so FiveM removes
+---it automatically when that resource stops.
 ---@diagnostic disable-next-line: duplicate-set-field
 function xLib.callback.register(name, cb)
     local event = cbEvent:format(name)
@@ -175,9 +195,13 @@ end
 
 ---@param name string
 ---@param cb function
+---@param owner? string Resource whose lifetime owns the callback.
 ---Registers a callback using the old ESX client callback signature: function(cb, ...).
-function xLib.callback.registerCompat(name, cb)
-    return xLib.callback.register(name, function(...)
+---The handler is created here so it can be removed when the owner resource stops.
+function xLib.callback.registerCompat(name, cb, owner)
+    local event = cbEvent:format(name)
+
+    local function compatCb(...)
         local response = promise.new()
         local responded = false
 
@@ -195,7 +219,24 @@ function xLib.callback.registerCompat(name, cb)
         cb(reply, ...)
 
         return table.unpack(Citizen.Await(response))
+    end
+
+    local previous = compatCallbacks[name]
+    if previous then
+        RemoveEventHandler(previous.handler)
+    end
+
+    RegisterNetEvent(event)
+    local handler = AddEventHandler(event, function(resource, key, ...)
+        TriggerServerEvent(cbEvent:format(resource), key, callbackResponse(pcall(compatCb, ...)))
     end)
+
+    registeredCallbackNames[name] = true
+    compatCallbacks[name] = {
+        owner = owner or resource_name,
+        handler = handler
+    }
+    publishValidCallback(name)
 end
 
 return xLib.callback

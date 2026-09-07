@@ -9,7 +9,7 @@
 local registeredCallbacks = {}
 local resource_name = GetCurrentResourceName() --TODO: Add cache
 local IS_DEBUG <const> = GetConvar("xLib:debug", "false") == "true"
-local VALIDATION_GRACE_MS <const> = GetConvarInt("xLib:callbackValidationGrace", 1000)
+local VALIDATION_GRACE_MS <const> = GetConvarInt("xLib:callbackValidationGrace", 15000)
 
 
 AddEventHandler('onResourceStop', function(resourceName)
@@ -31,12 +31,14 @@ function xLib.setValidCallback(callbackName, isValid)
     local resourceName = GetInvokingResource() or resource_name
     local callbackResource = registeredCallbacks[callbackName]
 
-    if callbackResource then
-        if not isValid then
+    if not isValid then
+        if callbackResource == resourceName then
             registeredCallbacks[callbackName] = nil
-            return
         end
+        return
+    end
 
+    if callbackResource then
         if callbackResource == resourceName then return end
 
         if IS_DEBUG then

@@ -21,7 +21,8 @@ end
 ---@param callback function
 ---@return nil
 function ESX.RegisterServerCallback(eventName, callback)
-    return xLib.callback.registerCompat(eventName, callback)
+    local owner = GetInvokingResource() or GetCurrentResourceName()
+    return xLib.callback.registerCompat(eventName, callback, owner)
 end
 
 ---@param eventName string
