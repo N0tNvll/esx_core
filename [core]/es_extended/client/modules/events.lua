@@ -35,11 +35,11 @@ RegisterNetEvent("esx:playerLoaded", function(xPlayer, _, skin)
 
     if not Config.Multichar then
         Core.FreezePlayer(false)
+        if IsScreenFadedOut() then
+            DoScreenFadeIn(500)
+        end
     end
 
-    if IsScreenFadedOut() then
-        DoScreenFadeIn(500)
-    end
 
     Actions:Init()
     xLib.points.startLoop()
@@ -138,7 +138,7 @@ AddStateBagChangeHandler("VehicleProperties", nil, function(bagName, _, value)
     end
 
     local tries = 0
-    
+
     while not NetworkDoesEntityExistWithNetworkId(netId) do
         Wait(200)
         tries = tries + 1
