@@ -32,10 +32,9 @@ RegisterNetEvent("esx:playerLoaded", function(xPlayer, _, skin)
 
     if not Config.Multichar then
         Core.FreezePlayer(false)
-    end
-
-    if IsScreenFadedOut() then
-        DoScreenFadeIn(500)
+        if IsScreenFadedOut() then
+            DoScreenFadeIn(500)
+        end
     end
 
     Actions:Init()
