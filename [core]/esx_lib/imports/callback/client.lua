@@ -14,6 +14,16 @@ local cbEvent = '__xLib_cb_%s'
 local callbackTimeout = GetConvarInt('xLib:callbackTimeout', 300000)
 local resource_name = GetCurrentResourceName() --TODO: Add cache
 
+local function createCallbackKey(event)
+    local key
+
+    repeat
+        key = ('%s:%s:%s'):format(event, GetGameTimer(), xLib.string.randomHex(32))
+    until not pendingCallbacks[key]
+
+    return key
+end
+
 local function publishValidCallback(name)
     local ok = pcall(function()
         xLib.setValidCallback(name, true)
@@ -96,11 +106,7 @@ end
 local function triggerServerCallback(_, event, delay, cb, ...)
     if not eventTimer(event, delay) then return end
 
-    local key
-
-    repeat
-        key = ('%s:%s'):format(event, math.random(0, 100000))
-    until not pendingCallbacks[key]
+    local key = createCallbackKey(event)
 
     ---@type promise | false
     local promise = not cb and promise.new()
@@ -123,12 +129,25 @@ local function triggerServerCallback(_, event, delay, cb, ...)
         end
     end
 
+    SetTimeout(callbackTimeout, function()
+        if not pendingCallbacks[key] then
+            return
+        end
+
+        pendingCallbacks[key] = nil
+
+        local err = ("callback event '%s' timed out"):format(key)
+        if promise then
+            promise:reject(err)
+        elseif cb then
+            warn(err)
+        end
+    end)
+
     TriggerServerEvent('xLib:validateCallback', event, resource_name, key)
     TriggerServerEvent(cbEvent:format(event), resource_name, key, ...)
 
     if promise then
-        SetTimeout(callbackTimeout, function() promise:reject(("callback event '%s' timed out"):format(key)) end)
-
         return table.unpack(Citizen.Await(promise))
     end
 end
@@ -215,6 +234,13 @@ function xLib.callback.registerCompat(name, cb, owner)
 
             return table.unpack(values)
         end
+
+        SetTimeout(callbackTimeout, function()
+            if not responded then
+                responded = true
+                response:reject(("compat callback '%s' timed out"):format(name))
+            end
+        end)
 
         cb(reply, ...)
 

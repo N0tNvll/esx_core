@@ -13,6 +13,26 @@ local cbEvent = '__xLib_cb_%s'
 local callbackTimeout = GetConvarInt('xLib:callbackTimeout', 300000)
 local resource_name = GetCurrentResourceName() --TODO: Add cache
 
+local function createCallbackKey(event, playerId)
+    local key
+
+    repeat
+        key = ('%s:%s:%s:%s'):format(event, playerId, GetGameTimer(), xLib.string.randomHex(32))
+    until not pendingCallbacks[key]
+
+    return key
+end
+
+local function clearPendingForSource(playerId)
+    playerId = tostring(playerId)
+
+    for key, pending in pairs(pendingCallbacks) do
+        if pending.source == playerId then
+            pendingCallbacks[key] = nil
+        end
+    end
+end
+
 local function publishValidCallback(name)
     local ok = pcall(function()
         xLib.setValidCallback(name, true)
@@ -57,13 +77,21 @@ AddEventHandler('onResourceStop', function(resource)
 end)
 
 RegisterNetEvent(cbEvent:format(resource_name), function(key, ...)
-    local cb = pendingCallbacks[key]
+    local pending = pendingCallbacks[key]
 
-    if not cb then return end
+    if not pending then return end
+
+    if pending.source ~= tostring(source) then
+        return
+    end
 
     pendingCallbacks[key] = nil
 
-    cb(...)
+    pending.cb(...)
+end)
+
+AddEventHandler('playerDropped', function()
+    clearPendingForSource(source)
 end)
 
 ---@param _ any
@@ -75,39 +103,51 @@ end)
 local function triggerClientCallback(_, event, playerId, cb, ...)
     xLib.verify(playerId, 'playerId', true)
 
-    local key
-
-    repeat
-        key = ('%s:%s:%s'):format(event, math.random(0, 100000), playerId)
-    until not pendingCallbacks[key]
+    local key = createCallbackKey(event, playerId)
 
     ---@type promise | false
     local promise = not cb and promise.new()
 
-    pendingCallbacks[key] = function(response, ...)
-        if response == 'cb_invalid' then
-            response = ("callback '%s' does not exist"):format(event)
+    pendingCallbacks[key] = {
+        source = tostring(playerId),
+        cb = function(response, ...)
+            if response == 'cb_invalid' then
+                response = ("callback '%s' does not exist"):format(event)
 
-            return promise and promise:reject(response) or error(response)
+                return promise and promise:reject(response) or error(response)
+            end
+
+            response = { response, ... }
+
+            if promise then
+                return promise:resolve(response)
+            end
+
+            if cb then
+                cb(table.unpack(response))
+            end
+        end
+    }
+
+    SetTimeout(callbackTimeout, function()
+        if not pendingCallbacks[key] then
+            return
         end
 
-        response = { response, ... }
+        pendingCallbacks[key] = nil
 
+        local err = ("callback event '%s' timed out"):format(key)
         if promise then
-            return promise:resolve(response)
+            promise:reject(err)
+        elseif cb then
+            warn(err)
         end
-
-        if cb then
-            cb(table.unpack(response))
-        end
-    end
+    end)
 
     TriggerClientEvent('xLib:validateCallback', playerId, event, resource_name, key)
     TriggerClientEvent(cbEvent:format(event), playerId, resource_name, key, ...)
 
     if promise then
-        SetTimeout(callbackTimeout, function() promise:reject(("callback event '%s' timed out"):format(key)) end)
-
         return table.unpack(Citizen.Await(promise))
     end
 end
@@ -194,6 +234,13 @@ function xLib.callback.registerCompat(name, cb, owner)
 
             return table.unpack(values)
         end
+
+        SetTimeout(callbackTimeout, function()
+            if not responded then
+                responded = true
+                response:reject(("compat callback '%s' timed out"):format(name))
+            end
+        end)
 
         cb(source, reply, ...)
 
