@@ -3,7 +3,7 @@
 ---@param count number How many of the item to show
 ---@return nil
 function ESX.UI.ShowInventoryItemNotification(add, item, count)
-    SendNUIMessage({
+    xLib.nui.send({
         action = "inventoryNotification",
         add = add,
         item = item,

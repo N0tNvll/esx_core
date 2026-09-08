@@ -27,7 +27,7 @@ local function notifyItemChange(name, delta, added)
         local item = ESX.PlayerData.inventory[i]
 
         if item.name == name then
-            SendNUIMessage({
+            xLib.nui.send({
                 action = "notify",
                 added = added,
                 amount = delta,

@@ -15,6 +15,39 @@ xLib.streaming.requestModel = function(modelHash, cb)
 	return cb and cb(modelHash) or modelHash
 end
 
+---@param modelHash number | string
+---@param message? string
+---@param cb? function
+---@return number | nil
+xLib.streaming.requestModelWithSpinner = function(modelHash, message, cb)
+    if type(message) == "function" then
+        cb = message
+        message = nil
+    end
+
+    modelHash = type(modelHash) == "number" and modelHash or joaat(modelHash)
+
+    if not IsModelInCdimage(modelHash) then return end
+
+    if HasModelLoaded(modelHash) then
+        return cb and cb(modelHash) or modelHash
+    end
+
+    BeginTextCommandBusyspinnerOn("STRING")
+    AddTextComponentSubstringPlayerName(message or "Loading model")
+    EndTextCommandBusyspinnerOn(4)
+
+    RequestModel(modelHash)
+    while not HasModelLoaded(modelHash) do
+        DisableAllControlActions(0)
+        Wait(0)
+    end
+
+    BusyspinnerOff()
+
+    return cb and cb(modelHash) or modelHash
+end
+
 ---@param textureDict string
 ---@param cb? function
 ---@return string | nil

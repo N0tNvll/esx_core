@@ -4,7 +4,7 @@ local Inventory = ESXInventory
 function Inventory.pushState()
     local items = Inventory.buildItems()
 
-    SendNUIMessage({
+    xLib.nui.send({
         action = "state",
         items = items,
         slotCount = Inventory.computeSlotCount(items),
@@ -21,14 +21,14 @@ function Inventory.open()
 
     Inventory.isOpen = true
 
-    SendNUIMessage({
+    xLib.nui.send({
         action = "open",
         locale = Inventory.buildLocale(),
         theme = Inventory.buildTheme(),
         hotbarSlots = Config.HotbarSlots,
     })
     Inventory.pushState()
-    SetNuiFocus(true, true)
+    xLib.nui.focus(true, true)
 end
 
 ---@param fromNui boolean?
@@ -42,10 +42,10 @@ function Inventory.close(fromNui)
     local hadStorage = Inventory.currentStorage ~= nil
     Inventory.currentStorage = nil
 
-    SetNuiFocus(false, false)
+    xLib.nui.focus(false, false)
 
     if not fromNui then
-        SendNUIMessage({ action = "close" })
+        xLib.nui.send({ action = "close" })
     end
 
     if hadStorage then
@@ -55,16 +55,16 @@ end
 
 exports("ShowInventory", Inventory.open)
 
-RegisterNUICallback("close", function(_, cb)
+xLib.nui.register("close", function()
     Inventory.close(true)
-    cb({})
+    return {}
 end)
 
-RegisterNUICallback("saveSlots", function(data, cb)
-    cb({})
+xLib.nui.register("saveSlots", function(data, reply)
+    reply({})
 
     if type(data) ~= "table" or type(data.slots) ~= "table" then
-        return
+        return xLib.nui.defer
     end
 
     for key, slot in pairs(data.slots) do
@@ -74,52 +74,56 @@ RegisterNUICallback("saveSlots", function(data, cb)
     end
 
     Inventory.saveSlotMap()
+    return xLib.nui.defer
 end)
 
-RegisterNUICallback("useItem", function(data, cb)
-    cb({})
+xLib.nui.register("useItem", function(data, reply)
+    reply({})
 
     if type(data) ~= "table" or type(data.name) ~= "string" or data.type ~= "item_standard" then
-        return
+        return xLib.nui.defer
     end
 
     TriggerServerEvent("esx:useItem", data.name)
+    return xLib.nui.defer
 end)
 
-RegisterNUICallback("giveItem", function(data, cb)
-    cb({})
+xLib.nui.register("giveItem", function(data, reply)
+    reply({})
 
     if type(data) ~= "table" or type(data.name) ~= "string" or not Inventory.ITEM_TYPES[data.type] then
-        return
+        return xLib.nui.defer
     end
 
     local target = tonumber(data.target)
     local count = tonumber(data.count)
 
     if not target or not count or count < 1 then
-        return
+        return xLib.nui.defer
     end
 
     TriggerServerEvent("esx:giveInventoryItem", math.floor(target), data.type, data.name, math.floor(count))
+    return xLib.nui.defer
 end)
 
-RegisterNUICallback("dropItem", function(data, cb)
-    cb({})
+xLib.nui.register("dropItem", function(data, reply)
+    reply({})
 
     if type(data) ~= "table" or type(data.name) ~= "string" or not Inventory.ITEM_TYPES[data.type] then
-        return
+        return xLib.nui.defer
     end
 
     local count = tonumber(data.count)
 
     if not count or count < 1 then
-        return
+        return xLib.nui.defer
     end
 
     TriggerServerEvent("esx:removeInventoryItem", data.type, data.name, math.floor(count))
+    return xLib.nui.defer
 end)
 
-RegisterNUICallback("getNearbyPlayers", function(_, cb)
+xLib.nui.register("getNearbyPlayers", function()
     local players = {}
     local myId = PlayerId()
     local myCoords = GetEntityCoords(PlayerPedId())
@@ -144,42 +148,45 @@ RegisterNUICallback("getNearbyPlayers", function(_, cb)
         return a.distance < b.distance
     end)
 
-    cb(players)
+    return players
 end)
 
-RegisterNUICallback("storagePut", function(data, cb)
-    cb({})
+xLib.nui.register("storagePut", function(data, reply)
+    reply({})
 
     if not Inventory.currentStorage or type(data) ~= "table" or type(data.name) ~= "string" or data.type ~= "item_standard" then
-        return
+        return xLib.nui.defer
     end
 
     local count = tonumber(data.count)
 
     if not count or count < 1 then
-        return
+        return xLib.nui.defer
     end
 
     TriggerServerEvent("esx_inventory:storagePut", data.name, math.floor(count))
+    return xLib.nui.defer
 end)
 
-RegisterNUICallback("storageTake", function(data, cb)
-    cb({})
+xLib.nui.register("storageTake", function(data, reply)
+    reply({})
 
     if not Inventory.currentStorage or type(data) ~= "table" or type(data.name) ~= "string" then
-        return
+        return xLib.nui.defer
     end
 
     local count = tonumber(data.count)
 
     if not count or count < 1 then
-        return
+        return xLib.nui.defer
     end
 
     TriggerServerEvent("esx_inventory:storageTake", data.name, math.floor(count))
+    return xLib.nui.defer
 end)
 
-RegisterNUICallback("uiError", function(data, cb)
-    cb({})
+xLib.nui.register("uiError", function(data, reply)
+    reply({})
     print("^1[esx_inventory:ui]^7", json.encode(data or {}))
+    return xLib.nui.defer
 end)

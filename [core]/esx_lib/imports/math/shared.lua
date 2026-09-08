@@ -54,6 +54,43 @@ function xLib.math.toNumber(value, min, max, round)
     return xLib.math.clamp(num, min, max)
 end
 
+--- Safely converts input to number without throwing.
+--- @param value any Input value
+--- @param min number|nil Minimum accepted value
+--- @param max number|nil Maximum accepted value
+--- @param round boolean|nil Round to nearest integer
+--- @return number|nil
+function xLib.math.tryNumber(value, min, max, round)
+    local num = tonumber(value)
+
+    if not num or num ~= num or num == math.huge or num == -math.huge then
+        return
+    end
+
+    if round then
+        num = num >= 0 and math_floor(num + 0.5) or math_ceil(num - 0.5)
+    end
+
+    if min and num < min then
+        return
+    end
+
+    if max and num > max then
+        return
+    end
+
+    return num
+end
+
+--- Safely converts input to an integer without throwing.
+--- @param value any Input value
+--- @param min number|nil Minimum accepted value
+--- @param max number|nil Maximum accepted value
+--- @return number|nil
+function xLib.math.toInteger(value, min, max)
+    return xLib.math.tryNumber(value, min, max, true)
+end
+
 --- Converts input string to multiple numbers.
 --- @param input string|number Input string or number (e.g., "1,2,3" or 1)
 --- @param min number|nil Minimum bound

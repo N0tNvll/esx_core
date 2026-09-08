@@ -25,13 +25,13 @@ AddEventHandler("esx:loadingScreenOff", function()
     loadingScreenFinished = true
 end)
 
-RegisterNUICallback("ready", function(_, cb)
+xLib.nui.register("ready", function()
     ready = true
-    cb(1)
+    return 1
 end)
 
 function setGuiState(state)
-        SetNuiFocus(state, state)
+        xLib.nui.focus(state, state)
         guiEnabled = state
 
         if state then
@@ -40,7 +40,7 @@ function setGuiState(state)
             ClearTimecycleModifier()
         end
 
-        SendNUIMessage({ type = "enableui", enable = state })
+        xLib.nui.send({ type = "enableui", enable = state })
 end
 
 RegisterNetEvent("esx_identity:showRegisterIdentity", function()
@@ -54,7 +54,7 @@ RegisterNetEvent("esx_identity:showRegisterIdentity", function()
         end
 end)
 
-RegisterNUICallback("register", function(data, cb)
+xLib.nui.register("register", function(data, reply)
         if not guiEnabled then
             return
         end
@@ -71,5 +71,6 @@ RegisterNUICallback("register", function(data, cb)
                 TriggerEvent("esx_skin:playerRegistered")
             end
         end, data)
-        cb(1)
+        reply(1)
+        return xLib.nui.defer
 end)
