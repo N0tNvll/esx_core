@@ -3,7 +3,7 @@ local OpenedMenus, MenuType = {}, "dialog"
 local function openMenu(namespace, name, data)
     OpenedMenus[namespace .. "_" .. name] = true
 
-    SendNUIMessage({
+    xLib.nui.send({
         action = "openMenu",
         namespace = namespace,
         name = name,
@@ -12,7 +12,7 @@ local function openMenu(namespace, name, data)
 
     xLib.timeout.setTimeout(200, function()
         if next(OpenedMenus) then
-            SetNuiFocus(true, true)
+            xLib.nui.focus(true, true)
         end
     end)
 end
@@ -20,14 +20,14 @@ end
 local function closeMenu(namespace, name)
     OpenedMenus[namespace .. "_" .. name] = nil
 
-    SendNUIMessage({
+    xLib.nui.send({
         action = "closeMenu",
         namespace = namespace,
         name = name,
     })
 
     if not next(OpenedMenus) then
-        SetNuiFocus(false, false)
+        xLib.nui.focus(false, false)
     end
 end
 

@@ -5,7 +5,7 @@ end
 xLib.triggerMedalClip = function(publicKey, eventName, clipOptions)
     if not publicKey or publicKey == '' then return end
 
-    SendNUIMessage({
+    local message = {
         action = 'medalClip',
         publicKey = publicKey,
         payload = {
@@ -18,5 +18,7 @@ xLib.triggerMedalClip = function(publicKey, eventName, clipOptions)
                 alertType = 'Default'
             }
         }
-    })
+    }
+
+    xLib.nui.send(message)
 end

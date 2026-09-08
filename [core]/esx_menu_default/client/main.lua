@@ -8,7 +8,7 @@ local function openMenu(namespace, name, data)
     data.namespace = namespace
     data.name = name
 
-    SendNUIMessage({
+    xLib.nui.send({
         action = "openMenu",
         data = data
     })
@@ -21,7 +21,7 @@ local function closeMenu(namespace, name)
         OpenedMenus = 0
     end
 
-    SendNUIMessage({
+    xLib.nui.send({
         action = "closeMenu",
         data = {
             namespace = namespace,
@@ -40,39 +40,41 @@ end)
 
 ESX.UI.Menu.RegisterType(MenuType, openMenu, closeMenu)
 
-RegisterNUICallback("menu_submit", function(data, cb)
+xLib.nui.register("menu_submit", function(data, reply)
     local menu = ESX.UI.Menu.GetOpened(MenuType, data._namespace, data._name)
 
     if not menu then
-        return
+        return xLib.nui.defer
     end
 
     if menu.submit ~= nil then
         menu.submit(data, menu)
     end
 
-    cb("OK")
+    reply("OK")
+    return xLib.nui.defer
 end)
 
-RegisterNUICallback("menu_cancel", function(data, cb)
+xLib.nui.register("menu_cancel", function(data, reply)
     local menu = ESX.UI.Menu.GetOpened(MenuType, data._namespace, data._name)
 
     if not menu then
-        return
+        return xLib.nui.defer
     end
 
     if menu.cancel ~= nil then
         menu.cancel(data, menu)
     end
 
-    cb("OK")
+    reply("OK")
+    return xLib.nui.defer
 end)
 
-RegisterNUICallback("menu_change", function(data, cb)
+xLib.nui.register("menu_change", function(data, reply)
     local menu = ESX.UI.Menu.GetOpened(MenuType, data._namespace, data._name)
 
     if not menu then
-        return
+        return xLib.nui.defer
     end
 
     for i = 1, #data.elements, 1 do
@@ -88,7 +90,8 @@ RegisterNUICallback("menu_change", function(data, cb)
     if menu.change ~= nil then
         menu.change(data, menu)
     end
-    cb("OK")
+    reply("OK")
+    return xLib.nui.defer
 end)
 
 xLib.addKeybind({
@@ -98,7 +101,7 @@ xLib.addKeybind({
     defaultKey = "RETURN",
     onPressed = function()
     if OpenedMenus > 0 and (GetGameTimer() - GUI.Time) > 200 then
-        SendNUIMessage({
+        xLib.nui.send({
             action = "controlPressed",
             control = "ENTER",
         })
@@ -114,7 +117,7 @@ xLib.addKeybind({
     defaultKey = "BACK",
     onPressed = function()
     if OpenedMenus > 0 then
-        SendNUIMessage({
+        xLib.nui.send({
             action = "controlPressed",
             control = "BACKSPACE",
         })
@@ -130,7 +133,7 @@ xLib.addKeybind({
     defaultKey = "UP",
     onPressed = function()
     if OpenedMenus > 0 then
-        SendNUIMessage({
+        xLib.nui.send({
             action = "controlPressed",
             control = "TOP",
         })
@@ -146,7 +149,7 @@ xLib.addKeybind({
     defaultKey = "DOWN",
     onPressed = function()
     if OpenedMenus > 0 then
-        SendNUIMessage({
+        xLib.nui.send({
             action = "controlPressed",
             control = "DOWN",
         })
@@ -162,7 +165,7 @@ xLib.addKeybind({
     defaultKey = "LEFT",
     onPressed = function()
     if OpenedMenus > 0 then
-        SendNUIMessage({
+        xLib.nui.send({
             action = "controlPressed",
             control = "LEFT",
         })
@@ -178,7 +181,7 @@ xLib.addKeybind({
     defaultKey = "RIGHT",
     onPressed = function()
     if OpenedMenus > 0 then
-        SendNUIMessage({
+        xLib.nui.send({
             action = "controlPressed",
             control = "RIGHT",
         })

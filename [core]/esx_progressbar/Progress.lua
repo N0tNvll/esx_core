@@ -50,7 +50,7 @@ local function Progressbar(message, length, Options)
     if CurrentProgress.FreezePlayer then
         FreezeEntityPosition(ESX.PlayerData.ped, CurrentProgress.FreezePlayer)
     end
-    SendNUIMessage({
+    xLib.nui.send({
         type = "Progressbar",
         length = length or 3000,
         message = message or "ESX-Framework",
@@ -71,7 +71,7 @@ local function CancelProgressbar()
     if not CurrentProgress then
         return
     end
-    SendNUIMessage({
+    xLib.nui.send({
         type = "Close",
     })
     ClearPedTasks(ESX.PlayerData.ped)

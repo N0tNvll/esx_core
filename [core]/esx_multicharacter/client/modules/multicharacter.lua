@@ -137,13 +137,13 @@ function Multicharacter:PrepForUI()
 end
 
 function Multicharacter:CloseUI()
-    SendNUIMessage({
+    xLib.nui.send({
         action = "ToggleMulticharacter",
         data = {
             show = false
         }
     })
-    SetNuiFocus(false, false)
+    xLib.nui.focus(false, false)
 end
 
 function Multicharacter:SetupCharacter(index)

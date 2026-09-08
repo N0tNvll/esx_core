@@ -45,7 +45,7 @@ function Menu:InitCharacter()
     end
     Wait(500)
     
-    SendNUIMessage({
+    xLib.nui.send({
         action = "ToggleMulticharacter",
         data = {
             show = true,
@@ -56,7 +56,7 @@ function Menu:InitCharacter()
         }
     })
 
-    SetNuiFocus(true, true)
+    xLib.nui.focus(true, true)
 end
 
 function Menu:SelectCharacter(index)
