@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 function Core.PlayerSession.OnPlayerDropped(playerId, reason, cb)
     local p = not cb and promise:new()
     local function resolve()

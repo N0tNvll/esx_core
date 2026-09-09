@@ -1,3 +1,8 @@
+<!--
+  SPDX-License-Identifier: GPL-3.0-only
+  Copyright (C) 2022-2026 ESX Framework
+-->
+
 <script setup>
 import { ref } from 'vue'
 import { Form, Field, ErrorMessage } from 'vee-validate';

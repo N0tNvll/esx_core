@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ---@class ProgressBarAnimation
 ---@field public type "anim" | "Scenario"
 ---@field public dict? string

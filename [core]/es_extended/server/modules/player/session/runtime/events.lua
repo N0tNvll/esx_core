@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 AddEventHandler("chatMessage", function(playerId, _, message)
     local xPlayer = ESX.GetPlayerFromId(playerId)
     if xPlayer and message:sub(1, 1) == "/" and playerId > 0 then

@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 local function decodeJsonObject(value, fallback)
     if type(value) == "table" then
         return value

@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * Copyright (C) 2022-2026 ESX Framework
+ */
+
 export function getResourceName(): string {
   const win = window as unknown as { GetParentResourceName?: () => string }
   return win.GetParentResourceName ? win.GetParentResourceName() : "esx_inventory"

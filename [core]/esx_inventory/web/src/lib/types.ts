@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * Copyright (C) 2022-2026 ESX Framework
+ */
+
 export interface InventoryItem {
   type: "item_standard" | "item_account" | "item_weapon"
   name: string

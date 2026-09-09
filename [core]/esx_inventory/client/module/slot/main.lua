@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 local Inventory = ESXInventory
 
 local SLOT_KVP <const> = "esx_inventory:slots"

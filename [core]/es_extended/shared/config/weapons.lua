@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 Config.DefaultWeaponTints = {
     [0] = TranslateCap("tint_default"),
     [1] = TranslateCap("tint_green"),

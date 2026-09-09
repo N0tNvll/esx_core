@@ -1,3 +1,8 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * Copyright (C) 2022-2026 ESX Framework
+ */
+
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"

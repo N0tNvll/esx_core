@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 --[[
     Generic client-side player state cache, modelled on ox_lib cache.
     Framework agnostic: natives only, no ESX coupling.

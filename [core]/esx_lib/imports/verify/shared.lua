@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ---@alias CustomType 'number' | 'boolean' | 'function' | 'table' | 'string' | 'nil' | 'array' | 'int' | 'uint' | 'float' |  'char' | 'vector3' | 'vector4' | 'ped' | 'playerId' | 'vehicle' | 'prop' | 'class' | 'model'
 
 ---Checks if value is an array

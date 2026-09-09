@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 if not Config.CustomInventory then
     local STREAM_DISTANCE <const> = 150.0
     local CELL_SIZE <const> = 100.0

@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 --- Triggers an event for one or more clients.
 ---@param eventName string The name of the event to trigger.
 ---@param playerIds table|number If a number, represents a single player ID. If a table, represents an array of player IDs.

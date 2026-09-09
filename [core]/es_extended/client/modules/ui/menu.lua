@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ---@param menuType string
 ---@param open function The function to call on open
 ---@param close function The function to call on close

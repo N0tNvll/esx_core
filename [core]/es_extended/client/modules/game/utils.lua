@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ---@param str string The string to hash
 ---@return string The hashed string
 function ESX.HashString(str)

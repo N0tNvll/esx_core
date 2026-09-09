@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 Core.PlayerClass = Core.PlayerClass or {}
 
 function Core.PlayerClass.AttachBase(self)

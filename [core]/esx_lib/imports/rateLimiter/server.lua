@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ---@class RateLimiterOptions
 ---@field capacity number Maximum tokens a key can accumulate.
 ---@field refill number Tokens restored per interval.

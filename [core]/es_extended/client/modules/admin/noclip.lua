@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 local noclip = false
 local noclipPos = vector3(0, 0, 70)
 local heading = 0

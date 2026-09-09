@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ---@class InventoryStorageDefinition
 ---@field label string                                              # Display name of the storage.
 ---@field slots number                                              # Slot count shown by the UI.

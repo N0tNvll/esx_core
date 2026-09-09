@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 function Adjustments:RemoveHudComponents()
     for i = 1, #Config.RemoveHudComponents do
         if Config.RemoveHudComponents[i] then

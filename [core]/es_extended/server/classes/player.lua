@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ---@class ESXAccount
 ---@field name string               # Account name (e.g., "bank", "money").
 ---@field money number              # Current balance in this account.

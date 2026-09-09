@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 local placeHolders = {
     server_name = function()
         return GetConvar("sv_projectName", "ESX-Framework")

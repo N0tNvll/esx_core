@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 function Core.PlayerSession.OnPlayerJoined(playerId)
     local identifier = Core.PlayerSession.GetPlayerIdentifier(playerId)
 

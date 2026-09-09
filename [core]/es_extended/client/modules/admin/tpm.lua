@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 RegisterNetEvent("esx:tpm", function()
     local GetEntityCoords = GetEntityCoords
     local GetGroundZFor_3dCoord = GetGroundZFor_3dCoord

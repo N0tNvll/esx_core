@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 function ESX.OpenContext(...)
     return Core.IsResourceFound("esx_context") and exports["esx_context"]:Open(...)
 end

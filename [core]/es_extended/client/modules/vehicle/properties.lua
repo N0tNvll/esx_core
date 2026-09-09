@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ---@diagnostic disable-next-line: param-type-mismatch
 AddStateBagChangeHandler("VehicleProperties", nil, function(bagName, _, value)
     if not value then

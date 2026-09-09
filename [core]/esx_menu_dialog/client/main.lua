@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 local OpenedMenus, MenuType = {}, "dialog"
 
 local function openMenu(namespace, name, data)

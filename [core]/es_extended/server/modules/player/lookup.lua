@@ -1,3 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-only
+-- Copyright (C) 2022-2026 ESX Framework
+
 ESX.GetPlayers = GetPlayers
 
 local function checkTable(key, val, xPlayer, xPlayers, minimal)
