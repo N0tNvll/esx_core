@@ -13,3 +13,11 @@ function ESX.UI.ShowInventoryItemNotification(add, item, count)
         count = count,
     })
 end
+
+ESX.SecureNetEvent("esx:showInventoryItemNotification", function(add, item, count)
+    if type(add) ~= "boolean" or type(item) ~= "string" then
+        return
+    end
+
+    ESX.UI.ShowInventoryItemNotification(add, item, tonumber(count) or 1)
+end)

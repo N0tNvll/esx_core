@@ -47,7 +47,7 @@ function Core.PlayerClass.AttachWeapons(self)
             })
 
             GiveWeaponToPed(GetPlayerPed(self.source), joaat(weaponName), ammo, false, false)
-            self.triggerEvent("esx:addInventoryItem", weaponLabel, false, true)
+            self.triggerEvent("esx:showInventoryItemNotification", true, weaponLabel, 1)
             self.triggerEvent("esx:addLoadoutItem", weaponName, weaponLabel, ammo)
             return true
         end
@@ -66,7 +66,7 @@ function Core.PlayerClass.AttachWeapons(self)
                     self.loadout[loadoutNum].components[#self.loadout[loadoutNum].components + 1] = weaponComponent
                     local componentHash = ESX.GetWeaponComponent(weaponName, weaponComponent).hash
                     GiveWeaponComponentToPed(GetPlayerPed(self.source), joaat(weaponName), componentHash)
-                    self.triggerEvent("esx:addInventoryItem", component.label, false, true)
+                    self.triggerEvent("esx:showInventoryItemNotification", true, component.label, 1)
                     return true
                 end
             end
@@ -115,7 +115,7 @@ function Core.PlayerClass.AttachWeapons(self)
             if weaponObject.tints and weaponObject.tints[weaponTintIndex] then
                 self.loadout[loadoutNum].tintIndex = weaponTintIndex
                 self.triggerEvent("esx:setWeaponTint", weaponName, weaponTintIndex)
-                self.triggerEvent("esx:addInventoryItem", weaponObject.tints[weaponTintIndex], false, true)
+                self.triggerEvent("esx:showInventoryItemNotification", true, weaponObject.tints[weaponTintIndex], 1)
                 return true
             end
         end
@@ -158,7 +158,7 @@ function Core.PlayerClass.AttachWeapons(self)
         end
 
         if weaponLabel then
-            self.triggerEvent("esx:removeInventoryItem", weaponLabel, false, true)
+            self.triggerEvent("esx:showInventoryItemNotification", false, weaponLabel, 1)
             self.triggerEvent("esx:removeLoadoutItem", weaponName, weaponLabel)
             return true
         end
@@ -182,7 +182,7 @@ function Core.PlayerClass.AttachWeapons(self)
                     end
 
                     self.triggerEvent("esx:removeWeaponComponent", weaponName, weaponComponent)
-                    self.triggerEvent("esx:removeInventoryItem", component.label, false, true)
+                    self.triggerEvent("esx:showInventoryItemNotification", false, component.label, 1)
                     return true
                 end
             end
