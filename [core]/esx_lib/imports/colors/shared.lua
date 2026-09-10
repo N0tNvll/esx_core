@@ -2,7 +2,8 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 ---@class colorslib
-xLib.colors = xLib.colors or {}
+local colors = rawget(xLib, "colors")
+xLib.colors = type(colors) == "table" and colors or {}
 
 xLib.colors.brand = GetConvar("esx:brand-color", "#FB9B04")
 xLib.colors.darkest = GetConvar("esx:darkest-color", "#161616")

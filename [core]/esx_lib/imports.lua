@@ -79,8 +79,6 @@ local function call(self, index, ...)
 
     -- Module Loading
     if not module then
-        self[index] = Noop -- to prevent module from loading again if doesn't exists.
-
         module = loadModule(self, index)
 
         if not module then
@@ -89,6 +87,7 @@ local function call(self, index, ...)
             end
                 
             if not ... then
+                -- Cache missing-module export proxies only after the real import failed.
                 self[index] = method
             end
 
