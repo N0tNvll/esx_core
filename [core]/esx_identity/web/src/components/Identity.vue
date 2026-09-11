@@ -56,15 +56,13 @@ async function submit() {
 
 <template>
     <main class="identity-stage" :class="{ 'is-preview': isPreview }" :lang="activeLocale">
+        <div class="brand-lockup brand-header">
+            <img src="/brand-logo.png" alt="ESX" class="brand-logo" />
+            <span class="brand-divider"></span>
+            <span class="eyebrow">{{ t("roleplay") }}<br /><b>{{ t("newLife") }}</b></span>
+        </div>
         <section class="identity-shell">
             <div class="form-panel">
-                <div class="form-topline">
-                    <div class="brand-lockup">
-                        <img src="/brand-logo.png" alt="ESX" class="brand-logo" />
-                        <span class="brand-divider"></span>
-                        <span class="eyebrow">{{ t("roleplay") }}<br /><b>{{ t("newLife") }}</b></span>
-                    </div>
-                </div>
                 <div class="form-heading">
                     <h2>{{ t("formTitle") }}</h2>
                     <p>{{ t("formSubtitle") }}</p>

@@ -82,10 +82,16 @@ svg {
     width: 100%;
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 20px;
     padding: 40px;
     background: radial-gradient(ellipse at 20% 50%, rgba(39, 29, 14, 0.32), transparent 65%), rgba(5, 7, 7, 0.76);
+}
+.brand-header {
+    padding: 0;
+    margin-bottom: 12px;
 }
 .identity-stage.is-preview {
     background: radial-gradient(ellipse at 8% 60%, #27231a 0, transparent 48%), radial-gradient(ellipse at 92% 0, #1e2422 0, transparent 45%), #0b0e0e;
@@ -105,16 +111,16 @@ svg {
 .brand-lockup {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 18px;
     padding: 0;
 }
 .brand-logo {
-    width: 112px;
-    height: 42px;
+    width: 84px;
+    height: 31px;
     object-fit: contain;
 }
 .brand-divider {
-    height: 32px;
+    height: 24px;
     width: 1px;
     background: #ffffff26;
 }
@@ -131,24 +137,18 @@ svg {
     letter-spacing: 1.5px;
 }
 .form-panel {
-    padding: 32px 44px 28px;
+    padding: 14px 44px 28px;
     background: linear-gradient(145deg, #1b1c1a 0%, #171918 100%);
 }
-.form-topline {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-}
 .form-heading {
-    margin: 24px 0 28px;
+    margin: 4px 0 20px;
+    text-align: center;
 }
 .form-heading h2 {
-    font-size: 32px;
+    font-size: 30px;
     letter-spacing: -1.1px;
     font-weight: 600;
-    margin: 11px 0 8px;
+    margin: 8px 0 6px;
 }
 .form-heading p {
     color: #999d95;
@@ -157,12 +157,12 @@ svg {
 .form-fields {
     display: flex;
     flex-direction: column;
-    gap: 17px;
+    gap: 12px;
 }
 .field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 12px;
 }
 .field {
     min-width: 0;
@@ -175,7 +175,7 @@ svg {
     font-size: 11px;
     font-weight: 500;
     color: #d4d6ce;
-    margin-bottom: 9px;
+    margin-bottom: 7px;
     width: 100%;
 }
 .field > label > span:not(.label-meta),
@@ -185,14 +185,14 @@ svg {
 }
 .label-meta {
     margin-left: auto;
-    font-size: 7px;
+    font-size: 10px;
     font-family: Consolas, monospace;
     letter-spacing: 0.6px;
     color: #93998e;
 }
 .field input:not([type="range"]),
 .gender-option {
-    height: 46px;
+    height: 40px;
     border: 1px solid #ffffff13;
     border-radius: 7px;
     background: #10131188;
@@ -290,7 +290,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: flex;
     align-items: center;
     gap: 23px;
-    height: 43px;
+    height: 38px;
 }
 .height-slider {
     -webkit-appearance: none;
@@ -335,8 +335,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 49px;
-    margin-top: 18px;
+    height: 44px;
+    margin-top: 14px;
     background: var(--brand);
     border: 1px solid #ffb332;
     border-radius: 7px;
@@ -368,7 +368,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 14px;
+    margin-top: 10px;
     font-size: 9px;
     color: #949b8c;
 }
@@ -434,17 +434,17 @@ kbd {
 }
 @media (min-width: 1500px) and (min-height: 900px) {
     .identity-shell {
-        width: 720px;
+        width: 680px;
     }
     .form-panel {
-        padding: 47px 51px 34px;
+        padding: 14px 51px 28px;
     }
     .form-heading {
-        margin-top: 46px;
-        margin-bottom: 33px;
+        margin-top: 4px;
+        margin-bottom: 20px;
     }
     .form-fields {
-        gap: 21px;
+        gap: 12px;
     }
 }
 @media (max-height: 800px) and (min-width: 901px) {
@@ -461,7 +461,7 @@ kbd {
         gap: 14px;
     }
     .form-heading h2 {
-        font-size: 29px;
+        font-size: 27px;
     }
 }
 @media (max-width: 900px) {
@@ -489,22 +489,19 @@ kbd {
     .form-panel {
         padding: 24px;
     }
-    .form-topline {
-        flex-wrap: wrap;
-    }
     .field-row {
         grid-template-columns: 1fr;
         gap: 17px;
     }
     .label-meta {
-        font-size: 6px;
+        font-size: 9px;
     }
     .gender-option {
         gap: 7px;
         padding: 0 10px;
     }
     .form-heading h2 {
-        font-size: 28px;
+        font-size: 27px;
     }
     .keyboard-hint {
         display: none;
