@@ -1,31 +1,21 @@
-<!--
-  SPDX-License-Identifier: GPL-3.0-only
-  Copyright (C) 2022-2026 ESX Framework
--->
-
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
 <script setup>
-import { onMounted } from 'vue';
-import Identity from './components/Identity.vue'
+import { onMounted, onUnmounted, ref } from "vue";
+import Identity from "./components/Identity.vue";
+import { inGame, isPreview, postNui } from "./nui.js";
 
+const previewLocale = new URLSearchParams(window.location.search).get("lang") || "es";
+const visible = ref(isPreview);
+const settings = ref(isPreview ? { locale: previewLocale } : {});
+function onMessage(event) {
+    if (event.data?.type !== "enableui" || typeof event.data.enable !== "boolean") return;
+    if (event.data.settings) settings.value = event.data.settings;
+    visible.value = event.data.enable;
+}
 onMounted(() => {
-  fetch("http://esx_identity/ready", {
-    method: "POST",
-    body: JSON.stringify({}),
-  });
-
-  window.addEventListener("message", (event) => {
-    if (event.data.type === "enableui") {
-        document.body.classList[event.data.enable ? "remove" : "add"]("none");
-    }
-  });
-})
-
+    window.addEventListener("message", onMessage);
+    if (inGame) postNui("ready").catch((error) => console.error("[esx_identity] NUI ready:", error));
+});
+onUnmounted(() => window.removeEventListener("message", onMessage));
 </script>
-
-<template>
-  <Identity/>
-</template>
-
-<style scoped>
-
-</style>
+<template><Identity v-if="visible" :settings="settings" /></template>

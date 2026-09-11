@@ -4,6 +4,7 @@
 local loadingScreenFinished = false
 local ready = false
 local guiEnabled = false
+local registrationPending = false
 local timecycleModifier = "hud_def_blur"
 
 ESX.SecureNetEvent("esx_identity:alreadyRegistered", function()
@@ -43,7 +44,18 @@ function setGuiState(state)
             ClearTimecycleModifier()
         end
 
-        xLib.nui.send({ type = "enableui", enable = state })
+        xLib.nui.send({
+            type = "enableui",
+            enable = state,
+            settings = {
+                maxNameLength = Config.MaxNameLength,
+                minHeight = Config.MinHeight,
+                maxHeight = Config.MaxHeight,
+maxAge = Config.MaxAge,
+                locale = Config.Locale,
+                dateFormat = Config.DateFormat
+            }
+        })
 end
 
 RegisterNetEvent("esx_identity:showRegisterIdentity", function()
@@ -59,21 +71,29 @@ end)
 
 xLib.nui.register("register", function(data, reply)
         if not guiEnabled then
-            return
+            return xLib.nui.fail("registrationClosed")
         end
 
-        xLib.callback("esx_identity:registerIdentity", false, function(callback)
-            if not callback then
+        if registrationPending then
+            return xLib.nui.fail("registrationPending")
+        end
+        registrationPending = true
+
+        CreateThread(function()
+            local ok, callback = pcall(xLib.callback.await, "esx_identity:registerIdentity", false, data)
+            registrationPending = false
+            if not ok or not callback then
+                reply(xLib.nui.fail("registerFailed"))
                 return
             end
 
+            reply(xLib.nui.ok())
             ESX.ShowNotification(TranslateCap("thank_you_for_registering"))
             setGuiState(false)
 
             if not ESX.GetConfig().Multichar then
                 TriggerEvent("esx_skin:playerRegistered")
             end
-        end, data)
-        reply(1)
+        end)
         return xLib.nui.defer
 end)

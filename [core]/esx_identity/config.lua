@@ -2,7 +2,7 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 Config = {}
-Config.Locale = GetConvar("esx:locale", "en")
+Config.Locale = ESX.GetConfig().Locale
 
 -- [Config.EnableCommands]
 -- Enables Commands Such As /char and /chardel
