@@ -96,6 +96,7 @@ function Core.PlayerClass.AttachInventory(self)
 
         TriggerEvent("esx:onAddInventoryItem", self.source, itemName, item.count)
         self.triggerEvent("esx:addInventoryItem", itemName, item.count, false, item)
+        self.triggerEvent("esx:setInventory", self.getInventory())
         return true
     end
 
@@ -118,6 +119,7 @@ function Core.PlayerClass.AttachInventory(self)
 
                     TriggerEvent("esx:onRemoveInventoryItem", self.source, itemName, item.count)
                     self.triggerEvent("esx:removeInventoryItem", itemName, item.count)
+                    self.triggerEvent("esx:setInventory", self.getInventory())
                     return true
                 end
 

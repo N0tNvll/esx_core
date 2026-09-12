@@ -154,7 +154,7 @@ export default function InventorySystem() {
   )
 
   const handleUse = useCallback((item: InventoryItem) => {
-    if (item.type !== "item_standard" || !item.usable) return
+    if (item.type !== "item_standard") return
     fetchNui("useItem", { type: item.type, name: item.name })
   }, [])
 

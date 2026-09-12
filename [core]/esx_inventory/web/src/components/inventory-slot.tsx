@@ -67,9 +67,9 @@ export default function InventorySlot({
 
     let borderClasses = "border-light/20 hover:border-light/40"
     if (isSelected) {
-      borderClasses = "border-brand shadow-lg shadow-brand/40 scale-105"
+      borderClasses = "border-brand/80 scale-105"
     } else if (isHotbarSlot) {
-      borderClasses = "border-brand/40 shadow-md shadow-brand/10"
+      borderClasses = "border-brand/45"
     }
 
     const hoverClasses = item ? "hover:scale-105" : ""
@@ -97,7 +97,7 @@ export default function InventorySlot({
         </div>
 
         <div className="absolute top-1 left-1 right-1">
-          <div className="bg-darkest/90 backdrop-blur-sm px-1.5 py-0.5 rounded border border-brand/20">
+          <div className="bg-darkest/90 backdrop-blur-sm px-1.5 py-0.5 rounded">
             <span className="text-[10px] font-semibold text-lightest truncate block">
               {item.label}
             </span>

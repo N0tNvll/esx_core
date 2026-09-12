@@ -42,7 +42,7 @@ export default function ActionPanel({
       <Button
         data-drop="use"
         onClick={onUse}
-        disabled={(!selectedItem || !selectedItem.usable) && !dragFromLeft}
+        disabled={(!selectedItem || selectedItem.type !== "item_standard") && !dragFromLeft}
         className={`${dragFromLeft ? "bg-brand/80 ring-2 ring-brand/50 shadow-xl shadow-brand/50" : "bg-brand hover:bg-brand/90"} text-darkest font-semibold px-8 py-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-brand/20 w-full flex items-center justify-center gap-2`}
       >
         <Hand className="w-5 h-5 pointer-events-none" />

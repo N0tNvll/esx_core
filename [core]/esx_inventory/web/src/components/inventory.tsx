@@ -66,7 +66,7 @@ export default function Inventory({
 
   return (
     <div className="w-full">
-      <div className="mb-4 p-4 rounded-2xl bg-dark/40 backdrop-blur-xl border border-light/10">
+      <div className="mb-4 p-4 rounded-2xl bg-dark/40 backdrop-blur-xl">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
             <Weight className="w-4 h-4 text-brand" />
@@ -76,7 +76,7 @@ export default function Inventory({
             {totalWeight.toFixed(1)} / {maxWeight}
           </span>
         </div>
-        <div className="h-3 bg-darkest rounded-full overflow-hidden border border-light/20">
+        <div className="h-3 bg-darkest rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-brand to-brand/80 transition-all duration-300 shadow-lg shadow-brand/30"
             style={{ width: `${weightPercentage}%` }}
@@ -84,7 +84,7 @@ export default function Inventory({
         </div>
       </div>
 
-      <div className="p-6 rounded-2xl bg-dark/30 backdrop-blur-2xl border border-light/10 shadow-2xl relative">
+      <div className="p-6 rounded-2xl bg-dark/30 backdrop-blur-2xl shadow-2xl relative">
         <div className="flex items-center justify-center gap-2 mb-4">
           <div className="text-brand">{icon}</div>
           <h2 className="text-xl font-bold text-lightest">{title}</h2>
@@ -105,7 +105,7 @@ export default function Inventory({
               isSelected={item !== null && itemKey(item) === selectedItem}
               onSelect={() => item && setSelectedItem(itemKey(item) === selectedItem ? null : itemKey(item))}
               onPointerDown={(e) => item && onSlotPointerDown(item, panel, e)}
-              onUse={item && onUseItem && item.type === "item_standard" && item.usable ? () => onUseItem(item) : undefined}
+              onUse={item && onUseItem && item.type === "item_standard" ? () => onUseItem(item) : undefined}
               onGive={item && onGiveItem ? () => onGiveItem(item) : undefined}
               onDropItem={item && onDropItem && (!canDropItem || canDropItem(item)) ? () => onDropItem(item) : undefined}
               useLabel={useLabel}

@@ -6,6 +6,25 @@
 ---@return nil
 function ESX.RegisterUsableItem(item, cb)
     Core.UsableItemsCallbacks[item] = cb
+
+    if Config.CustomInventory or not ESX.GetExtendedPlayers then
+        return
+    end
+
+    local xPlayers = ESX.GetExtendedPlayers()
+
+    for i = 1, #xPlayers do
+        local xPlayer = xPlayers[i]
+        local inventoryItem = xPlayer.getInventoryItem and xPlayer.getInventoryItem(item)
+
+        if inventoryItem and inventoryItem.count and inventoryItem.count > 0 then
+            if xPlayer.inventory and xPlayer.inventory[item] then
+                xPlayer.inventory[item].usable = true
+            end
+
+            TriggerClientEvent("esx:setInventory", xPlayer.source, xPlayer.getInventory())
+        end
+    end
 end
 
 ---@param source number

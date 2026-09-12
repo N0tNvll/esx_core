@@ -7,6 +7,76 @@ local lastCounts = {} ---@type table<string, number>
 local hasCountSnapshot = false
 local refreshScheduled = false
 
+local function ensureInventory()
+    if type(ESX.PlayerData.inventory) ~= "table" then
+        ESX.PlayerData.inventory = {}
+    end
+
+    return ESX.PlayerData.inventory
+end
+
+local function buildEntry(name, count, itemData)
+    itemData = type(itemData) == "table" and itemData or {}
+
+    return {
+        name = name,
+        count = count,
+        label = itemData.label or name,
+        weight = itemData.weight or 0,
+        usable = itemData.usable == true,
+        rare = itemData.rare == true,
+        canRemove = itemData.canRemove ~= false,
+    }
+end
+
+local function setInventoryItem(name, count, itemData)
+    if type(name) ~= "string" or type(count) ~= "number" then
+        return
+    end
+
+    local inventory = ensureInventory()
+
+    for i = 1, #inventory do
+        if inventory[i].name == name then
+            if count > 0 then
+                inventory[i].count = count
+
+                if type(itemData) == "table" then
+                    inventory[i].label = itemData.label or inventory[i].label
+                    inventory[i].weight = itemData.weight or inventory[i].weight
+                    inventory[i].usable = itemData.usable == true
+                    inventory[i].rare = itemData.rare == true
+                    inventory[i].canRemove = itemData.canRemove ~= false
+                end
+            else
+                table.remove(inventory, i)
+            end
+
+            return
+        end
+    end
+
+    if count > 0 then
+        inventory[#inventory + 1] = buildEntry(name, count, itemData)
+    end
+end
+
+local function getInventoryItemCount(name)
+    local inventory = ensureInventory()
+
+    for i = 1, #inventory do
+        if inventory[i].name == name then
+            return inventory[i].count or 0
+        end
+    end
+
+    return 0
+end
+
+local function replaceInventory(newInventory)
+    ESX.PlayerData.inventory = type(newInventory) == "table" and newInventory or {}
+end
+
 ---@return table<string, number>
 local function snapshotCounts()
     local counts = {}
@@ -89,8 +159,45 @@ local function scheduleRefresh()
     end)
 end
 
-RegisterNetEvent("esx:addInventoryItem", scheduleRefresh)
-RegisterNetEvent("esx:removeInventoryItem", scheduleRefresh)
+RegisterNetEvent("esx:setInventory", function(newInventory)
+    replaceInventory(newInventory)
+    scheduleRefresh()
+end)
+
+RegisterNetEvent("esx:addInventoryItem", function(item, count, _, itemData)
+    local previous = getInventoryItemCount(item)
+
+    setInventoryItem(item, count, itemData)
+
+    if count > previous then
+        notifyItemChange(item, count - previous, true)
+    end
+
+    hasCountSnapshot = true
+    lastCounts = snapshotCounts()
+
+    if Inventory.isOpen then
+        Inventory.pushState()
+    end
+end)
+
+RegisterNetEvent("esx:removeInventoryItem", function(item, count)
+    local previous = getInventoryItemCount(item)
+
+    setInventoryItem(item, count)
+
+    if count < previous then
+        notifyItemChange(item, previous - count, false)
+    end
+
+    hasCountSnapshot = true
+    lastCounts = snapshotCounts()
+
+    if Inventory.isOpen then
+        Inventory.pushState()
+    end
+end)
+
 RegisterNetEvent("esx:addLoadoutItem", scheduleRefresh)
 RegisterNetEvent("esx:removeLoadoutItem", scheduleRefresh)
 
