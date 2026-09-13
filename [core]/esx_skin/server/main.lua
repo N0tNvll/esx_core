@@ -23,6 +23,9 @@ RegisterNetEvent("esx_skin:save", function(skin)
         return
     end
     local xPlayer = ESX.Player(source)
+    if not xPlayer then
+        return
+    end
 
     if not ESX.GetConfig().CustomInventory then
         local defaultMaxWeight = ESX.GetConfig().MaxWeight
@@ -42,7 +45,14 @@ RegisterNetEvent("esx_skin:save", function(skin)
 end)
 
 RegisterNetEvent("esx_skin:setWeight", function(skin)
+    if not skin or type(skin) ~= "table" then
+        return
+    end
+
     local xPlayer = ESX.Player(source)
+    if not xPlayer then
+        return
+    end
 
     if not ESX.GetConfig().CustomInventory then
         local defaultMaxWeight = ESX.GetConfig().MaxWeight
