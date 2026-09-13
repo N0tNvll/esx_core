@@ -14,7 +14,7 @@ local registeredCallbackNames = {}
 local compatCallbacks = {}
 local timers = {}
 local cbEvent = '__xLib_cb_%s'
-local callbackTimeout = GetConvarInt('xLib:callbackTimeout', 300000)
+local callbackTimeout = GetConvarInt('xLib:callbackTimeout', GetConvarInt('esx:callbackTimeout', 15000))
 local resource_name = GetCurrentResourceName() --TODO: Add cache
 
 local function createCallbackKey(event)

@@ -13,8 +13,11 @@ local pendingCallbacks = {}
 local registeredCallbackNames = {}
 local compatCallbacks = {}
 local cbEvent = '__xLib_cb_%s'
-local callbackTimeout = GetConvarInt('xLib:callbackTimeout', 300000)
+local callbackTimeout = GetConvarInt('xLib:callbackTimeout', GetConvarInt('esx:callbackTimeout', 15000))
 local resource_name = GetCurrentResourceName() --TODO: Add cache
+
+SetConvarReplicated('esx:callbackTimeout', tostring(callbackTimeout))
+SetConvarReplicated('xLib:callbackTimeout', tostring(callbackTimeout))
 
 local function createCallbackKey(event, playerId)
     local key
@@ -26,12 +29,23 @@ local function createCallbackKey(event, playerId)
     return key
 end
 
+local function expirePendingCallback(key, err)
+    local pending = pendingCallbacks[key]
+
+    if not pending then
+        return
+    end
+
+    pendingCallbacks[key] = nil
+    pending.expire(err)
+end
+
 local function clearPendingForSource(playerId)
     playerId = tostring(playerId)
 
     for key, pending in pairs(pendingCallbacks) do
         if pending.source == playerId then
-            pendingCallbacks[key] = nil
+            expirePendingCallback(key, ("callback event '%s' was cancelled because player %s disconnected"):format(key, playerId))
         end
     end
 end
@@ -129,22 +143,18 @@ local function triggerClientCallback(_, event, playerId, cb, ...)
             if cb then
                 cb(table.unpack(response))
             end
+        end,
+        expire = function(err)
+            if promise then
+                promise:reject(err)
+            elseif cb then
+                warn(err)
+            end
         end
     }
 
     SetTimeout(callbackTimeout, function()
-        if not pendingCallbacks[key] then
-            return
-        end
-
-        pendingCallbacks[key] = nil
-
-        local err = ("callback event '%s' timed out"):format(key)
-        if promise then
-            promise:reject(err)
-        elseif cb then
-            warn(err)
-        end
+        expirePendingCallback(key, ("callback event '%s' timed out"):format(key))
     end)
 
     TriggerClientEvent('xLib:validateCallback', playerId, event, resource_name, key)

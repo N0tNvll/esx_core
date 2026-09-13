@@ -14,12 +14,29 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
         return
     end
 
-    if Core.RegisteredCommands[name] then
+    local previousCommand = Core.RegisteredCommands[name]
+    local isOverride = previousCommand ~= nil
+
+    local function forEachGroup(commandGroup, cbForGroup)
+        if type(commandGroup) == "table" then
+            for _, v in ipairs(commandGroup) do
+                cbForGroup(v)
+            end
+        else
+            cbForGroup(commandGroup)
+        end
+    end
+
+    if isOverride then
         print(('[^3WARNING^7] Command ^5"%s" ^7already registered, overriding command'):format(name))
 
-        if Core.RegisteredCommands[name].suggestion then
+        if previousCommand.suggestion then
             TriggerClientEvent("chat:removeSuggestion", -1, ("/%s"):format(name))
         end
+
+        forEachGroup(previousCommand.group, function(v)
+            ExecuteCommand(("remove_ace group.%s command.%s allow"):format(v, name))
+        end)
     end
 
     if suggestion then
@@ -30,6 +47,14 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
     end
 
     Core.RegisteredCommands[name] = { group = group, cb = cb, allowConsole = allowConsole, suggestion = suggestion }
+
+    forEachGroup(group, function(v)
+        ExecuteCommand(("add_ace group.%s command.%s allow"):format(v, name))
+    end)
+
+    if isOverride then
+        return
+    end
 
     RegisterCommand(name, function(playerId, args)
         local command = Core.RegisteredCommands[name]
@@ -149,7 +174,7 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
                     xPlayer.showNotification(err)
                 end
             else
-                cb(xPlayer or false, args, function(msg)
+                command.cb(xPlayer or false, args, function(msg)
                     if playerId == 0 then
                         print(("[^3WARNING^7] %s^7"):format(msg))
                     else
@@ -159,12 +184,4 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
             end
         end
     end, true)
-
-    if type(group) == "table" then
-        for _, v in ipairs(group) do
-            ExecuteCommand(("add_ace group.%s command.%s allow"):format(v, name))
-        end
-    else
-        ExecuteCommand(("add_ace group.%s command.%s allow"):format(group, name))
-    end
 end
