@@ -81,8 +81,13 @@ end
 ---@return string?
 ---@diagnostic disable-next-line: duplicate-set-field
 function ESX.GetVehicleType(model, player, cb)
-    if cb and not ESX.IsFunctionReference(cb) then
-        error("Invalid callback function")
+    if ESX.IsFunctionReference(player) and cb == nil then
+        cb = player
+        player = nil
+    elseif cb == false then
+        cb = nil
+    elseif cb and not ESX.IsFunctionReference(cb) then
+        cb = nil
     end
 
     local promise = not cb and promise.new()

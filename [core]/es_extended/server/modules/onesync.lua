@@ -12,7 +12,14 @@ ESX.OneSync = {}
 ---@return number? netId
 function ESX.OneSync.SpawnVehicle(vehicleModel, coords, heading, vehicleProperties, cb, vehicleType)
     if cb and not ESX.IsFunctionReference(cb) then
-        error("Invalid callback function")
+        if vehicleType == nil and type(cb) == "string" then
+            vehicleType = cb
+            cb = nil
+        elseif cb == false then
+            cb = nil
+        else
+            cb = nil
+        end
     end
 
     vehicleModel = joaat(vehicleModel)

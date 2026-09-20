@@ -429,6 +429,10 @@ function xLib.game.setVehicleProperties(vehicle, props)
     local pearlescentColor, wheelColor = GetVehicleExtraColours(vehicle)
     SetVehicleModKit(vehicle, 0)
 
+    while not IsVehicleModLoadDone(vehicle) do
+        Wait(0)
+    end
+
     if props.tyresCanBurst ~= nil then
         SetVehicleTyresCanBurst(vehicle, props.tyresCanBurst)
     end
