@@ -3,7 +3,7 @@
 
 return {
     ["skin_menu"] = "Skin Meny",
-    ["use_rotate_view"] = "Använd Q och E för att rotera.",
+    ["drag_rotate_view"] = "Håll ned vänster musknapp och dra för att rotera vyn.",
     ["skin"] = "Ända utseende",
     ["saveskin"] = "Spara",
 }
