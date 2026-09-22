@@ -52,17 +52,11 @@ if not IsDuplicityVersion() then -- Only register this event for the client
     end)
 
     if not ESX.GetConfig("CustomInventory") then
-        ESX.SecureNetEvent("esx:setInventory", function(newInventory)
-            local previous = ESX.PlayerData.inventory
-
-            ESX.PlayerData.inventory = type(newInventory) == "table" and newInventory or {}
-
-            if OnPlayerData then
-                OnPlayerData("inventory", ESX.PlayerData.inventory, previous)
-            end
-        end)
-
         ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotification, itemData)
+            if type(count) ~= "number" then
+                return
+            end
+
             local found = false
             local previous = ESX.PlayerData.inventory
 

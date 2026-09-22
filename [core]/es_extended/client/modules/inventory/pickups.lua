@@ -30,23 +30,38 @@ local function requestPickups(playerCoords)
     TriggerServerEvent("esx:requestPickups")
 end
 
-ESX.SecureNetEvent("esx:createPickup", function(pickupId, label, coords, itemType, name, components, tintIndex)
+---@param pickupId integer
+---@param label string
+---@param coords vector3
+---@param itemType string
+---@param name string
+---@param components? string[]
+---@param tintIndex? integer
+local function spawnPickup(pickupId, label, coords, itemType, name, components, tintIndex)
     if pickups[pickupId] then
         return
     end
 
+    local entry = {
+        label = label,
+        inRange = false,
+        coords = coords,
+    }
+
+    pickups[pickupId] = entry
+
     local function setObjectProperties(object)
+        if pickups[pickupId] ~= entry then
+            xLib.game.deleteObject(object)
+            return
+        end
+
         SetEntityAsMissionEntity(object, true, false)
         PlaceObjectOnGroundProperly(object)
         FreezeEntityPosition(object, true)
         SetEntityCollision(object, false, true)
 
-        pickups[pickupId] = {
-            obj = object,
-            label = label,
-            inRange = false,
-            coords = coords,
-        }
+        entry.obj = object
     end
 
     if itemType == "item_weapon" then
@@ -66,13 +81,13 @@ ESX.SecureNetEvent("esx:createPickup", function(pickupId, label, coords, itemTyp
     else
         xLib.game.spawnLocalObject("prop_money_bag_01", coords, setObjectProperties)
     end
-end)
+end
+
+ESX.SecureNetEvent("esx:createPickup", spawnPickup)
 
 ESX.SecureNetEvent("esx:createMissingPickups", function(missingPickups)
     for pickupId, pickup in pairs(missingPickups) do
-        if not pickups[pickupId] then
-            TriggerEvent("esx:createPickup", pickupId, pickup.label, vector3(pickup.coords.x, pickup.coords.y, pickup.coords.z - 1.0), pickup.type, pickup.name, pickup.components, pickup.tintIndex)
-        end
+        spawnPickup(pickupId, pickup.label, vector3(pickup.coords.x, pickup.coords.y, pickup.coords.z - 1.0), pickup.type, pickup.name, pickup.components, pickup.tintIndex)
     end
 end)
 

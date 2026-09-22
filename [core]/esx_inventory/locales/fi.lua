@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Avaa reppu",
     ["player_inventory"] = "Tavarat",
     ["storage"] = "Varasto",
+    ["storage_full"] = "Varasto on täynnä",
     ["weight"] = "Paino",
     ["take"] = "Ota",
     ["nearby_players"] = "Lähellä olevat pelaajat",

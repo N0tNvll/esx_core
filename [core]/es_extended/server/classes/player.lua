@@ -124,7 +124,7 @@
 ---@field group string              # Player permission group.
 ---@field identifier string         # Unique identifier (usually Steam or license).
 ---@field license string            # Player license string.
----@field inventory table<string, ESXInventoryItem> # SPARSE map keyed by item name. Do not access directly; use getInventory()/getInventoryItem().
+---@field inventory ESXInventoryItem[] # Owned items (count > 0) sorted by label.
 ---@field job ESXJob                # Player's current job.
 ---@field loadout ESXInventoryWeapon[] # Player's current weapons.
 ---@field name string               # Player's display name.

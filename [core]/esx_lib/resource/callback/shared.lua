@@ -12,7 +12,20 @@
 local registeredCallbacks = {}
 local resource_name = GetCurrentResourceName() --TODO: Add cache
 local IS_DEBUG <const> = GetConvar("xLib:debug", "false") == "true"
-local VALIDATION_GRACE_MS <const> = GetConvarInt("xLib:callbackValidationGrace", 15000)
+
+---@return integer
+local function getValidationGrace()
+    local grace = GetConvarInt("xLib:callbackValidationGrace", 15000)
+    local timeout = tonumber(GetConvar("xLib:callbackTimeout", GetConvar("esx:callbackTimeout", "")))
+
+    if timeout and timeout > 0 and timeout < math.huge and grace * 2 > timeout then
+        return math.floor(timeout / 2)
+    end
+
+    return grace
+end
+
+local VALIDATION_GRACE_MS <const> = getValidationGrace()
 local VALIDATION_WINDOW_MS <const> = GetConvarInt("xLib:callbackValidationWindow", 5000)
 local VALIDATION_MAX_REQUESTS <const> = GetConvarInt("xLib:callbackValidationMaxRequests", 30)
 local MAX_CALLBACK_NAME_LEN <const> = 200

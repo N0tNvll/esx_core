@@ -38,13 +38,32 @@ if Config.Multichar then
         end
     end)
 else
+    local joiningPlayers = {}
+
     RegisterNetEvent("esx:onPlayerJoined", function()
         local playerId = source
+
+        if joiningPlayers[playerId] or ESX.Players[playerId] then
+            return
+        end
+
+        joiningPlayers[playerId] = true
         Core.PlayerSession.WaitForJobs()
 
+        local ok, err = true, nil
         if not ESX.Players[playerId] then
-            Core.PlayerSession.OnPlayerJoined(playerId)
+            ok, err = pcall(Core.PlayerSession.OnPlayerJoined, playerId)
         end
+
+        joiningPlayers[playerId] = nil
+
+        if not ok then
+            error(err)
+        end
+    end)
+
+    AddEventHandler("playerDropped", function()
+        joiningPlayers[source] = nil
     end)
 end
 

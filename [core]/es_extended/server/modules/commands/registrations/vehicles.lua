@@ -15,7 +15,7 @@ local upgrades = Config.SpawnVehMaxUpgrades and {
 
 ESX.RegisterCommand(
     "car",
-    FilterGroups(CommandPermissions.car),
+    FilterGroups(CommandPermissions.car, "car"),
     function(xPlayer, args, showError)
         if not xPlayer then
             return showError("[^1ERROR^7] The xPlayer value is nil")
@@ -79,7 +79,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     { "cardel", "dv" },
-    FilterGroups(CommandPermissions.cardel),
+    FilterGroups(CommandPermissions.cardel, "cardel"),
     function(xPlayer, args)
         local ped = GetPlayerPed(xPlayer.source)
         local pedVehicle = GetVehiclePedIsIn(ped, false)
@@ -115,7 +115,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     { "fix", "repair" },
-    FilterGroups(CommandPermissions.fix),
+    FilterGroups(CommandPermissions.fix, "fix"),
     function(xPlayer, args, showError)
         local xTarget = args.playerId
         local ped = GetPlayerPed(xTarget.source)

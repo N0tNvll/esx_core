@@ -7,7 +7,7 @@
 
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
-import { ArrowRightLeft, Gift, Hand } from "lucide-react"
+import { ArrowRightLeft, Crosshair, Gift, Hand } from "lucide-react"
 import type { InventoryItem, NearbyPlayer } from "@/lib/types"
 
 interface ActionPanelProps {
@@ -19,8 +19,11 @@ interface ActionPanelProps {
   onUse: () => void
   showPlayerList: boolean
   setShowPlayerList: (value: boolean) => void
+  giveMode: "item" | "ammo"
+  canGiveAmmo: boolean
   nearbyPlayers: NearbyPlayer[]
   onOpenPlayerList: () => void
+  onOpenAmmoList: () => void
   onGiveToPlayer: (playerId: number) => void
 }
 
@@ -33,8 +36,11 @@ export default function ActionPanel({
   onUse,
   showPlayerList,
   setShowPlayerList,
+  giveMode,
+  canGiveAmmo,
   nearbyPlayers,
   onOpenPlayerList,
+  onOpenAmmoList,
   onGiveToPlayer,
 }: ActionPanelProps) {
   return (
@@ -64,13 +70,23 @@ export default function ActionPanel({
       <div className="relative">
         <Button
           data-drop="give"
-          onClick={() => (showPlayerList ? setShowPlayerList(false) : onOpenPlayerList())}
+          onClick={() => (showPlayerList && giveMode === "item" ? setShowPlayerList(false) : onOpenPlayerList())}
           disabled={!selectedItem && !dragFromLeft}
           className={`${dragFromLeft ? "bg-mid/60 ring-2 ring-brand/30 border-brand/40 shadow-xl shadow-brand/30" : "bg-mid hover:bg-mid/80 border-light/20"} text-lightest font-semibold px-8 py-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all border w-full flex items-center justify-center gap-2`}
         >
           <Gift className="w-5 h-5 pointer-events-none" />
           <span className="pointer-events-none">{t("give")}</span>
         </Button>
+
+        {canGiveAmmo && (
+          <Button
+            onClick={() => (showPlayerList && giveMode === "ammo" ? setShowPlayerList(false) : onOpenAmmoList())}
+            className="bg-mid hover:bg-mid/80 border-light/20 text-lightest font-semibold px-8 py-6 rounded-xl transition-all border w-full flex items-center justify-center gap-2 mt-4"
+          >
+            <Crosshair className="w-5 h-5 pointer-events-none" />
+            <span className="pointer-events-none">{t("giveAmmo")}</span>
+          </Button>
+        )}
 
         {showPlayerList && selectedItem && (
           <div className="absolute top-full mt-2 w-full bg-dark/95 backdrop-blur-xl border border-light/20 rounded-xl overflow-hidden shadow-2xl z-50">

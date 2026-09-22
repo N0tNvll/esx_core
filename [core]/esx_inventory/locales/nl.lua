@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Laat inventaris zien",
     ["player_inventory"] = "Inventaris",
     ["storage"] = "Opslag",
+    ["storage_full"] = "Opslag is vol",
     ["weight"] = "Gewicht",
     ["take"] = "Pakken",
     ["nearby_players"] = "Spelers in de buurt",

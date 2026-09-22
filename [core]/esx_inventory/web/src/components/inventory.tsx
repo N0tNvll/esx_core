@@ -57,12 +57,17 @@ export default function Inventory({
   const totalWeight = items.reduce((sum, item) => sum + item.weight * item.count, 0)
   const weightPercentage = maxWeight > 0 ? Math.min((totalWeight / maxWeight) * 100, 100) : 0
 
-  const slots = Array.from({ length: slotCount }, (_, i) => {
+  const totalSlots = items.reduce(
+    (count, item) => (Number.isInteger(item.slot) && item.slot >= count ? item.slot + 1 : count),
+    slotCount
+  )
+
+  const slots = Array.from({ length: totalSlots }, (_, i) => {
     return items.find((item) => item.slot === i) || null
   })
 
   const maxVisibleSlots = maxVisibleRows * 5
-  const needsScrolling = slotCount > maxVisibleSlots
+  const needsScrolling = totalSlots > maxVisibleSlots
 
   return (
     <div className="w-full">

@@ -6,12 +6,14 @@ xLib.vehiclePlate = {}
 
 local NumberCharset = {}
 local LetterCharset = {}
+local reservedPlates = {}
+local RESERVATION_MS <const> = 30000
 
 for i = 48, 57 do NumberCharset[#NumberCharset + 1] = string.char(i) end
 for i = 65, 90 do LetterCharset[#LetterCharset + 1] = string.char(i) end
 
 local function trim(value)
-    return (tostring(value):gsub("^%s*(.-)%s*$", "%1"))
+    return tostring(value):match("^%s*(.*%S)") or ""
 end
 
 local function getRandomChunk(charset, length)
@@ -121,12 +123,25 @@ function xLib.vehiclePlate.generateUnique(options, exists)
 
     options = options or {}
     local attempts = tonumber(options.attempts or 30) or 30
+    local now = GetGameTimer()
+
+    for plate, expiresAt in pairs(reservedPlates) do
+        if expiresAt <= now then
+            reservedPlates[plate] = nil
+        end
+    end
 
     for _ = 1, attempts do
         local plate = xLib.vehiclePlate.generate(options)
 
-        if plate and (not exists or not exists(plate)) then
-            return plate
+        if plate and not reservedPlates[plate] then
+            reservedPlates[plate] = GetGameTimer() + RESERVATION_MS
+
+            if not exists or not exists(plate) then
+                return plate
+            end
+
+            reservedPlates[plate] = nil
         end
     end
 end

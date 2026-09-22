@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Envanteri Göster",
     ["player_inventory"] = "Envanter",
     ["storage"] = "Depo",
+    ["storage_full"] = "Depo dolu",
     ["weight"] = "Ağırlık",
     ["take"] = "Al",
     ["nearby_players"] = "Yakındaki oyuncular",

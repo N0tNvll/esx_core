@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Buka Inventaris",
     ["player_inventory"] = "Inventaris",
     ["storage"] = "Penyimpanan",
+    ["storage_full"] = "Penyimpanan penuh",
     ["weight"] = "Berat",
     ["take"] = "Ambil",
     ["nearby_players"] = "Pemain terdekat",

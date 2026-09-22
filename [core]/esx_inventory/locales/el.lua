@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Εμφάνιση Αποθήκης",
     ["player_inventory"] = "Αντικείμενα",
     ["storage"] = "Αποθήκη",
+    ["storage_full"] = "Η αποθήκη είναι γεμάτη",
     ["weight"] = "Βάρος",
     ["take"] = "Πάρε",
     ["nearby_players"] = "Κοντινοί παίκτες",

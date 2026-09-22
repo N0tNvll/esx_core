@@ -46,7 +46,9 @@ local function resolveSocietyAccounts(xPlayers)
             if society then
                 local account = getSharedAccount(society.account)
                 accounts[jobName] = {
+                    accountName = society.account,
                     account = account,
+                    available = account and account.money or 0,
                     pendingDebit = 0,
                 }
             else
@@ -60,9 +62,17 @@ end
 
 local function flushSocietyDebits(accounts)
     for _, entry in pairs(accounts) do
-        if entry and entry.pendingDebit > 0 then
-            entry.account.removeMoney(entry.pendingDebit)
-            entry.pendingDebit = 0
+        if entry and entry.account then
+            if entry.pendingDebit > 0 then
+                entry.account.removeMoney(entry.pendingDebit)
+                entry.pendingDebit = 0
+            end
+
+            local account = getSharedAccount(entry.accountName)
+            if account then
+                entry.account = account
+                entry.available = account.money
+            end
         end
     end
 end
@@ -82,7 +92,7 @@ end
 local function payPlayer(xPlayer, societyAccounts)
     local player = xPlayer.source
 
-    if not ESX.GetPlayerFromId(player) then
+    if ESX.GetPlayerFromId(player) ~= xPlayer then
         return
     end
 
@@ -106,10 +116,8 @@ local function payPlayer(xPlayer, societyAccounts)
         local societyEntry = societyAccounts[xPlayer.job.name]
 
         if societyEntry then
-            local account = societyEntry.account
-            local availableMoney = account and (account.money - societyEntry.pendingDebit) or 0
-
-            if availableMoney >= salary then
+            if societyEntry.account and societyEntry.available >= salary then
+                societyEntry.available -= salary
                 societyEntry.pendingDebit += salary
                 xPlayer.addAccountMoney("bank", salary, "Paycheck")
                 TriggerClientEvent("esx:showAdvancedNotification", player, TranslateCap("bank"), TranslateCap("received_paycheck"), TranslateCap("received_salary", salary), "CHAR_BANK_MAZE", 9)

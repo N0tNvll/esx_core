@@ -5,7 +5,7 @@ local CommandPermissions = Core.CommandPermissions
 local FilterGroups = Core.FilterCommandGroups
 ESX.RegisterCommand(
     "setaccountmoney",
-    FilterGroups(CommandPermissions.setaccountmoney),
+    FilterGroups(CommandPermissions.setaccountmoney, "setaccountmoney"),
     function(xPlayer, args, showError)
         if not args.playerId.getAccount(args.account) then
             return showError(TranslateCap("command_giveaccountmoney_invalid"))
@@ -35,7 +35,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     "giveaccountmoney",
-    FilterGroups(CommandPermissions.giveaccountmoney),
+    FilterGroups(CommandPermissions.giveaccountmoney, "giveaccountmoney"),
     function(xPlayer, args, showError)
         if not args.playerId.getAccount(args.account) then
             return showError(TranslateCap("command_giveaccountmoney_invalid"))
@@ -65,7 +65,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     "removeaccountmoney",
-    FilterGroups(CommandPermissions.removeaccountmoney),
+    FilterGroups(CommandPermissions.removeaccountmoney, "removeaccountmoney"),
     function(xPlayer, args, showError)
         if not args.playerId.getAccount(args.account) then
             return showError(TranslateCap("command_removeaccountmoney_invalid"))

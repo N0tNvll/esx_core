@@ -50,7 +50,7 @@ end
 function xLib.math.toNumber(value, min, max, round)
     local num = toNumber(value, "toNumber")
     
-    if round then
+    if round and math.type(num) ~= "integer" then
         num = num >= 0 and math_floor(num + 0.5) or math_ceil(num - 0.5)
     end
     
@@ -70,7 +70,7 @@ function xLib.math.tryNumber(value, min, max, round)
         return
     end
 
-    if round then
+    if round and math.type(num) ~= "integer" then
         num = num >= 0 and math_floor(num + 0.5) or math_ceil(num - 0.5)
     end
 
@@ -89,9 +89,24 @@ end
 --- @param value any Input value
 --- @param min number|nil Minimum accepted value
 --- @param max number|nil Maximum accepted value
---- @return number|nil
+--- @return integer|nil
 function xLib.math.toInteger(value, min, max)
-    return xLib.math.tryNumber(value, min, max, true)
+    local num = xLib.math.tryNumber(value, nil, nil, true)
+    num = num and math.tointeger(num)
+
+    if not num then
+        return
+    end
+
+    if min and num < min then
+        return
+    end
+
+    if max and num > max then
+        return
+    end
+
+    return num
 end
 
 --- Converts input string to multiple numbers.

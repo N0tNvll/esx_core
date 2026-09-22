@@ -14,8 +14,20 @@ local registeredCallbackNames = {}
 local compatCallbacks = {}
 local timers = {}
 local cbEvent = '__xLib_cb_%s'
-local callbackTimeout = GetConvarInt('xLib:callbackTimeout', GetConvarInt('esx:callbackTimeout', 15000))
+local DEFAULT_AWAIT_TIMEOUT <const> = 300000
 local resource_name = GetCurrentResourceName() --TODO: Add cache
+
+---@return integer|nil
+local function getConfiguredTimeout()
+    local value = tonumber(GetConvar('xLib:callbackTimeout', GetConvar('esx:callbackTimeout', '')))
+
+    if value and value < math.huge then
+        return math.max(math.floor(value), 0)
+    end
+end
+
+local configuredTimeout = getConfiguredTimeout()
+local awaitTimeout = configuredTimeout or DEFAULT_AWAIT_TIMEOUT
 
 local function createCallbackKey(event)
     local key
@@ -132,20 +144,24 @@ local function triggerServerCallback(_, event, delay, cb, ...)
         end
     end
 
-    SetTimeout(callbackTimeout, function()
-        if not pendingCallbacks[key] then
-            return
-        end
+    local timeout = promise and awaitTimeout or configuredTimeout
 
-        pendingCallbacks[key] = nil
+    if timeout and timeout > 0 then
+        SetTimeout(timeout, function()
+            if not pendingCallbacks[key] then
+                return
+            end
 
-        local err = ("callback event '%s' timed out"):format(key)
-        if promise then
-            promise:reject(err)
-        elseif cb then
-            warn(err)
-        end
-    end)
+            pendingCallbacks[key] = nil
+
+            local err = ("callback event '%s' timed out"):format(key)
+            if promise then
+                promise:reject(err)
+            elseif cb then
+                warn(err)
+            end
+        end)
+    end
 
     TriggerServerEvent('xLib:validateCallback', event, resource_name, key)
     TriggerServerEvent(cbEvent:format(event), resource_name, key, ...)
@@ -238,12 +254,14 @@ function xLib.callback.registerCompat(name, cb, owner)
             return table.unpack(values)
         end
 
-        SetTimeout(callbackTimeout, function()
-            if not responded then
-                responded = true
-                response:reject(("compat callback '%s' timed out"):format(name))
-            end
-        end)
+        if configuredTimeout and configuredTimeout > 0 then
+            SetTimeout(configuredTimeout, function()
+                if not responded then
+                    responded = true
+                    response:reject(("compat callback '%s' timed out"):format(name))
+                end
+            end)
+        end
 
         cb(reply, ...)
 

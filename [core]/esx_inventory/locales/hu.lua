@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Leltár mutatása",
     ["player_inventory"] = "Leltár",
     ["storage"] = "Tároló",
+    ["storage_full"] = "A tároló megtelt",
     ["weight"] = "Súly",
     ["take"] = "Elvesz",
     ["nearby_players"] = "Közeli játékosok",

@@ -5,6 +5,8 @@
 xLib.nui = {}
 xLib.nui.defer = {}
 
+local DEFER_TIMEOUT_MS <const> = GetConvarInt("xLib:nuiDeferTimeout", 10000)
+
 ---@param message table|string
 ---@param data? any
 function xLib.nui.send(message, data)
@@ -98,11 +100,20 @@ function xLib.nui.register(name, handler)
             return
         end
 
-        if response == xLib.nui.defer then
+        if response == xLib.nui.defer or (response == nil and canDefer) then
+            if not replied and DEFER_TIMEOUT_MS > 0 then
+                SetTimeout(DEFER_TIMEOUT_MS, function()
+                    if not replied then
+                        print(("[xLib:nui] Callback %s timed out"):format(name))
+                        reply(xLib.nui.fail("timeout", "timeout"))
+                    end
+                end)
+            end
+
             return
         end
 
-        if not replied and (response ~= nil or not canDefer) then
+        if not replied then
             reply(response)
         end
     end)

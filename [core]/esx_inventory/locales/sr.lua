@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Otvaranje inventara",
     ["player_inventory"] = "Inventar",
     ["storage"] = "Skladište",
+    ["storage_full"] = "Skladište je puno",
     ["weight"] = "Težina",
     ["take"] = "Uzmi",
     ["nearby_players"] = "Igrači u blizini",

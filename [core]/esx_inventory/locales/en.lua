@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Show Inventory",
     ["player_inventory"] = "Inventory",
     ["storage"] = "Storage",
+    ["storage_full"] = "Storage is full",
     ["weight"] = "Weight",
     ["take"] = "Take",
     ["nearby_players"] = "Nearby Players",

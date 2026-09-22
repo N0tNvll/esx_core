@@ -4,6 +4,7 @@
 local Inventory = ESXInventory
 
 local lastCounts = {} ---@type table<string, number>
+local itemLabels = {} ---@type table<string, string>
 local hasCountSnapshot = false
 local refreshScheduled = false
 
@@ -61,20 +62,16 @@ local function setInventoryItem(name, count, itemData)
     end
 end
 
-local function getInventoryItemCount(name)
-    local inventory = ensureInventory()
-
-    for i = 1, #inventory do
-        if inventory[i].name == name then
-            return inventory[i].count or 0
-        end
-    end
-
-    return 0
-end
-
 local function replaceInventory(newInventory)
     ESX.PlayerData.inventory = type(newInventory) == "table" and newInventory or {}
+end
+
+---@param name any
+---@param label any
+local function rememberLabel(name, label)
+    if type(name) == "string" and type(label) == "string" and label ~= "" then
+        itemLabels[name] = label
+    end
 end
 
 ---@return table<string, number>
@@ -86,33 +83,50 @@ local function snapshotCounts()
 
         if item.count > 0 then
             counts[item.name] = item.count
+            rememberLabel(item.name, item.label)
         end
     end
 
     return counts
 end
 
+local function ensureCountSnapshot()
+    if hasCountSnapshot then
+        return
+    end
+
+    hasCountSnapshot = true
+    lastCounts = snapshotCounts()
+end
+
 ---@param name string
 ---@param delta number
 ---@param added boolean
 local function notifyItemChange(name, delta, added)
-    for i = 1, #ESX.PlayerData.inventory do
-        local item = ESX.PlayerData.inventory[i]
+    xLib.nui.send({
+        action = "notify",
+        added = added,
+        amount = delta,
+        item = {
+            name = name,
+            label = itemLabels[name] or name,
+            image = Config.ItemImageUrl:format(name),
+        },
+    })
+end
 
-        if item.name == name then
-            xLib.nui.send({
-                action = "notify",
-                added = added,
-                amount = delta,
-                item = {
-                    name = item.name,
-                    label = item.label,
-                    image = Config.ItemImageUrl:format(item.name),
-                },
-            })
-            return
-        end
+---@param name string
+---@param count number
+local function trackCount(name, count)
+    local previous = lastCounts[name] or 0
+
+    if count > previous then
+        notifyItemChange(name, count - previous, true)
+    elseif count < previous then
+        notifyItemChange(name, previous - count, false)
     end
+
+    lastCounts[name] = count > 0 and count or nil
 end
 
 local function refreshAndNotify()
@@ -165,16 +179,18 @@ RegisterNetEvent("esx:setInventory", function(newInventory)
 end)
 
 RegisterNetEvent("esx:addInventoryItem", function(item, count, _, itemData)
-    local previous = getInventoryItemCount(item)
-
-    setInventoryItem(item, count, itemData)
-
-    if count > previous then
-        notifyItemChange(item, count - previous, true)
+    if type(item) ~= "string" or type(count) ~= "number" then
+        return
     end
 
-    hasCountSnapshot = true
-    lastCounts = snapshotCounts()
+    ensureCountSnapshot()
+
+    if type(itemData) == "table" then
+        rememberLabel(item, itemData.label)
+    end
+
+    setInventoryItem(item, count, itemData)
+    trackCount(item, count)
 
     if Inventory.isOpen then
         Inventory.pushState()
@@ -182,16 +198,13 @@ RegisterNetEvent("esx:addInventoryItem", function(item, count, _, itemData)
 end)
 
 RegisterNetEvent("esx:removeInventoryItem", function(item, count)
-    local previous = getInventoryItemCount(item)
-
-    setInventoryItem(item, count)
-
-    if count < previous then
-        notifyItemChange(item, previous - count, false)
+    if type(item) ~= "string" or type(count) ~= "number" then
+        return
     end
 
-    hasCountSnapshot = true
-    lastCounts = snapshotCounts()
+    ensureCountSnapshot()
+    setInventoryItem(item, count)
+    trackCount(item, count)
 
     if Inventory.isOpen then
         Inventory.pushState()
@@ -227,7 +240,6 @@ OnPlayerData = function(key)
 end
 
 RegisterNetEvent("esx:playerLoaded", function()
-    Wait(0)
     hasCountSnapshot = true
     lastCounts = snapshotCounts()
 end)
@@ -241,8 +253,5 @@ CreateThread(function()
         Wait(500)
     end
 
-    if not hasCountSnapshot then
-        hasCountSnapshot = true
-        lastCounts = snapshotCounts()
-    end
+    ensureCountSnapshot()
 end)

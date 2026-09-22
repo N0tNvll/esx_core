@@ -85,31 +85,36 @@ function Core.SavePlayers(cb)
 
         for i = index, last do
             local xPlayer = players[i]
-            updateHealthAndArmorInMetadata(xPlayer)
-            parameters[#parameters + 1] = buildSaveParameters(xPlayer)
+
+            if ESX.Players[xPlayer.source] == xPlayer then
+                updateHealthAndArmorInMetadata(xPlayer)
+                parameters[#parameters + 1] = buildSaveParameters(xPlayer)
+            end
         end
 
-        MySQL.prepare(
-            SAVE_QUERY,
-            parameters,
-            function()
-                savedCount = savedCount + #parameters
+        local function onBatchSaved()
+            savedCount = savedCount + #parameters
 
-                if last < totalCount then
-                    SetTimeout(SAVE_BATCH_INTERVAL, function()
-                        saveBatch(last + 1)
-                    end)
-                else
-                    done = true
+            if last < totalCount then
+                SetTimeout(SAVE_BATCH_INTERVAL, function()
+                    saveBatch(last + 1)
+                end)
+            else
+                done = true
 
-                    if type(cb) == "function" then
-                        return cb()
-                    end
-
-                    print(("[^2INFO^7] Saved ^5%s^7 %s over ^5%s^7 ms"):format(totalCount, totalCount > 1 and "players" or "player", GetGameTimer() - startTime))
+                if type(cb) == "function" then
+                    return cb()
                 end
+
+                print(("[^2INFO^7] Saved ^5%s^7 %s over ^5%s^7 ms"):format(savedCount, savedCount > 1 and "players" or "player", GetGameTimer() - startTime))
             end
-        )
+        end
+
+        if #parameters == 0 then
+            return onBatchSaved()
+        end
+
+        MySQL.prepare(SAVE_QUERY, parameters, onBatchSaved)
     end
 
     saveBatch(1)

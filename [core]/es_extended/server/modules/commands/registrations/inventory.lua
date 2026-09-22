@@ -6,7 +6,7 @@ local FilterGroups = Core.FilterCommandGroups
 if not Config.CustomInventory then
     ESX.RegisterCommand(
         "giveitem",
-        FilterGroups(CommandPermissions.giveitem),
+        FilterGroups(CommandPermissions.giveitem, "giveitem"),
         function(xPlayer, args)
             args.playerId.addInventoryItem(args.item, args.count)
             if Config.AdminLogging then
@@ -36,7 +36,7 @@ if not Config.CustomInventory then
 
     ESX.RegisterCommand(
         "giveweapon",
-        FilterGroups(CommandPermissions.giveweapon),
+        FilterGroups(CommandPermissions.giveweapon, "giveweapon"),
         function(xPlayer, args, showError)
             if args.playerId.hasWeapon(args.weapon) then
                 return showError(TranslateCap("command_giveweapon_hasalready"))
@@ -66,7 +66,7 @@ if not Config.CustomInventory then
 
     ESX.RegisterCommand(
         "giveammo",
-        FilterGroups(CommandPermissions.giveammo),
+        FilterGroups(CommandPermissions.giveammo, "giveammo"),
         function(xPlayer, args, showError)
             if not args.playerId.hasWeapon(args.weapon) then
                 return showError(TranslateCap("command_giveammo_noweapon_found"))
@@ -96,7 +96,7 @@ if not Config.CustomInventory then
 
     ESX.RegisterCommand(
         "giveweaponcomponent",
-        FilterGroups(CommandPermissions.giveweaponcomponent),
+        FilterGroups(CommandPermissions.giveweaponcomponent, "giveweaponcomponent"),
         function(xPlayer, args, showError)
             if args.playerId.hasWeapon(args.weaponName) then
                 local component = ESX.GetWeaponComponent(args.weaponName, args.componentName)
@@ -137,7 +137,7 @@ if not Config.CustomInventory then
 end
 
 if not Config.CustomInventory then
-    ESX.RegisterCommand("refreshitems", FilterGroups(CommandPermissions.refreshitems), function(xPlayer)
+    ESX.RegisterCommand("refreshitems", FilterGroups(CommandPermissions.refreshitems, "refreshitems"), function(xPlayer)
         local itemCount = ESX.RefreshItems()
 
         if xPlayer then
@@ -149,12 +149,10 @@ if not Config.CustomInventory then
 
     ESX.RegisterCommand(
         "clearinventory",
-        FilterGroups(CommandPermissions.clearinventory),
+        FilterGroups(CommandPermissions.clearinventory, "clearinventory"),
         function(xPlayer, args)
-            for itemName, item in pairs(args.playerId.inventory) do
-                if item.count > 0 then
-                    args.playerId.setInventoryItem(itemName, 0)
-                end
+            for itemName in pairs(args.playerId.getInventory(true)) do
+                args.playerId.setInventoryItem(itemName, 0)
             end
             TriggerEvent("esx:playerInventoryCleared", args.playerId)
             if Config.AdminLogging then
@@ -177,7 +175,7 @@ if not Config.CustomInventory then
 
     ESX.RegisterCommand(
         "clearloadout",
-        FilterGroups(CommandPermissions.clearloadout),
+        FilterGroups(CommandPermissions.clearloadout, "clearloadout"),
         function(xPlayer, args)
             for i = #args.playerId.loadout, 1, -1 do
                 args.playerId.removeWeapon(args.playerId.loadout[i].name)

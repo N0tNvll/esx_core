@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Afficher l'inventaire",
     ["player_inventory"] = "Inventaire",
     ["storage"] = "Stockage",
+    ["storage_full"] = "Le stockage est plein",
     ["weight"] = "Poids",
     ["take"] = "Prendre",
     ["nearby_players"] = "Joueurs à proximité",

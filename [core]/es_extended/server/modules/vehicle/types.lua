@@ -2,7 +2,8 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 local KVP_KEY <const> = "esx_vehicleTypes"
-local KVP_VERSION <const> = 1
+local KVP_VERSION <const> = 2
+local CONFIRMATIONS_REQUIRED <const> = 2
 
 local validTypes <const> = {
     automobile = true,
@@ -16,6 +17,8 @@ local validTypes <const> = {
 }
 
 local storedTypes = {}
+local reports = {}
+local askedPlayers = {}
 local persistQueued = false
 
 local function persistVehicleTypes()
@@ -36,20 +39,98 @@ local function persistVehicleTypes()
     end)
 end
 
+local function getReporterKey(playerId)
+    return GetPlayerIdentifierByType(tostring(playerId), "license") or ("source:%s"):format(playerId)
+end
+
+local function countVotes(modelReports, vehicleType)
+    local votes = 0
+
+    for _, reportedType in pairs(modelReports) do
+        if reportedType == vehicleType then
+            votes = votes + 1
+        end
+    end
+
+    return votes
+end
+
+local function askPlayer(model, playerId, cb)
+    local asked = askedPlayers[model] or {}
+    askedPlayers[model] = asked
+    asked[getReporterKey(playerId)] = true
+
+    xLib.callback("esx:GetVehicleType", playerId, function(vehicleType)
+        Core.CacheVehicleType(model, vehicleType, playerId)
+
+        if cb then
+            cb(validTypes[vehicleType] and vehicleType or false)
+        end
+    end, model)
+end
+
+local function requestConfirmation(model)
+    local asked = askedPlayers[model] or {}
+
+    for playerId in pairs(ESX.Players) do
+        if not asked[getReporterKey(playerId)] then
+            return askPlayer(model, playerId)
+        end
+    end
+end
+
 ---@param model string|number
 ---@param vehicleType string|false|nil
+---@param playerId? number
 ---@return nil
-function Core.CacheVehicleType(model, vehicleType)
+function Core.CacheVehicleType(model, vehicleType, playerId)
     model = type(model) == "string" and joaat(model) or model
 
-    if type(model) ~= "number" or not validTypes[vehicleType] then
+    if type(model) ~= "number" then
         return
     end
 
-    Core.vehicleTypesByModel[model] = vehicleType
-    storedTypes[tostring(model)] = vehicleType
+    if not validTypes[vehicleType] then
+        if playerId and reports[model] then
+            requestConfirmation(model)
+        end
 
-    persistVehicleTypes()
+        return
+    end
+
+    local key = tostring(model)
+
+    if storedTypes[key] then
+        return
+    end
+
+    local modelReports = reports[model] or {}
+    reports[model] = modelReports
+
+    if playerId then
+        modelReports[getReporterKey(playerId)] = vehicleType
+    end
+
+    local votes = countVotes(modelReports, vehicleType)
+
+    if votes >= CONFIRMATIONS_REQUIRED then
+        storedTypes[key] = vehicleType
+        reports[model] = nil
+        askedPlayers[model] = nil
+        Core.vehicleTypesByModel[model] = vehicleType
+
+        return persistVehicleTypes()
+    end
+
+    local current = Core.vehicleTypesByModel[model]
+
+    if not current or votes > countVotes(modelReports, current) then
+        Core.vehicleTypesByModel[model] = vehicleType
+    end
+
+    if playerId then
+        requestConfirmation(model)
+    end
 end
 
 local function restoreVehicleTypes()
@@ -104,6 +185,14 @@ function ESX.GetVehicleType(model, player, cb)
     model = type(model) == "string" and joaat(model) or model
 
     if Core.vehicleTypesByModel[model] then
+        if player and reports[model] then
+            local asked = askedPlayers[model]
+
+            if not (asked and asked[getReporterKey(player)]) then
+                askPlayer(model, player)
+            end
+        end
+
         return resolve(Core.vehicleTypesByModel[model])
     end
 
@@ -111,14 +200,26 @@ function ESX.GetVehicleType(model, player, cb)
         return resolve(nil)
     end
 
-    xLib.callback("esx:GetVehicleType", player, function(vehicleType)
-        Core.CacheVehicleType(model, vehicleType)
-        resolve(vehicleType)
-    end, model)
+    askPlayer(model, player, resolve)
 
     if promise then
         return Citizen.Await(promise)
     end
 end
+
+RegisterCommand("clearvehicletypes", function(src)
+    if src ~= 0 then
+        print("^1[ERROR]^7 This command can only be run from the server console.")
+        return
+    end
+
+    storedTypes = {}
+    reports = {}
+    askedPlayers = {}
+    Core.vehicleTypesByModel = {}
+    DeleteResourceKvp(KVP_KEY)
+
+    print("^2[SUCCESS]^7 Cleared the vehicle type cache.")
+end, true)
 
 restoreVehicleTypes()

@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Pokazi Shrambo",
     ["player_inventory"] = "Inventar",
     ["storage"] = "Skladišče",
+    ["storage_full"] = "Skladišče je polno",
     ["weight"] = "Teža",
     ["take"] = "Vzemi",
     ["nearby_players"] = "Bližnji igralci",

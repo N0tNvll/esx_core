@@ -3,6 +3,8 @@
 
 local Inventory = ESXInventory
 
+local uiReady = false
+
 ---@return nil
 function Inventory.pushState()
     local items = Inventory.buildItems()
@@ -18,7 +20,7 @@ end
 
 ---@return nil
 function Inventory.open()
-    if Inventory.isOpen or not ESX.PlayerLoaded or ESX.PlayerData.dead or IsPauseMenuActive() then
+    if Inventory.isOpen or not uiReady or not ESX.PlayerLoaded or ESX.PlayerData.dead or IsPauseMenuActive() then
         return
     end
 
@@ -58,8 +60,23 @@ end
 
 exports("ShowInventory", Inventory.open)
 
+xLib.nui.register("ready", function()
+    uiReady = true
+
+    if Inventory.isOpen then
+        Inventory.close(true)
+    end
+
+    return {}
+end)
+
 xLib.nui.register("close", function()
-    Inventory.close(true)
+    if Inventory.isOpen then
+        Inventory.close(true)
+    else
+        xLib.nui.focus(false, false)
+    end
+
     return {}
 end)
 
@@ -106,6 +123,31 @@ xLib.nui.register("giveItem", function(data, reply)
     end
 
     TriggerServerEvent("esx:giveInventoryItem", math.floor(target), data.type, data.name, math.floor(count))
+    return xLib.nui.defer
+end)
+
+xLib.nui.register("giveAmmo", function(data, reply)
+    reply({})
+
+    if type(data) ~= "table" or type(data.name) ~= "string" then
+        return xLib.nui.defer
+    end
+
+    local target = tonumber(data.target)
+    local count = tonumber(data.count)
+
+    if not target or not count or count < 1 then
+        return xLib.nui.defer
+    end
+
+    count = math.floor(count)
+
+    if count > GetAmmoInPedWeapon(PlayerPedId(), joaat(data.name)) then
+        ESX.ShowNotification(TranslateCap("noammo"))
+        return xLib.nui.defer
+    end
+
+    TriggerServerEvent("esx:giveInventoryItem", math.floor(target), "item_ammo", data.name, count)
     return xLib.nui.defer
 end)
 

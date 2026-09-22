@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "فتح الحقيبة",
     ["player_inventory"] = "المخزون",
     ["storage"] = "التخزين",
+    ["storage_full"] = "التخزين ممتلئ",
     ["weight"] = "الوزن",
     ["take"] = "خذ",
     ["nearby_players"] = "اللاعبون القريبون",
