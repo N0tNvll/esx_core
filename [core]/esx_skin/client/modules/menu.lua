@@ -8,6 +8,8 @@ Menu.isOpen = false
 Menu.saveable = false
 Menu.focusIndex = 1
 
+local DRAG_DEGREES_PER_SCREEN <const> = 360.0
+
 local function round(value)
     return math.floor((tonumber(value) or 0) + 0.5)
 end
@@ -419,6 +421,17 @@ function Menu:Rotate(direction)
     end
 end
 
+---@param delta number
+function Menu:Drag(delta)
+    delta = normalizeNumber(delta, 0)
+    if not self.isOpen or delta == 0 then
+        return
+    end
+
+    delta = math.max(-1.0, math.min(1.0, delta))
+    Skin.heading = (Skin.heading - delta * DRAG_DEGREES_PER_SCREEN) % 360
+end
+
 function Menu:SetCameraPreset(preset)
     if preset == "face" then
         Skin.zoomOffset = 0.4
@@ -515,6 +528,11 @@ end)
 
 xLib.nui.register("skinMenu:rotate", function(data)
     Menu:Rotate(type(data) == "table" and data.direction or "right")
+    return { ok = true }
+end)
+
+xLib.nui.register("skinMenu:drag", function(data)
+    Menu:Drag(type(data) == "table" and data.delta or 0)
     return { ok = true }
 end)
 

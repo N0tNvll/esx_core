@@ -3,7 +3,7 @@
 
 return {
     ["skin_menu"] = "Ulkonäkö",
-    ["use_rotate_view"] = "Paina Q tai E liikutaaksesi kameraa.",
+    ["drag_rotate_view"] = "Pidä hiiren vasenta painiketta pohjassa ja vedä kääntääksesi kameraa.",
     ["skin"] = "Muokkaa ulkonäköä",
     ["saveskin"] = "Tallenna",
 }

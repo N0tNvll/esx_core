@@ -3,7 +3,7 @@
 
 return {
     ["skin_menu"] = "menu de Skin",
-    ["use_rotate_view"] = "utilisez Q et E pour tourner la vue.",
+    ["drag_rotate_view"] = "Maintenez le clic gauche et faites glisser pour tourner la vue.",
     ["skin"] = "changer de skin",
     ["saveskin"] = "sauvegarder skin dans un fichier",
 }
