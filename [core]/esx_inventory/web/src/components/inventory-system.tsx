@@ -16,6 +16,7 @@ import { useDrag } from "@/hooks/use-drag"
 import {
   DEFAULT_LOCALE,
   THEME_VARIABLES,
+  hasGivableAmmo,
   itemKey,
   type InventoryItem,
   type LocaleMap,
@@ -36,8 +37,10 @@ export default function InventorySystem() {
   const [selectedRight, setSelectedRight] = useState<string | null>(null)
   const [amount, setAmount] = useState<number>(1)
   const [showPlayerList, setShowPlayerList] = useState(false)
+  const [giveMode, setGiveMode] = useState<"item" | "ammo">("item")
   const [nearbyPlayers, setNearbyPlayers] = useState<NearbyPlayer[]>([])
   const [notification, setNotification] = useState<NotificationData | null>(null)
+  const [logoUrl, setLogoUrl] = useState("")
 
   const itemsRef = useRef<InventoryItem[]>([])
   itemsRef.current = items
@@ -65,13 +68,14 @@ export default function InventorySystem() {
       if (data.action === "open") {
         if (data.locale) setLocale({ ...DEFAULT_LOCALE, ...data.locale })
         if (typeof data.hotbarSlots === "number") setHotbarSlots(data.hotbarSlots)
-        if (data.theme) {
+        if (data.theme && typeof data.theme === "object") {
           for (const [key, cssVar] of Object.entries(THEME_VARIABLES)) {
             const value = data.theme[key]
             if (typeof value === "string" && value !== "") {
               document.documentElement.style.setProperty(cssVar, value)
             }
           }
+          setLogoUrl(typeof data.theme.logoUrl === "string" ? data.theme.logoUrl.trim() : "")
         }
         setVisible(true)
       } else if (data.action === "state") {
@@ -96,7 +100,22 @@ export default function InventorySystem() {
     window.addEventListener("message", onMessage)
     window.addEventListener("error", onError)
     window.addEventListener("unhandledrejection", onRejection)
+
+    let cancelled = false
+    let retryTimer: number | undefined
+
+    const announceReady = async () => {
+      const response = await fetchNui("ready")
+      if (!cancelled && response === null) {
+        retryTimer = window.setTimeout(announceReady, 1000)
+      }
+    }
+
+    announceReady()
+
     return () => {
+      cancelled = true
+      window.clearTimeout(retryTimer)
       window.removeEventListener("message", onMessage)
       window.removeEventListener("error", onError)
       window.removeEventListener("unhandledrejection", onRejection)
@@ -105,12 +124,17 @@ export default function InventorySystem() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeInventory()
+        return
+      }
+
       if (!visible) return
 
       const target = event.target as HTMLElement | null
       const isTyping = target !== null && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")
 
-      if (event.key === "Escape" || (event.key === "Backspace" && !isTyping)) {
+      if (event.key === "Backspace" && !isTyping) {
         closeInventory()
       }
     }
@@ -181,7 +205,8 @@ export default function InventorySystem() {
     [clampedAmount]
   )
 
-  const openPlayerList = useCallback(async () => {
+  const openPlayerList = useCallback(async (mode: "item" | "ammo" = "item") => {
+    setGiveMode(mode)
     const players = await fetchNui<NearbyPlayer[]>("getNearbyPlayers")
     setNearbyPlayers(Array.isArray(players) ? players : [])
     setShowPlayerList(true)
@@ -190,24 +215,39 @@ export default function InventorySystem() {
   const handleGiveIntent = useCallback(
     (item: InventoryItem) => {
       setSelectedLeft(itemKey(item))
-      openPlayerList()
+      openPlayerList("item")
     },
     [openPlayerList]
   )
 
+  useEffect(() => {
+    if (giveMode === "ammo" && !hasGivableAmmo(selectedItem)) {
+      setShowPlayerList(false)
+    }
+  }, [giveMode, selectedItem])
+
   const handleGiveToPlayer = useCallback(
     (playerId: number) => {
       if (!selectedItem) return
-      fetchNui("giveItem", {
-        type: selectedItem.type,
-        name: selectedItem.name,
-        count: clampedAmount(selectedItem),
-        target: playerId,
-      })
+      if (giveMode === "ammo") {
+        if (!hasGivableAmmo(selectedItem)) return
+        fetchNui("giveAmmo", {
+          name: selectedItem.name,
+          count: Math.min(Math.max(1, Math.floor(amount) || 1), selectedItem.ammo ?? 0),
+          target: playerId,
+        })
+      } else {
+        fetchNui("giveItem", {
+          type: selectedItem.type,
+          name: selectedItem.name,
+          count: clampedAmount(selectedItem),
+          target: playerId,
+        })
+      }
       setSelectedLeft(null)
       setShowPlayerList(false)
     },
-    [selectedItem, clampedAmount]
+    [selectedItem, giveMode, amount, clampedAmount]
   )
 
   const { drag, startDrag } = useDrag(visible, {
@@ -235,6 +275,16 @@ export default function InventorySystem() {
 
   return (
     <div className="w-full max-w-7xl relative select-none">
+      {logoUrl !== "" && (
+        <img
+          key={logoUrl}
+          src={logoUrl}
+          alt=""
+          draggable={false}
+          className="block h-12 max-w-[240px] mx-auto mb-6 object-contain"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
+        />
+      )}
       <div className={`grid grid-cols-1 ${storage ? "lg:grid-cols-[1fr_auto_1fr]" : "lg:grid-cols-[minmax(0,640px)_auto]"} gap-6 items-center justify-center`}>
         <Inventory
           title={t("inventory")}
@@ -267,8 +317,11 @@ export default function InventorySystem() {
           onUse={() => selectedItem && handleUse(selectedItem)}
           showPlayerList={showPlayerList}
           setShowPlayerList={setShowPlayerList}
+          giveMode={giveMode}
+          canGiveAmmo={hasGivableAmmo(selectedItem)}
           nearbyPlayers={nearbyPlayers}
-          onOpenPlayerList={openPlayerList}
+          onOpenPlayerList={() => openPlayerList("item")}
+          onOpenAmmoList={() => openPlayerList("ammo")}
           onGiveToPlayer={handleGiveToPlayer}
         />
 

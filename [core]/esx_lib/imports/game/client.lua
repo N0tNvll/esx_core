@@ -429,8 +429,14 @@ function xLib.game.setVehicleProperties(vehicle, props)
     local pearlescentColor, wheelColor = GetVehicleExtraColours(vehicle)
     SetVehicleModKit(vehicle, 0)
 
-    while not IsVehicleModLoadDone(vehicle) do
+    local modLoadDeadline = GetGameTimer() + 5000
+
+    while not IsVehicleModLoadDone(vehicle) and GetGameTimer() < modLoadDeadline do
         Wait(0)
+
+        if not DoesEntityExist(vehicle) then
+            return
+        end
     end
 
     if props.tyresCanBurst ~= nil then

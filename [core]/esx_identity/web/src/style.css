@@ -10,8 +10,12 @@ html {
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     --brand: #fb9b04;
+    --brand-rgb: 251, 155, 4;
     --brand-bright: #ffb435;
-    --surface: #141515;
+    --brand-soft: #fbd190;
+    --surface: #171918;
+    --panel: #1b1c1a;
+    --line: #34342e;
     --muted: #999b98;
     --border: rgba(255, 255, 255, 0.09);
     color-scheme: dark;
@@ -87,7 +91,7 @@ svg {
     justify-content: center;
     gap: 20px;
     padding: 40px;
-    background: radial-gradient(ellipse at 20% 50%, rgba(39, 29, 14, 0.32), transparent 65%), rgba(5, 7, 7, 0.76);
+    background: radial-gradient(ellipse at 20% 50%, rgba(var(--brand-rgb), 0.05), transparent 65%), rgba(5, 7, 7, 0.76);
 }
 .brand-header {
     padding: 0;
@@ -101,7 +105,7 @@ svg {
     max-width: 100%;
     display: grid;
     grid-template-columns: 1fr;
-    border: 1px solid #34342e;
+    border: 1px solid var(--line);
     border-radius: 20px;
     overflow: hidden;
     background: var(--surface);
@@ -138,7 +142,7 @@ svg {
 }
 .form-panel {
     padding: 14px 44px 28px;
-    background: linear-gradient(145deg, #1b1c1a 0%, #171918 100%);
+    background: linear-gradient(145deg, var(--panel) 0%, var(--surface) 100%);
 }
 .form-heading {
     margin: 4px 0 20px;
@@ -180,7 +184,7 @@ svg {
 }
 .field > label > span:not(.label-meta),
 .gender-field > legend > span {
-    color: #a78041;
+    color: rgba(var(--brand-rgb), 0.65);
     font-size: 10px;
 }
 .label-meta {
@@ -215,9 +219,9 @@ svg {
     border-color: #ffffff2a;
 }
 .field input:not([type="range"]):focus {
-    border-color: #c58b32;
+    border-color: rgba(var(--brand-rgb), 0.75);
     outline: none;
-    box-shadow: 0 0 0 3px #fb9b040b;
+    box-shadow: 0 0 0 3px rgba(var(--brand-rgb), 0.04);
     background: #141710;
 }
 .field input[aria-invalid="true"] {
@@ -263,8 +267,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: #959d90;
 }
 .gender-option.selected {
-    border-color: #c28835;
-    background: #fb9b040a;
+    border-color: rgba(var(--brand-rgb), 0.75);
+    background: rgba(var(--brand-rgb), 0.04);
 }
 .gender-option.selected > svg {
     color: var(--brand);
@@ -308,9 +312,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     width: 13px;
     height: 13px;
     background: var(--brand);
-    border: 3px solid #fbd190;
+    border: 3px solid var(--brand-soft);
     border-radius: 50%;
-    box-shadow: 0 0 0 4px #fb9b0410;
+    box-shadow: 0 0 0 4px rgba(var(--brand-rgb), 0.06);
 }
 .height-value {
     position: relative;
@@ -338,7 +342,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     height: 44px;
     margin-top: 14px;
     background: var(--brand);
-    border: 1px solid #ffb332;
+    border: 1px solid var(--brand-bright);
     border-radius: 7px;
     color: #241a08;
     font-size: 12px;
@@ -351,7 +355,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 .submit-button:hover:not(:disabled) {
     background: var(--brand-bright);
-    box-shadow: 0 6px 22px #fb9b0418;
+    box-shadow: 0 6px 22px rgba(var(--brand-rgb), 0.09);
     transform: translateY(-1px);
 }
 .submit-button:active:not(:disabled) {
@@ -514,7 +518,7 @@ kbd {
     .form-panel {
         overflow-y: auto;
         scrollbar-width: thin;
-        scrollbar-color: #665338 transparent;
+        scrollbar-color: rgba(var(--brand-rgb), 0.35) transparent;
     }
 }
 @media (max-height: 800px) and (min-width: 901px) {

@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "显示物品栏",
     ["player_inventory"] = "物品栏",
     ["storage"] = "储物箱",
+    ["storage_full"] = "储物箱已满",
     ["weight"] = "重量",
     ["take"] = "取出",
     ["nearby_players"] = "附近玩家",

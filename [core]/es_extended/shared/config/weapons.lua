@@ -1034,7 +1034,7 @@ Config.Weapons = {
         label = TranslateCap("weapon_emplauncher"),
         tints = Config.DefaultWeaponTints,
         components = {
-            { name = "clip_default", label = TranslateCap("clip_default"), hash = `COMPONENT_EMPLAUNCHER_CLIP_01` },
+            { name = "clip_default", label = TranslateCap("component_clip_default"), hash = `COMPONENT_EMPLAUNCHER_CLIP_01` },
         },
         ammo = { label = TranslateCap("ammo_grenadelauncher"), hash = `AMMO_EMPLAUNCHER` },
     },

@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Öppna inventory",
     ["player_inventory"] = "Inventarie",
     ["storage"] = "Förvaring",
+    ["storage_full"] = "Förvaringen är full",
     ["weight"] = "Vikt",
     ["take"] = "Ta",
     ["nearby_players"] = "Spelare i närheten",

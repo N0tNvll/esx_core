@@ -37,6 +37,12 @@ function ESX.SearchInventory(items, count)
         end
     end
 
+    if count then
+        for i = 1, #items do
+            data[items[i]] = 0
+        end
+    end
+
     return not item and data or data[item]
 end
 

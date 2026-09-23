@@ -15,6 +15,7 @@ end
 ---@field canRemove boolean
 ---@field image string
 ---@field slot number?
+---@field ammo number?
 
 ---@class ESXInventoryClient
 ---@field isOpen boolean

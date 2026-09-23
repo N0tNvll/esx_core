@@ -15,14 +15,17 @@ function ESX.RegisterUsableItem(item, cb)
 
     for i = 1, #xPlayers do
         local xPlayer = xPlayers[i]
-        local inventoryItem = xPlayer.getInventoryItem and xPlayer.getInventoryItem(item)
+        local inventory = xPlayer.inventory
 
-        if inventoryItem and inventoryItem.count and inventoryItem.count > 0 then
-            if xPlayer.inventory and xPlayer.inventory[item] then
-                xPlayer.inventory[item].usable = true
+        for j = 1, #inventory do
+            local inventoryItem = inventory[j]
+
+            if inventoryItem.name == item then
+                inventoryItem.usable = true
+
+                TriggerClientEvent("esx:setInventory", xPlayer.source, inventory)
+                break
             end
-
-            TriggerClientEvent("esx:setInventory", xPlayer.source, xPlayer.getInventory())
         end
     end
 end

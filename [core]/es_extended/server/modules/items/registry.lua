@@ -31,24 +31,7 @@ if not Config.CustomInventory then
                 end
             end
 
-            xPlayer.inventory = {}
-            xPlayer.weight = 0
-
-            for itemName, count in pairs(minimalInv) do
-                local itemData = ESX.Items[itemName]
-
-                xPlayer.inventory[itemName] = {
-                    name = itemName,
-                    count = count,
-                    label = itemData.label,
-                    weight = itemData.weight,
-                    usable = Core.UsableItemsCallbacks[itemName] ~= nil,
-                    rare = itemData.rare,
-                    canRemove = itemData.canRemove,
-                }
-
-                xPlayer.weight = xPlayer.weight + (itemData.weight * count)
-            end
+            Core.PlayerClass.ReplaceInventory(xPlayer, minimalInv)
 
             TriggerClientEvent("esx:setInventory", xPlayer.source, xPlayer.getInventory())
         end
@@ -56,14 +39,16 @@ if not Config.CustomInventory then
 
     ---@return number newItemCount
     function ESX.RefreshItems()
-        ESX.Items = {}
-
         local items = MySQL.query.await("SELECT * FROM items") or {}
         local itemCount = #items
+        local registry = {}
+
         for i = 1, itemCount do
             local item = items[i]
-            ESX.Items[item.name] = { label = item.label, weight = item.weight, rare = item.rare, canRemove = item.can_remove }
+            registry[item.name] = { label = item.label, weight = item.weight, rare = item.rare, canRemove = item.can_remove }
         end
+
+        ESX.Items = registry
         refreshPlayerInventories()
 
         return itemCount

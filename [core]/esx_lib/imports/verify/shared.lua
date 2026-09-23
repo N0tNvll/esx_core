@@ -59,15 +59,19 @@ local function isCallable(value)
     return false
 end
 
-xLib.callback.register('xLib:validateModel', function(model)
-    return IsModelValid(model)
-end)
-
 local function validateModel(model)
-    local players = GetPlayers()
-    local source = tonumber(players[math.random(1,#players)])
+    if not IsDuplicityVersion() then
+        return IsModelValid(model)
+    end
 
-    return xLib.callback.await('xLib:validateModel', source, false, model)
+    local players = GetPlayers()
+    if #players == 0 then
+        return false
+    end
+
+    local source = tonumber(players[math.random(1, #players)])
+
+    return xLib.callback.await('xLib:validateModel', source, model)
 end
 
 ---Make sure value is a valid type

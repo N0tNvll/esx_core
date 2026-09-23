@@ -5,7 +5,7 @@ local CommandPermissions = Core.CommandPermissions
 local FilterGroups = Core.FilterCommandGroups
 ESX.RegisterCommand(
     { "setcoords", "tp" },
-    FilterGroups(CommandPermissions.setcoords),
+    FilterGroups(CommandPermissions.setcoords, "setcoords"),
     function(xPlayer, args)
         xPlayer.setCoords({ x = args.x, y = args.y, z = args.z })
         if Config.AdminLogging then
@@ -32,7 +32,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     "setjob",
-    FilterGroups(CommandPermissions.setjob),
+    FilterGroups(CommandPermissions.setjob, "setjob"),
     function(xPlayer, args, showError)
         if not ESX.DoesJobExist(args.job, args.grade) then
             return showError(TranslateCap("command_setjob_invalid"))
@@ -63,7 +63,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     "setgroup",
-    FilterGroups(CommandPermissions.setgroup),
+    FilterGroups(CommandPermissions.setgroup, "setgroup"),
     function(xPlayer, args)
         if not args.playerId then
             args.playerId = xPlayer.source

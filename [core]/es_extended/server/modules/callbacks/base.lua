@@ -64,6 +64,10 @@ end)
 xLib.callback.registerCompat("esx:spawnVehicle", function(source, cb, vehData)
     print('[^3WARNING^7] esx:spawnVehicle callback is deprecated and will be removed in a future update.')
 
+    if not Core.IsPlayerAdmin(source) then
+        return cb(false)
+    end
+
     vehData = type(vehData) == "table" and vehData or {}
 
     local ped = GetPlayerPed(source)

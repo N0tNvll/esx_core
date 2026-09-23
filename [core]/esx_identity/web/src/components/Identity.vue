@@ -1,11 +1,11 @@
 <!-- SPDX-License-Identifier: GPL-3.0-only -->
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { defaults, validateIdentity, toPayload } from "../identity.js";
 import { createTranslator, normalizeLocale } from "../i18n.js";
 import { isPreview, postNui } from "../nui.js";
 
-const props = defineProps({ settings: { type: Object, default: () => ({}) } });
+const props = defineProps({ settings: { type: Object, default: () => ({}) }, theme: { type: Object, default: () => ({}) } });
 const settings = computed(() => ({ ...defaults, ...props.settings }));
 const activeLocale = computed(() => normalizeLocale(settings.value.locale));
 const t = computed(() => createTranslator(activeLocale.value));
@@ -16,6 +16,9 @@ const pending = ref(false);
 const feedback = ref("");
 const previewComplete = ref(false);
 const firstInput = ref(null);
+const logoFailed = ref(false);
+const customLogo = computed(() => (typeof props.theme?.logoUrl === "string" ? props.theme.logoUrl.trim() : ""));
+watch(customLogo, () => (logoFailed.value = false));
 const errors = computed(() => validateIdentity(form, settings.value, t.value));
 const completed = computed(() => Object.keys(form).filter((key) => !errors.value[key]).length);
 const minDate = computed(() => `${settings.value.currentYear - settings.value.maxAge}-01-01`);
@@ -57,7 +60,8 @@ async function submit() {
 <template>
     <main class="identity-stage" :class="{ 'is-preview': isPreview }" :lang="activeLocale">
         <div class="brand-lockup brand-header">
-            <img src="/brand-logo.png" alt="ESX" class="brand-logo" />
+            <img v-if="customLogo && !logoFailed" :src="customLogo" alt="ESX" class="brand-logo" @error="logoFailed = true" />
+            <img v-else src="/brand-logo.png" alt="ESX" class="brand-logo" />
             <span class="brand-divider"></span>
             <span class="eyebrow">{{ t("roleplay") }}<br /><b>{{ t("newLife") }}</b></span>
         </div>

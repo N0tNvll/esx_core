@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "pokaż ekwipunek",
     ["player_inventory"] = "Ekwipunek",
     ["storage"] = "Magazyn",
+    ["storage_full"] = "Magazyn jest pełny",
     ["weight"] = "Waga",
     ["take"] = "Weź",
     ["nearby_players"] = "Gracze w pobliżu",

@@ -15,8 +15,14 @@ local function toServerId(value)
 end
 
 local function toVector3(coords)
-    if type(coords) == "vector3" then
+    local coordsType = type(coords)
+
+    if coordsType == "vector3" then
         return coords
+    end
+
+    if coordsType == "vector4" then
+        return vector3(coords.x, coords.y, coords.z)
     end
 
     if type(coords) ~= "table" then
@@ -103,6 +109,10 @@ function xLib.player.distanceToPlayer(source, target)
     target = toServerId(target)
 
     if not source or not target or source == target then
+        return
+    end
+
+    if GetPlayerRoutingBucket(source) ~= GetPlayerRoutingBucket(target) then
         return
     end
 

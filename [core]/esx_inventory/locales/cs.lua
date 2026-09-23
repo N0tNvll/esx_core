@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "Otevřít inventář",
     ["player_inventory"] = "Inventář",
     ["storage"] = "Sklad",
+    ["storage_full"] = "Sklad je plný",
     ["weight"] = "Váha",
     ["take"] = "Vzít",
     ["nearby_players"] = "Hráči poblíž",

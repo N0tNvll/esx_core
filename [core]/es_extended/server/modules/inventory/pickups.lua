@@ -7,16 +7,16 @@ if not Config.CustomInventory then
     local CELL_RANGE <const> = math.ceil(STREAM_DISTANCE / CELL_SIZE)
 
     local PICKUP_TTL_MS <const> = 30 * 60 * 1000
+    local MAX_PICKUP_ID <const> = 65635
     local MAX_ACTIVE_PER_PLAYER <const> = 50
-    local MAX_ACTIVE_PER_CELL <const> = 25
+    local MAX_ACTIVE_PER_PLAYER_CELL <const> = 25
+    local MAX_ACTIVE_PER_CELL <const> = 250
     local MAX_ACTIVE_GLOBAL <const> = 5000
 
-    ---@type table<number, table<string, { [number]: true, count: number }>>
+    ---@type table<number, table<string, { entries: table<number, true>, count: number, owners: table<string, number> }>>
     local pickupGrid = {}
-    ---@type table<number, table<number, true>>
-    local playerPickups = {}
-    ---@type table<number, number>
-    local playerPickupCounts = {}
+    ---@type table<string, number>
+    local ownerPickupCounts = {}
     local activePickupCount = 0
 
     ---@param coords vector3
@@ -65,6 +65,30 @@ if not Config.CustomInventory then
         return keys
     end
 
+    ---@param playerId number
+    ---@return string
+    local function getOwnerKey(playerId)
+        return GetPlayerIdentifierByType(tostring(playerId), "license") or ("source:%s"):format(playerId)
+    end
+
+    ---@param value any
+    ---@return vector3?
+    local function toVector3(value)
+        local valueType = type(value)
+
+        if valueType == "vector3" or valueType == "vector4" then
+            return value.xyz
+        end
+
+        if valueType == "table" then
+            local x, y, z = tonumber(value.x), tonumber(value.y), tonumber(value.z)
+
+            if x and y and z then
+                return vector3(x, y, z)
+            end
+        end
+    end
+
     ---@param pickupId number
     ---@param pickup table
     local function addPickupToGrid(pickupId, pickup)
@@ -78,12 +102,16 @@ if not Config.CustomInventory then
         local cell = bucketGrid[pickup.cellKey]
 
         if not cell then
-            cell = { entries = {}, count = 0 }
+            cell = { entries = {}, count = 0, owners = {} }
             bucketGrid[pickup.cellKey] = cell
         end
 
         cell.entries[pickupId] = true
         cell.count = cell.count + 1
+
+        if pickup.owner then
+            cell.owners[pickup.owner] = (cell.owners[pickup.owner] or 0) + 1
+        end
     end
 
     ---@param pickupId number
@@ -104,6 +132,11 @@ if not Config.CustomInventory then
         if cell.entries[pickupId] then
             cell.entries[pickupId] = nil
             cell.count = cell.count - 1
+
+            if pickup.owner then
+                local ownerCount = (cell.owners[pickup.owner] or 1) - 1
+                cell.owners[pickup.owner] = ownerCount > 0 and ownerCount or nil
+            end
         end
 
         if cell.count <= 0 then
@@ -127,22 +160,9 @@ if not Config.CustomInventory then
         Core.Pickups[pickupId] = nil
         removePickupFromGrid(pickupId, pickup)
 
-        if pickup.playerId then
-            playerPickupCounts[pickup.playerId] = (playerPickupCounts[pickup.playerId] or 1) - 1
-
-            if playerPickupCounts[pickup.playerId] <= 0 then
-                playerPickupCounts[pickup.playerId] = nil
-            end
-
-            local playerIds = playerPickups[pickup.playerId]
-
-            if playerIds then
-                playerIds[pickupId] = nil
-
-                if not next(playerIds) then
-                    playerPickups[pickup.playerId] = nil
-                end
-            end
+        if pickup.owner then
+            local ownerCount = (ownerPickupCounts[pickup.owner] or 1) - 1
+            ownerPickupCounts[pickup.owner] = ownerCount > 0 and ownerCount or nil
         end
 
         activePickupCount = activePickupCount - 1
@@ -176,73 +196,81 @@ if not Config.CustomInventory then
     ---@param name string
     ---@param count integer
     ---@param label string
-    ---@param playerId number
+    ---@param playerId? number
     ---@param components? string | table
     ---@param tintIndex? integer
-    ---@param coords? table | vector3
+    ---@param coords? table | vector3 | vector4
+    ---@param bucket? number
     ---@return number? pickupId
-    function ESX.CreatePickup(itemType, name, count, label, playerId, components, tintIndex, coords)
-        local xPlayer = ESX.GetPlayerFromId(playerId)
+    function ESX.CreatePickup(itemType, name, count, label, playerId, components, tintIndex, coords, bucket)
+        local xPlayer = playerId and ESX.GetPlayerFromId(playerId) or nil
+        local pickupCoords = toVector3(coords)
 
-        if not xPlayer then
+        if not pickupCoords then
+            if not xPlayer then
+                return nil
+            end
+
+            pickupCoords = xPlayer.getCoords(true)
+        end
+
+        local owner = xPlayer and getOwnerKey(playerId) or nil
+        local pickupBucket = tonumber(bucket) or (xPlayer and GetPlayerRoutingBucket(playerId)) or 0
+
+        if activePickupCount >= MAX_ACTIVE_GLOBAL then
             return nil
         end
 
-        coords = ((type(coords) == "vector3" or type(coords) == "vector4") and coords.xyz or xPlayer.getCoords(true))
-
-        local cellKey = getCellKey(coords)
-        local bucket = GetPlayerRoutingBucket(playerId)
-
-        local bucketGrid = pickupGrid[bucket]
+        local cellKey = getCellKey(pickupCoords)
+        local bucketGrid = pickupGrid[pickupBucket]
         local cell = bucketGrid and bucketGrid[cellKey] or nil
 
         if cell and cell.count >= MAX_ACTIVE_PER_CELL then
             return nil
         end
 
-        if activePickupCount >= MAX_ACTIVE_GLOBAL then
-            return nil
+        if owner then
+            if (ownerPickupCounts[owner] or 0) >= MAX_ACTIVE_PER_PLAYER then
+                return nil
+            end
+
+            if cell and (cell.owners[owner] or 0) >= MAX_ACTIVE_PER_PLAYER_CELL then
+                return nil
+            end
         end
 
-        local playerCount = playerPickupCounts[playerId] or 0
+        local pickupId = Core.PickupId
 
-        if playerCount >= MAX_ACTIVE_PER_PLAYER then
-            return nil
-        end
+        repeat
+            pickupId = pickupId >= MAX_PICKUP_ID and 0 or pickupId + 1
+        until not Core.Pickups[pickupId]
 
-        local pickupId = (Core.PickupId == 65635 and 0 or Core.PickupId + 1)
-
-        Core.Pickups[pickupId] = {
+        local pickup = {
             type = itemType,
             name = name,
             count = count,
             label = label,
-            coords = coords,
-            bucket = bucket,
+            coords = pickupCoords,
+            bucket = pickupBucket,
             cellKey = cellKey,
             createdAt = GetGameTimer(),
-            playerId = playerId,
+            owner = owner,
         }
 
         if itemType == "item_weapon" then
-            Core.Pickups[pickupId].components = components
-            Core.Pickups[pickupId].tintIndex = tintIndex
+            pickup.components = components
+            pickup.tintIndex = tintIndex
         end
 
-        addPickupToGrid(pickupId, Core.Pickups[pickupId])
+        Core.Pickups[pickupId] = pickup
+        addPickupToGrid(pickupId, pickup)
         activePickupCount = activePickupCount + 1
 
-        local playerIds = playerPickups[playerId]
-
-        if not playerIds then
-            playerIds = {}
-            playerPickups[playerId] = playerIds
+        if owner then
+            ownerPickupCounts[owner] = (ownerPickupCounts[owner] or 0) + 1
         end
 
-        playerIds[pickupId] = true
-        playerPickupCounts[playerId] = (playerPickupCounts[playerId] or 0) + 1
-
-        xLib.triggerClientEvent("esx:createPickup", getPlayersInStreamRange(coords, bucket), pickupId, label, coords, itemType, name, components, tintIndex)
+        xLib.triggerClientEvent("esx:createPickup", getPlayersInStreamRange(pickupCoords, pickupBucket), pickupId, label, pickupCoords, itemType, name, components, tintIndex)
         Core.PickupId = pickupId
 
         return pickupId
@@ -275,7 +303,14 @@ if not Config.CustomInventory then
                     local pickup = Core.Pickups[pickupId]
 
                     if pickup and #(playerCoords - pickup.coords) <= STREAM_DISTANCE then
-                        nearbyPickups[pickupId] = pickup
+                        nearbyPickups[pickupId] = {
+                            label = pickup.label,
+                            coords = pickup.coords,
+                            type = pickup.type,
+                            name = pickup.name,
+                            components = pickup.components,
+                            tintIndex = pickup.tintIndex,
+                        }
                     end
                 end
             end

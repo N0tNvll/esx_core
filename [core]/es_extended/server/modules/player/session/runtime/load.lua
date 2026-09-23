@@ -82,25 +82,9 @@ function loadESXPlayer(identifier, playerId, isNew)
     }
 
     if not Config.CustomInventory then
-        local inventory = (result.inventory and result.inventory ~= "") and json.decode(result.inventory) or {}
+        local inventory = decodeJsonObject(result.inventory, {})
 
-        for name, count in pairs(inventory) do
-            local item = ESX.Items[name]
-
-            if item and count > 0 then
-                userData.weight += (count * item.weight)
-
-                userData.inventory[name] = {
-                    name = name,
-                    count = count,
-                    label = item.label,
-                    weight = item.weight,
-                    usable = Core.UsableItemsCallbacks[name] ~= nil,
-                    rare = item.rare,
-                    canRemove = item.canRemove,
-                }
-            end
-        end
+        userData.inventory, userData.weight = Core.PlayerClass.BuildInventory(inventory)
     elseif result.inventory and result.inventory ~= "" then
         userData.inventory = json.decode(result.inventory)
     end
@@ -176,17 +160,8 @@ function loadESXPlayer(identifier, playerId, isNew)
     userData.variables = xPlayer.variables or {}
 
     if not Config.CustomInventory then
-        local clientInventory = {}
-
-        for _, item in pairs(userData.inventory) do
-            clientInventory[#clientInventory + 1] = item
-        end
-
-        table.sort(clientInventory, function(a, b)
-            return a.label < b.label
-        end)
-
-        userData.inventory = clientInventory
+        userData.inventory = xPlayer.getInventory()
+        userData.weight = xPlayer.getWeight()
     end
 
     xPlayer.triggerEvent("esx:playerLoaded", userData, isNew, userData.skin)

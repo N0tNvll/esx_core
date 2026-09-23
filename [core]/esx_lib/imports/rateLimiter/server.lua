@@ -66,6 +66,20 @@ local function normalizeKey(key)
     end
 end
 
+---@param cost any
+---@return number|nil
+local function normalizeCost(cost)
+    if cost == nil then
+        return 1
+    end
+
+    if type(cost) ~= "number" or cost ~= cost or cost <= 0 then
+        return nil
+    end
+
+    return math_ceil(cost)
+end
+
 ---@param options RateLimiterOptions
 ---@return RateLimiter
 local function createRateLimiter(options)
@@ -179,13 +193,9 @@ local function createRateLimiter(options)
             return false, 0
         end
 
-        cost = tonumber(cost) or 1
+        cost = normalizeCost(cost)
 
-        if cost <= 0 then
-            return true, 0
-        end
-
-        if cost > capacity then
+        if not cost or cost > capacity then
             return false, math.huge
         end
 
@@ -216,13 +226,9 @@ local function createRateLimiter(options)
             return 0
         end
 
-        cost = tonumber(cost) or 1
+        cost = normalizeCost(cost)
 
-        if cost <= 0 then
-            return 0
-        end
-
-        if cost > capacity then
+        if not cost or cost > capacity then
             return math.huge
         end
 

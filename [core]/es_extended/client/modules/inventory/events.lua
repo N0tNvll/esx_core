@@ -21,6 +21,14 @@ ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotificatio
     end
 
     if not found then
+        if type(count) ~= "number" then
+            if showNotification then
+                ESX.UI.ShowInventoryItemNotification(true, item, count)
+            end
+
+            return
+        end
+
         local entry
 
         if type(itemData) == "table" then
@@ -46,6 +54,7 @@ ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotificatio
         end
 
         ESX.PlayerData.inventory[#ESX.PlayerData.inventory + 1] = entry
+        ESX.UI.ShowInventoryItemNotification(true, entry.label, count)
     end
 
     if showNotification then

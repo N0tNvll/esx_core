@@ -54,6 +54,7 @@ function Inventory.buildItems()
             usable = false,
             canRemove = true,
             image = Config.ItemImageUrl:format(weapon.name),
+            ammo = type(weapon.ammo) == "number" and weapon.ammo or 0,
         }
     end
 
@@ -85,6 +86,7 @@ function Inventory.buildLocale()
         weight = TranslateCap("weight"),
         use = TranslateCap("use"),
         give = TranslateCap("give"),
+        giveAmmo = TranslateCap("giveammo"),
         remove = TranslateCap("remove"),
         take = TranslateCap("take"),
         amount = TranslateCap("amount"),
@@ -97,11 +99,5 @@ end
 
 ---@return table<string, string>
 function Inventory.buildTheme()
-    return {
-        primary = GetConvar("esx:ui:primaryColor", ""),
-        secondary = GetConvar("esx:ui:secondaryColor", ""),
-        background = GetConvar("esx:ui:backgroundColor", ""),
-        accent = GetConvar("esx:ui:accentColor", ""),
-        logo = GetConvar("esx:ui:logoUrl", ""),
-    }
+    return xLib.colors.getESXTheme()
 end

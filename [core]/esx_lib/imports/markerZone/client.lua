@@ -5,8 +5,14 @@
 xLib.markerZone = {}
 
 local function toVector3(coords)
-    if type(coords) == "vector3" then
+    local coordsType = type(coords)
+
+    if coordsType == "vector3" then
         return coords
+    end
+
+    if coordsType == "vector4" then
+        return vector3(coords.x, coords.y, coords.z)
     end
 
     if type(coords) ~= "table" then
@@ -104,19 +110,31 @@ function xLib.markerZone.create(data)
     local exitDistance = tonumber(data.exitDistance) or interactDistance
     local marker = data.marker
     local inInteractionRange = false
+    local pointNearby = false
+
+    ---@param distance number
+    local function leave(distance)
+        if inInteractionRange then
+            inInteractionRange = false
+            if data.onExit then data.onExit(distance) end
+        end
+
+        if pointNearby then
+            pointNearby = false
+            if data.onExitPoint then data.onExitPoint() end
+        end
+    end
 
     local handle = xLib.points.create(
         coords,
         drawDistance,
         data.hidden,
-        data.onEnterPoint,
         function()
-            if inInteractionRange then
-                inInteractionRange = false
-                if data.onExit then data.onExit(drawDistance) end
-            end
-
-            if data.onExitPoint then data.onExitPoint() end
+            pointNearby = true
+            if data.onEnterPoint then data.onEnterPoint() end
+        end,
+        function()
+            leave(drawDistance)
         end,
         function(distance)
             if marker ~= false and (not data.canDraw or data.canDraw(distance)) then
@@ -146,6 +164,14 @@ function xLib.markerZone.create(data)
         handle = handle,
         remove = function()
             xLib.points.remove(handle)
+
+            if inInteractionRange or pointNearby then
+                local ok, err = pcall(leave, #(GetEntityCoords(PlayerPedId()) - coords))
+
+                if not ok then
+                    print(("[^1ERROR^7] markerZone ^5%s^7 errored on remove: %s"):format(handle, err))
+                end
+            end
         end,
         hide = function(hidden)
             xLib.points.hide(handle, hidden ~= false)

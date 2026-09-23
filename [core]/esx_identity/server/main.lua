@@ -232,7 +232,7 @@ if not multichar then
         end
     end)
 
-    RegisterNetEvent("esx:playerLoaded", function(_, xPlayer)
+    AddEventHandler("esx:playerLoaded", function(_, xPlayer)
         local currentIdentity = playerIdentity[xPlayer.identifier]
 
         if currentIdentity and alreadyRegistered[xPlayer.identifier] then

@@ -6,6 +6,11 @@ local ready = false
 local guiEnabled = false
 local registrationPending = false
 local timecycleModifier = "hud_def_blur"
+local themeDefaults = {
+    secondaryColor = "#1b1c1a",
+    backgroundColor = "#171918",
+    accentColor = "#34342e",
+}
 
 ESX.SecureNetEvent("esx_identity:alreadyRegistered", function()
     while not loadingScreenFinished do
@@ -47,6 +52,7 @@ function setGuiState(state)
         xLib.nui.send({
             type = "enableui",
             enable = state,
+            theme = xLib.colors.getESXTheme(themeDefaults),
             settings = {
                 maxNameLength = Config.MaxNameLength,
                 minHeight = Config.MinHeight,

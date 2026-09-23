@@ -41,6 +41,7 @@ return {
     ["keymap_showinventory"] = "הצג מלאי",
     ["player_inventory"] = "מלאי",
     ["storage"] = "אחסון",
+    ["storage_full"] = "האחסון מלא",
     ["weight"] = "משקל",
     ["take"] = "קח",
     ["nearby_players"] = "שחקנים קרובים",

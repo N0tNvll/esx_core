@@ -3,7 +3,7 @@
 
 ---@diagnostic disable-next-line: param-type-mismatch
 AddStateBagChangeHandler("VehicleProperties", nil, function(bagName, _, value)
-    if not value then
+    if type(value) ~= "table" or not bagName:find("^entity:") then
         return
     end
 

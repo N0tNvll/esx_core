@@ -3,7 +3,7 @@
 
 local CommandPermissions = Core.CommandPermissions
 local FilterGroups = Core.FilterCommandGroups
-ESX.RegisterCommand("tpm", FilterGroups(CommandPermissions.tpm), function(xPlayer)
+ESX.RegisterCommand("tpm", FilterGroups(CommandPermissions.tpm, "tpm"), function(xPlayer)
     xPlayer.triggerEvent("esx:tpm")
     if Config.AdminLogging then
         ESX.DiscordLogFields("UserActions", "Admin Teleport /tpm Triggered!", "pink", {
@@ -15,7 +15,7 @@ end, false)
 
 ESX.RegisterCommand(
     "goto",
-    FilterGroups(CommandPermissions["goto"]),
+    FilterGroups(CommandPermissions["goto"], "goto"),
     function(xPlayer, args)
         local targetCoords = args.playerId.getCoords()
         local srcDim = GetPlayerRoutingBucket(xPlayer.source)
@@ -46,7 +46,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     "bring",
-    FilterGroups(CommandPermissions.bring),
+    FilterGroups(CommandPermissions.bring, "bring"),
     function(xPlayer, args)
         local targetCoords = args.playerId.getCoords()
         local playerCoords = xPlayer.getCoords()
@@ -78,7 +78,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     "kill",
-    FilterGroups(CommandPermissions.kill),
+    FilterGroups(CommandPermissions.kill, "kill"),
     function(xPlayer, args)
         args.playerId.triggerEvent("esx:killPlayer")
         if Config.AdminLogging then
@@ -101,7 +101,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     "freeze",
-    FilterGroups(CommandPermissions.freeze),
+    FilterGroups(CommandPermissions.freeze, "freeze"),
     function(xPlayer, args)
         args.playerId.triggerEvent("esx:freezePlayer", "freeze")
         if Config.AdminLogging then
@@ -124,7 +124,7 @@ ESX.RegisterCommand(
 
 ESX.RegisterCommand(
     "unfreeze",
-    FilterGroups(CommandPermissions.unfreeze),
+    FilterGroups(CommandPermissions.unfreeze, "unfreeze"),
     function(xPlayer, args)
         args.playerId.triggerEvent("esx:freezePlayer", "unfreeze")
         if Config.AdminLogging then
@@ -145,7 +145,7 @@ ESX.RegisterCommand(
     }
 )
 
-ESX.RegisterCommand("noclip", FilterGroups(CommandPermissions.noclip), function(xPlayer)
+ESX.RegisterCommand("noclip", FilterGroups(CommandPermissions.noclip, "noclip"), function(xPlayer)
     xPlayer.triggerEvent("esx:noclip")
     if Config.AdminLogging then
         ESX.DiscordLogFields("UserActions", "Admin NoClip /noclip Triggered!", "pink", {
@@ -157,7 +157,7 @@ end, false)
 
 ESX.RegisterCommand(
     {"setdim", "setbucket"},
-    FilterGroups(CommandPermissions.setdim),
+    FilterGroups(CommandPermissions.setdim, "setdim"),
     function(xPlayer, args)
         SetPlayerRoutingBucket(args.playerId.source, args.dimension)
         if Config.AdminLogging then

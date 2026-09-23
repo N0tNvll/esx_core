@@ -5,8 +5,14 @@
 xLib.blips = {}
 
 local function toVector3(coords)
-    if type(coords) == "vector3" then
+    local coordsType = type(coords)
+
+    if coordsType == "vector3" then
         return coords
+    end
+
+    if coordsType == "vector4" then
+        return vector3(coords.x, coords.y, coords.z)
     end
 
     if type(coords) ~= "table" then
@@ -59,12 +65,12 @@ end
 ---@param data BlipCreateOptions|table|vector3
 ---@return number|nil blip
 function xLib.blips.create(data)
-    if type(data) ~= "table" and type(data) ~= "vector3" then
-        return
-    end
+    local dataType = type(data)
 
-    if type(data) == "vector3" then
+    if dataType == "vector3" or dataType == "vector4" then
         data = { coords = data }
+    elseif dataType ~= "table" then
+        return
     end
 
     local blip
@@ -131,7 +137,12 @@ function xLib.blips.createMany(items, defaults)
             data[key] = value
         end
 
-        for key, value in pairs(items[i]) do
+        local item = items[i]
+        if type(item) ~= "table" then
+            item = { coords = item }
+        end
+
+        for key, value in pairs(item) do
             data[key] = value
         end
 
