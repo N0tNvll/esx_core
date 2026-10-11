@@ -165,6 +165,28 @@ return function(deps)
         local key = payload.key
         local value = payload.value
 
+        if key == 'Admin.Groups' and type(value) == 'table' then
+            local xPlayer = deps.ESX and deps.ESX.GetPlayerFromId(source)
+            local group = xPlayer and xPlayer.getGroup()
+            local errorMessage
+
+            if type(group) ~= 'string' then
+                errorMessage = 'Unable to verify your current ESX group; retry.'
+            elseif value[group] ~= true then
+                errorMessage = 'You cannot disable or remove your own group from panel access.'
+            end
+
+            if errorMessage then
+                TriggerClientEvent(EVENT_PREFIX .. 'cl:configAck', source, {
+                    ok = false,
+                    key = key,
+                    error = errorMessage,
+                })
+
+                return
+            end
+        end
+
         local ok, err = RuntimeConfig:Set(key, value)
 
         if ok then

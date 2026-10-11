@@ -70,6 +70,7 @@ Regardless of mode, the evaluation order is always:
 
 - Open with `/whitelist` (admins only).
 - Tabs: Dashboard, Whitelist, Discord, Admins, Logging & Performance.
+- The panel rejects changes to Admin groups that disable or remove your current ESX group, preventing accidental loss of your own panel access. Other groups remain editable.
 
 ## 5. Commands
 

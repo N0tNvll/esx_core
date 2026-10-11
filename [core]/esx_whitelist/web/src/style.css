@@ -90,6 +90,29 @@ body {
 
 .panel-close {
     margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--light-color);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.panel-close:hover {
+    background: var(--mid-color);
+    color: var(--lightest-color);
+}
+
+.panel-close:focus-visible {
+    outline: 2px solid var(--brand-color);
+    outline-offset: 2px;
 }
 
 .panel-body {
