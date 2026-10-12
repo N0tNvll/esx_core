@@ -1,35 +1,67 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
+local APPLY_TIMEOUT_MS <const> = 10000
+
+---@type table<integer, table>
+local pendingProperties = {}
+
+---@param netId integer
+---@param token table
+---@param deadline integer
+---@return boolean
+local function isPending(netId, token, deadline)
+    if pendingProperties[netId] ~= token then
+        return false
+    end
+
+    if GetGameTimer() > deadline then
+        pendingProperties[netId] = nil
+        return false
+    end
+
+    return true
+end
+
 ---@diagnostic disable-next-line: param-type-mismatch
 AddStateBagChangeHandler("VehicleProperties", nil, function(bagName, _, value)
     if type(value) ~= "table" or not bagName:find("^entity:") then
         return
     end
 
-    bagName = bagName:gsub("entity:", "")
-    local netId = tonumber(bagName)
+    local netId = tonumber(bagName:sub(8))
+
     if not netId then
-        error("Tried to set vehicle properties with invalid netId")
         return
     end
 
-    local tries = 0
+    local token = {}
+    local deadline = GetGameTimer() + APPLY_TIMEOUT_MS
+    pendingProperties[netId] = token
 
     while not NetworkDoesEntityExistWithNetworkId(netId) do
-        Wait(200)
-        tries += 1
-        if tries > 20 then
-            return error(("Invalid entity - ^5%s^7!"):format(netId))
+        if not isPending(netId, token, deadline) then
+            return
         end
+
+        Wait(100)
     end
 
     local vehicle = NetToVeh(netId)
 
-    if NetworkGetEntityOwner(vehicle) ~= ESX.playerId then
+    while NetworkGetEntityOwner(vehicle) ~= ESX.playerId do
+        if not DoesEntityExist(vehicle) or not isPending(netId, token, deadline) then
+            return
+        end
+
+        Wait(100)
+    end
+
+    if pendingProperties[netId] ~= token then
         return
     end
 
+    pendingProperties[netId] = nil
     xLib.game.setVehicleProperties(vehicle, value)
 end)
 

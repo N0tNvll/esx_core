@@ -3,6 +3,32 @@
 
 ESX.OneSync = {}
 
+---@param vehicle integer
+---@param properties table?
+local function applyServerProperties(vehicle, properties)
+    if type(properties) ~= "table" then
+        return
+    end
+
+    if type(properties.plate) == "string" and properties.plate ~= "" then
+        SetVehicleNumberPlateText(vehicle, properties.plate)
+    end
+
+    local color1, color2 = properties.color1, properties.color2
+
+    if type(color1) == "table" then
+        SetVehicleCustomPrimaryColour(vehicle, tonumber(color1[1]) or 0, tonumber(color1[2]) or 0, tonumber(color1[3]) or 0)
+    end
+
+    if type(color2) == "table" then
+        SetVehicleCustomSecondaryColour(vehicle, tonumber(color2[1]) or 0, tonumber(color2[2]) or 0, tonumber(color2[3]) or 0)
+    end
+
+    if math.type(color1) == "integer" and math.type(color2) == "integer" then
+        SetVehicleColours(vehicle, color1, color2)
+    end
+end
+
 ---@param vehicleModel number|string
 ---@param coords vector3|table
 ---@param heading number
@@ -77,6 +103,7 @@ function ESX.OneSync.SpawnVehicle(vehicleModel, coords, heading, vehicleProperti
         -- luacheck: ignore
         SetEntityOrphanMode(createdVehicle, 2)
         local networkId = NetworkGetNetworkIdFromEntity(createdVehicle)
+        applyServerProperties(createdVehicle, vehicleProperties)
         Entity(createdVehicle).state:set("VehicleProperties", vehicleProperties, true)
 
         resolve(networkId)
