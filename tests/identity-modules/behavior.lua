@@ -92,7 +92,11 @@ local function fixture(options)
     end }
     env.MySQL = {
         query = { await = function(...) record('query',...);return 1 end },
-        update = { await = function(...) record('update',...);return 1 end },
+        update = { await = function(...)
+            record('update',...)
+            if state.onUpdate then state.onUpdate() end
+            return 1
+        end },
         prepare = { await = function(...) record('prepare',...);return 1 end },
         single = function(query,params,cb)
             record('read',query,params);state.pending[#state.pending+1]=cb
@@ -110,7 +114,10 @@ local function fixture(options)
     end
     env.RegisterNetEvent = function() error('identity lifecycle must remain server-local') end
     env.TriggerClientEvent = function(...) record('client',...) end
-    env.TriggerEvent = function(...) record('event',...) end
+    env.TriggerEvent = function(name,...)
+        record('event',name,...)
+        if state.onRegistration and name=='esx_identity:completedRegistration' then state.onRegistration(...) end
+    end
     env.Wait = function(ms) record('wait',ms) end
     function state.invoke(data)
         local replies, value = 0
@@ -167,7 +174,7 @@ for _,multichar in ipairs({true,false}) do
         assert(state.invoke(data()) == true)
         assert(state.name=='Test Name' and state.variables.sex=='m' and state.variables.height==180)
         assert(state.states.name=='Test Name' and state.states.height==180)
-        assert(state.count('update')==1 and state.count('event','esx_identity:completedRegistration')==0)
+        assert(state.count('update')==1 and state.count('event','esx_identity:completedRegistration')==1)
     end)
 end
 test('multichar creation emits one formatted registration event', function()
@@ -359,5 +366,45 @@ test('multichar registration sends the canonical nationality', function()
     for _,entry in ipairs(state.trace) do
         if entry[1]=='event' then assert(entry[4].nationality=='Colombia') end
     end
+end)
+test('existing-player completion event contains the saved normalized identity', function()
+    local state=fixture({config={DateFormat='YYYY/MM/DD'}})
+    local received
+    state.onRegistration=function(source,payload)
+        assert(source==7)
+        assert(state.count('update')==1)
+        received=clone(payload)
+    end
+    assert(state.invoke(data({nationality='  spain  '}))==true)
+    assert(received.firstname=='Test' and received.lastname=='Name' and received.dateofbirth=='2000/02/29')
+    assert(received.sex=='m' and received.height==180 and received.nationality=='Spain')
+    assert(state.count('event','esx_identity:completedRegistration')==1)
+end)
+test('completion listeners cannot register the same identity a second time', function()
+    local state=fixture();local attempted=false
+    state.onRegistration=function()
+        assert(not attempted, 'completion emitted twice');attempted=true
+        assert(state.invoke(data())==false)
+    end
+    assert(state.invoke(data())==true and attempted)
+    assert(state.count('update')==1 and state.count('event','esx_identity:completedRegistration')==1)
+end)
+test('a database failure never emits registration completion', function()
+    local state=fixture()
+    state.onUpdate=function()error('database failed')end
+    assert(not pcall(state.invoke,data()))
+    assert(state.count('event','esx_identity:completedRegistration')==0)
+end)
+test('the real multichar listener never joins an existing player again', function()
+    local state,env=fixture()
+    env.xLib.rateLimiter=function()return{consume=function()return true end,forget=function()end}end
+    env.ESX.GetPlayerFromId=function()return state.player end
+    assert(load(MULTICHAR_SOURCE,'multicharacter','t',env))()
+    env.Multicharacter.sessions[7]={identifier=state.identifier,phase='registering',slots=4,characters={}}
+    env.Multicharacter.awaitingRegistration[7]=2
+    state.onRegistration=function(source,payload)env.Multicharacter:RegistrationComplete(source,payload)end
+    assert(state.invoke(data())==true)
+    assert(state.count('event','esx_identity:completedRegistration')==1)
+    assert(state.count('event','esx:onPlayerJoined')==0)
 end)
 print(('Passed %d identity regressions%s.'):format(cases, BASELINE and ' with matching baseline traces' or ''))

@@ -34,6 +34,7 @@ lua.lua_setglobal(state, to_luastring('SOURCES'));
 const validation = fs.readFileSync(path.join(root, '[core]/es_extended/shared/modules/validation.lua'), 'utf8')
   .replace('getmetatable(val)?.__call', '(getmetatable(val) and getmetatable(val).__call)');
 stringGlobal('CORE_VALIDATION', validation);
+stringGlobal('MULTICHAR_SOURCE', fs.readFileSync(path.join(root, '[core]/esx_multicharacter/server/modules/multicharacter.lua'), 'utf8'));
 stringGlobal('NATIONALITY_SOURCE', fs.readFileSync(path.join(root, '[core]/esx_lib/imports/nationality/shared.lua'), 'utf8'));
 const countries = JSON.parse(fs.readFileSync(path.join(root, '[core]/esx_lib/imports/nationality/countries.json')));
 lua.lua_newtable(state);

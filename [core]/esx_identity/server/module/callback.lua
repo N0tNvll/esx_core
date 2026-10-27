@@ -67,6 +67,10 @@ function Callback.RegisterIdentity(source, cb, data)
         IdentityModules.Database.SaveIdentity(identifier, currentIdentity)
         alreadyRegistered[identifier] = true
         playerIdentity[identifier] = nil
+        data.firstname = currentIdentity.firstName
+        data.lastname = currentIdentity.lastName
+        data.dateofbirth = currentIdentity.dateOfBirth
+        TriggerEvent("esx_identity:completedRegistration", source, data)
         return cb(true)
     end
 
