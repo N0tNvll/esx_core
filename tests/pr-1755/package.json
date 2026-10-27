@@ -1,0 +1,6 @@
+{
+  "name": "esx-lib-spatial-regressions",
+  "private": true,
+  "scripts": { "test": "node run.cjs" },
+  "devDependencies": { "fengari": "0.1.5" }
+}
