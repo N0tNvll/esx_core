@@ -38,4 +38,5 @@ return {
     ["invalid_dob_format"] = "Ogiltigt format (Födelsedatum): Försök igen.",
     ["invalid_sex_format"] = "Ogiltigt format (Kön): Försök igen.",
     ["invalid_height_format"] = "Ogiltigt format (Längd): Försök igen.",
+    ["invalid_nationality_format"] = "Välj ett giltigt land.",
 }

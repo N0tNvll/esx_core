@@ -154,6 +154,7 @@ local function loadPlayer(identifier, playerId, isNew, loading)
     }
     userData.skin = decodeJsonObject(result.skin, { sex = result.sex == 'f' and 1 or 0 })
     userData.metadata = (result.metadata and result.metadata ~= '') and json.decode(result.metadata) or {}
+    userData.nationality = xLib.nationality.normalize(result.nationality)
 
     local xPlayer = CreateExtendedPlayer(
         playerId,
@@ -167,7 +168,8 @@ local function loadPlayer(identifier, playerId, isNew, loading)
         userData.loadout,
         GetPlayerName(playerId),
         userData.coords,
-        userData.metadata
+        userData.metadata,
+        userData.nationality
     )
 
     GlobalState['playerCount'] = (GlobalState['playerCount'] or 0) + 1

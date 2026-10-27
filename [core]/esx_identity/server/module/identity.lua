@@ -6,7 +6,7 @@ local playerIdentity = IdentityModules.state.playerIdentity
 local alreadyRegistered = IdentityModules.state.alreadyRegistered
 
 ---@param xPlayer StaticPlayer|xPlayer
----@param data {firstName:string?, lastName:string?, dateOfBirth:string?, height:number?, sex:"m"|"f"?}
+---@param data {firstName:string?, lastName:string?, dateOfBirth:string?, height:number?, nationality:string?, sex:"m"|"f"?}
 function Identity.SetPlayerData(xPlayer, data)
     local name = ("%s %s"):format(data.firstName, data.lastName)
     xPlayer.setName(name)
@@ -15,6 +15,7 @@ function Identity.SetPlayerData(xPlayer, data)
     xPlayer.set("dateofbirth", data.dateOfBirth)
     xPlayer.set("sex", data.sex)
     xPlayer.set("height", data.height)
+    xPlayer.setNationality(data.nationality)
 
     local state = Player(xPlayer.getSource()).state
     state:set("name", name, true)

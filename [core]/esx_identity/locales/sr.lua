@@ -38,4 +38,5 @@ return {
     ["invalid_dob_format"] = "Nevazeci Format (Datum Rodjenja): Pokusajte ponovo.",
     ["invalid_sex_format"] = "Nevazeci Format (Pol): Pokusajte ponovo.",
     ["invalid_height_format"] = "Nevazeci Format (Visina): Pokusajte ponovo.",
+    ["invalid_nationality_format"] = "Izaberite važeću državu.",
 }

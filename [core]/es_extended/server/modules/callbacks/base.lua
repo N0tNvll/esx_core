@@ -11,6 +11,7 @@ local function getPlayerData(xPlayer)
         money = xPlayer.getMoney(),
         position = xPlayer.getCoords(true),
         metadata = xPlayer.getMeta(),
+        nationality = xPlayer.nationality,
     }
 end
 

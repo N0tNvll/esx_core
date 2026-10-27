@@ -27,6 +27,7 @@ ESX.SecureNetEvent("esx_identity:setPlayerData", function(data)
         ESX.SetPlayerData("dateofbirth", data.dateOfBirth)
         ESX.SetPlayerData("sex", data.sex)
         ESX.SetPlayerData("height", data.height)
+        ESX.SetPlayerData("nationality", data.nationality)
     end)
 end)
 

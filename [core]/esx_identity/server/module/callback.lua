@@ -33,8 +33,15 @@ function Callback.RegisterIdentity(source, cb, data)
         return cb(false)
     end
 
+    local nationality = xLib.nationality.normalize(data.nationality)
+    if not nationality then
+        TriggerClientEvent("esx:showNotification", source, TranslateCap("invalid_nationality_format"), "error")
+        return cb(false)
+    end
+
     data.sex = string.lower(data.sex)
     data.height = tonumber(data.height)
+    data.nationality = nationality
 
     if xPlayer then
         local identifier = xPlayer.getIdentifier()
@@ -49,6 +56,7 @@ function Callback.RegisterIdentity(source, cb, data)
             dateOfBirth = IdentityModules.Util.FormatDate(data.dateofbirth),
             sex = data.sex,
             height = data.height,
+            nationality = nationality,
         }
 
         local currentIdentity = playerIdentity[identifier]
@@ -80,6 +88,7 @@ function Callback.RegisterIdentity(source, cb, data)
         dateOfBirth = formattedDate,
         sex = data.sex,
         height = data.height,
+        nationality = nationality,
     }
 
     TriggerEvent("esx_identity:completedRegistration", source, data)

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 import { createTranslator } from "./i18n.js";
+import { countries } from "./countries.js";
 
 export const defaults = { maxNameLength: 20, minHeight: 120, maxHeight: 220, maxAge: 100, currentYear: new Date().getFullYear(), locale: "en", dateFormat: "DD/MM/YYYY" };
 
@@ -29,9 +30,10 @@ export function validateIdentity(form, settings = defaults, translate = createTr
     if (!["m", "f"].includes(form.gender)) errors.gender = translate("genderRequired");
     const height = Number(form.height);
     if (!Number.isFinite(height) || height < settings.minHeight || height > settings.maxHeight) errors.height = translate("heightRange", { minHeight: settings.minHeight, maxHeight: settings.maxHeight });
+    if (!countries.some((country) => country.value === form.nationality)) errors.nationality = translate("nationalityRequired");
     return errors;
 }
 
 export function toPayload(form) {
-    return { firstname: form.firstname.trim(), lastname: form.lastname.trim(), dateofbirth: dateLabel(form.dob), sex: form.gender, height: Number(form.height) };
+    return { firstname: form.firstname.trim(), lastname: form.lastname.trim(), dateofbirth: dateLabel(form.dob), sex: form.gender, height: Number(form.height), nationality: form.nationality };
 }

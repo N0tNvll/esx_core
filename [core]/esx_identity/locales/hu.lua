@@ -38,4 +38,5 @@ return {
     ["invalid_dob_format"] = "Érvénytelen formátum (Születési Idő): Próbáld újra.",
     ["invalid_sex_format"] = "Érvénytelen formátum (Nem): Próbáld újra.",
     ["invalid_height_format"] = "Érvénytelen formátum (Magasság): Próbáld újra.",
+    ["invalid_nationality_format"] = "Válassz egy érvényes országot.",
 }

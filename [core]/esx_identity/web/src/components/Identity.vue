@@ -4,12 +4,14 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { defaults, validateIdentity, toPayload } from "../identity.js";
 import { createTranslator, normalizeLocale } from "../i18n.js";
 import { isPreview, postNui } from "../nui.js";
+import { countryOptions } from "../countries.js";
 
 const props = defineProps({ settings: { type: Object, default: () => ({}) }, theme: { type: Object, default: () => ({}) } });
 const settings = computed(() => ({ ...defaults, ...props.settings }));
 const activeLocale = computed(() => normalizeLocale(settings.value.locale));
 const t = computed(() => createTranslator(activeLocale.value));
-const form = reactive({ firstname: "", lastname: "", dob: "", gender: "", height: 175 });
+const form = reactive({ firstname: "", lastname: "", dob: "", gender: "", height: 175, nationality: "" });
+const nationalities = computed(() => countryOptions(activeLocale.value));
 const touched = reactive({});
 const attempted = ref(false);
 const pending = ref(false);
@@ -113,6 +115,14 @@ async function submit() {
                                 ><span class="label-meta">{{ t("ageHint", { maxAge: settings.maxAge }) }}</span></label
                             ><input id="dob" v-model="form.dob" type="date" :min="minDate" :max="maxDate" :aria-invalid="!!errorFor('dob')" aria-describedby="dob-error" @blur="touched.dob = true" /><span id="dob-error" class="field-error">{{ errorFor("dob") }}</span>
                         </div>
+                        <div class="field">
+                            <label for="nationality">{{ t("nationality") }} <span>{{ t("required") }}</span></label>
+                            <select id="nationality" v-model="form.nationality" required :aria-invalid="!!errorFor('nationality')" aria-describedby="nationality-error" @blur="touched.nationality = true">
+                                <option disabled value="">{{ t("nationalityPlaceholder") }}</option>
+                                <option v-for="country in nationalities" :key="country.value" :value="country.value">{{ country.label }}</option>
+                            </select>
+                            <span id="nationality-error" class="field-error">{{ errorFor("nationality") }}</span>
+                        </div>
                         <fieldset class="gender-field">
                             <legend>
                                 {{ t("gender") }} <span>{{ t("required") }}</span>
@@ -163,7 +173,7 @@ async function submit() {
                         ><span v-if="pending" class="spinner" aria-hidden="true"></span><svg v-else viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6" /></svg>
                     </button>
                     <div class="form-bottomline">
-                        <span>{{ t("completed", { completed }) }}</span
+                        <span>{{ t("completed", { completed, total: Object.keys(form).length }) }}</span
                         ><span class="keyboard-hint"><kbd>↵</kbd> {{ t("continueHint") }}</span>
                     </div>
                 </form>

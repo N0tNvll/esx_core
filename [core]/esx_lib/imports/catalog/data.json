@@ -35,7 +35,7 @@
   },
   "schemas": {
     "users": {
-      "sql": "CREATE TABLE IF NOT EXISTS `users` (\r\n\t`identifier` VARCHAR(60) NOT NULL,\r\n\t`ssn` VARCHAR(11) NOT NULL,\r\n\t`accounts` LONGTEXT NULL DEFAULT NULL,\r\n\t`group` VARCHAR(50) NULL DEFAULT 'user',\r\n\t`inventory` LONGTEXT NULL DEFAULT NULL,\r\n\t`job` VARCHAR(20) NULL DEFAULT 'unemployed',\r\n\t`job_grade` INT NULL DEFAULT 0,\r\n\t`loadout` LONGTEXT NULL DEFAULT NULL,\r\n\t`metadata` LONGTEXT NULL DEFAULT NULL,\r\n\t`position` longtext NULL DEFAULT NULL,\r\n\r\n\tPRIMARY KEY (`identifier`),\r\n\tUNIQUE KEY `unique_ssn` (`ssn`)\r\n) ENGINE=InnoDB",
+      "sql": "CREATE TABLE IF NOT EXISTS `users` (\r\n\t`identifier` VARCHAR(60) NOT NULL,\r\n\t`ssn` VARCHAR(11) NOT NULL,\r\n\t`accounts` LONGTEXT NULL DEFAULT NULL,\r\n\t`group` VARCHAR(50) NULL DEFAULT 'user',\r\n\t`inventory` LONGTEXT NULL DEFAULT NULL,\r\n\t`job` VARCHAR(20) NULL DEFAULT 'unemployed',\r\n\t`job_grade` INT NULL DEFAULT 0,\r\n\t`loadout` LONGTEXT NULL DEFAULT NULL,\r\n\t`metadata` LONGTEXT NULL DEFAULT NULL,\r\n\t`position` longtext NULL DEFAULT NULL,\r\n\t`nationality` VARCHAR(52) NULL DEFAULT NULL,\r\n\r\n\tPRIMARY KEY (`identifier`),\r\n\tUNIQUE KEY `unique_ssn` (`ssn`)\r\n) ENGINE=InnoDB",
       "fields": [
         "identifier",
         "ssn",
@@ -46,7 +46,8 @@
         "job_grade",
         "loadout",
         "metadata",
-        "position"
+        "position",
+        "nationality"
       ]
     },
     "items": {
@@ -262,6 +263,11 @@
         "jobs"
       ],
       "columns": [
+        {
+          "table": "users",
+          "name": "nationality",
+          "definition": "VARCHAR(52) NULL DEFAULT NULL"
+        },
         {
           "table": "jobs",
           "name": "type",

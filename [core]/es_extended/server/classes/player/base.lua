@@ -278,6 +278,19 @@ function Core.PlayerClass.AttachBase(self)
         return self.name
     end
 
+    function self.getNationality()
+        return self.nationality
+    end
+
+    function self.setNationality(value)
+        local nationality = xLib.nationality.normalize(value)
+        if value ~= nil and not nationality then return false end
+        self.nationality = nationality
+        Player(self.source).state:set('nationality', nationality, true)
+        self.triggerEvent('esx:updatePlayerData', 'nationality', nationality)
+        return true
+    end
+
     function self.setName(newName)
         self.name = newName
         Player(self.source).state:set("name", self.name, true)

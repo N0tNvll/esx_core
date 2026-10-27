@@ -22,6 +22,7 @@ CREATE TABLE `users` (
 	`loadout` LONGTEXT NULL DEFAULT NULL,
 	`metadata` LONGTEXT NULL DEFAULT NULL,
 	`position` longtext NULL DEFAULT NULL,
+	`nationality` VARCHAR(52) NULL DEFAULT NULL,
 
 	PRIMARY KEY (`identifier`),
 	UNIQUE KEY `unique_ssn` (`ssn`)

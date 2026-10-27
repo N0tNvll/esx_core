@@ -111,6 +111,8 @@
 ---@field getPlayTime fun(): number                                  # Get total playtime in seconds.
 ---@field set fun(k: string, v: any, replicate?: boolean)           # Set custom variable; replicate defaults to true.
 ---@field get fun(k: string): any                                    # Get custom variable.
+---@field getNationality fun(): string?                              # Country name, or nil when unspecified.
+---@field setNationality fun(nationality?: string): boolean           # Validate and update the country; nil clears it.
 --- Metadata Functions
 ---@field getMeta fun(index?: string, subIndex?: string|table): any   # Get metadata value(s).
 ---@field setMeta fun(index: string, value: any, subValue?: any)      # Set metadata value(s).
@@ -146,6 +148,7 @@
 ---@field lastPlaytime number       # Last recorded playtime in seconds.
 ---@field paycheckEnabled boolean   # Whether paycheck is enabled.
 ---@field admin boolean             # Whether the player is an admin.
+---@field nationality string?        # Canonical country name, or nil for an existing unspecified identity.
 
 ---@param playerId number
 ---@param identifier string
@@ -159,8 +162,9 @@
 ---@param name string
 ---@param coords vector4|{x: number, y: number, z: number, heading: number}
 ---@param metadata table
+---@param nationality? string
 ---@return xPlayer
-function CreateExtendedPlayer(playerId, identifier, ssn, group, accounts, inventory, weight, job, loadout, name, coords, metadata)
+function CreateExtendedPlayer(playerId, identifier, ssn, group, accounts, inventory, weight, job, loadout, name, coords, metadata, nationality)
     ---@diagnostic disable-next-line: missing-fields
     local self = {} ---@type xPlayer
 
@@ -176,6 +180,7 @@ function CreateExtendedPlayer(playerId, identifier, ssn, group, accounts, invent
     self.playerId = playerId
     self.source = playerId
     self.variables = {}
+    self.nationality = xLib.nationality.normalize(nationality)
     self.weight = weight
     self.maxWeight = Config.MaxWeight
     self.metadata = metadata
@@ -204,6 +209,7 @@ function CreateExtendedPlayer(playerId, identifier, ssn, group, accounts, invent
     stateBag:set("job", self.job, true)
     stateBag:set("group", self.group, true)
     stateBag:set("name", self.name, true)
+    stateBag:set("nationality", self.nationality, true)
 
 
     Core.PlayerClass.AttachBase(self)

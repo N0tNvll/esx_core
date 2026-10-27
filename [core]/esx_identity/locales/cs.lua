@@ -11,4 +11,5 @@ return {
     ["already_registered"] = "jiz mas zaregistrovanou postavu.",
     ["failed_identity"] = "nastaveni vasi postavy selhalo, zkus to prosim znovu pozdeji nebo kontaktuj majitele serveru!",
     ["create_a_character"] = "aby jsi mohl/a hrat, tak se musis registrovat.",
+    ["invalid_nationality_format"] = "Vyberte platnou zemi.",
 }

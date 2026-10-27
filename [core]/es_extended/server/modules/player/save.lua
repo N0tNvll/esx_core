@@ -2,7 +2,7 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 local SAVE_QUERY <const> =
-    'UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ? WHERE `identifier` = ?'
+    'UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ?, `nationality` = NULLIF(?, \'\') WHERE `identifier` = ?'
 local SAVE_BATCH_SIZE <const> = 25
 local SAVE_BATCH_INTERVAL <const> = 50
 local saveQueues = {}
@@ -38,6 +38,7 @@ local function buildSaveParameters(xPlayer)
         json.encode(xPlayer.getInventory(true)),
         json.encode(xPlayer.getLoadout(true)),
         json.encode(xPlayer.getMeta()),
+        xLib.nationality.normalize(xPlayer.nationality) or '',
         xPlayer.identifier,
     }
 end
@@ -70,6 +71,7 @@ local function executePlayerSave(xPlayer, cb, force)
         parameters[6],
         parameters[7],
         metadata,
+        parameters[9],
     })
     local previous = savedFingerprints[xPlayer]
 

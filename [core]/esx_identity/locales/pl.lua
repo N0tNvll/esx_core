@@ -33,4 +33,5 @@ return {
     ["no_identifier"] = "Wystąpił błąd podczas ładowania twojej postaci!\nKod błędu: identifier-missing\n\nPrzyczyna tego błędu nie jest znana, nie można znaleźć Twojego identyfikatora. Wróć później lub zgłoś ten problem zespołowi administracyjnemu serwera.",
     ["missing_identity"] = "Wystąpił błąd podczas ładowania twojej postaci!\nKod błędu: identity-missing\n\nWygląda na to, że brakuje Twojej tożsamości, spróbuj połączyć się ponownie.",
     ["deleted_identity"] = "Twoja postać została usunięta. Dołącz ponownie, aby utworzyć nową postać.",
+    ["invalid_nationality_format"] = "Wybierz prawidłowy kraj.",
 }
