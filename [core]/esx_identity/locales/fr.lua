@@ -38,4 +38,5 @@ return {
     ["invalid_dob_format"] = "Format invalide (Date de naissance) : Veuillez réessayer.",
     ["invalid_sex_format"] = "Format invalide (Genre) : Veuillez réessayer.",
     ["invalid_height_format"] = "Format invalide (Taille) : Veuillez réessayer.",
+    ["invalid_nationality_format"] = "Choisissez un pays valide.",
 }

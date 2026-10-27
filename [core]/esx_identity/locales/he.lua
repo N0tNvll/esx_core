@@ -38,4 +38,5 @@ return {
     ["invalid_dob_format"] = "פורמט לא תקני (תאריך לידה): נסה שוב.",
     ["invalid_sex_format"] = "פורמט לא תקני (מין): נסה שוב.",
     ["invalid_height_format"] = "פורמט לא תקני (גובה): נסה שוב.",
+    ["invalid_nationality_format"] = "יש לבחור מדינה תקינה.",
 }

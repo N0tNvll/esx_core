@@ -28,6 +28,7 @@ function Core.PlayerSession.CreateESXPlayer(identifier, playerId, data, loading)
         data.dateofbirth,
         data.sex,
         data.height,
+        xLib.nationality.normalize(data.nationality) or '',
     } or {
         json.encode(accounts),
         identifier,

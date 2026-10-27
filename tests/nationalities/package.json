@@ -1,0 +1,6 @@
+{
+  "name": "esx-nationality-regressions",
+  "private": true,
+  "scripts": { "test": "node run.cjs && node --test ui.test.mjs" },
+  "devDependencies": { "fengari": "0.1.5" }
+}

@@ -18,6 +18,7 @@ files {
     'imports.lua',
     'imports/**/client.lua',
     'imports/**/shared.lua',
+    'imports/nationality/countries.json',
     'html/medal.html',
     'html/medal.js',
 }

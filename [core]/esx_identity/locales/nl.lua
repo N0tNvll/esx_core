@@ -38,4 +38,5 @@ return {
     ["invalid_dob_format"] = "Ongeldige Volgorde (Geboortedatum): Probeer het nog een keer.",
     ["invalid_sex_format"] = "Ongeldige Volgorde (Geslacht): Probeer het nog een keer.",
     ["invalid_height_format"] = "Ongeldige Volgorde (Lengte): Probeer het nog een keer.",
+    ["invalid_nationality_format"] = "Selecteer een geldig land.",
 }

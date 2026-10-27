@@ -33,4 +33,5 @@ return {
     ["no_identifier"] = "Hahmosi lataamisessa ilmeni ongelma!\nVirhekoodi: identifier-missing\n\nVirhekoodin syytä ei tiedetä, joten ota yhteyttä ylläpitoon.",
     ["missing_identity"] = "Hahmosi lataamisessa ilmeni ongelma!\nVirhekoodi: identity-missing\n\nNäyttää siltä että hahmoasi ei ole olemassa. Kokeile yhdistää uudelleen tai ota yhteyttä ylläpitoon",
     ["deleted_identity"] = "Hahmosi on poistetu. Yhdistä palvelimelle uudestaan luodaksesi uusi hahmo.",
+    ["invalid_nationality_format"] = "Valitse kelvollinen maa.",
 }

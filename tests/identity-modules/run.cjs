@@ -34,6 +34,16 @@ lua.lua_setglobal(state, to_luastring('SOURCES'));
 const validation = fs.readFileSync(path.join(root, '[core]/es_extended/shared/modules/validation.lua'), 'utf8')
   .replace('getmetatable(val)?.__call', '(getmetatable(val) and getmetatable(val).__call)');
 stringGlobal('CORE_VALIDATION', validation);
+stringGlobal('NATIONALITY_SOURCE', fs.readFileSync(path.join(root, '[core]/esx_lib/imports/nationality/shared.lua'), 'utf8'));
+const countries = JSON.parse(fs.readFileSync(path.join(root, '[core]/esx_lib/imports/nationality/countries.json')));
+lua.lua_newtable(state);
+countries.forEach((country, index) => {
+  lua.lua_newtable(state);
+  lua.lua_pushstring(state, to_luastring(country.value));
+  lua.lua_setfield(state, -2, to_luastring('value'));
+  lua.lua_seti(state, -2, index + 1);
+});
+lua.lua_setglobal(state, to_luastring('COUNTRIES'));
 const baselineIndex = process.argv.indexOf('--baseline');
 if (baselineIndex !== -1) stringGlobal('BASELINE', fs.readFileSync(process.argv[baselineIndex + 1], 'utf8'));
 if (lauxlib.luaL_loadfile(state, path.join(__dirname, 'behavior.lua')) !== lua.LUA_OK ||

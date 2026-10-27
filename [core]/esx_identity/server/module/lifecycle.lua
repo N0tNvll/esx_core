@@ -43,6 +43,7 @@ local function checkIdentity(xPlayer)
             dateOfBirth = result.dateofbirth,
             sex = result.sex,
             height = result.height,
+            nationality = xLib.nationality.normalize(result.nationality),
         }
 
         alreadyRegistered[playerIdentifier] = true
@@ -84,6 +85,7 @@ function Lifecycle.RegisterHandlers()
                 dateOfBirth = result.dateofbirth,
                 sex = result.sex,
                 height = result.height,
+                nationality = xLib.nationality.normalize(result.nationality),
             }
 
             alreadyRegistered[identifier] = true

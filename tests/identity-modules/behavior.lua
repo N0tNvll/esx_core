@@ -72,6 +72,19 @@ local function fixture(options)
     env.xLib = { callback = { registerCompat = function(name,fn)
         record('callback',name);state.callbacks[name]=fn
     end } }
+    env.LoadResourceFile = function(resource, file)
+        assert(resource=='esx_lib' and file=='imports/nationality/countries.json')
+        return 'countries'
+    end
+    env.json = { decode = function() return COUNTRIES end }
+    env.xLib.nationality = assert(load(NATIONALITY_SOURCE, 'nationality', 't', env))()
+    player.setNationality = function(value)
+        local nationality = env.xLib.nationality.normalize(value)
+        if value ~= nil and not nationality then return false end
+        player.nationality=nationality;state.states.nationality=nationality
+        record('nationality',nationality)
+        return true
+    end
     env.ESXCatalog = { awaitReady = function()
         record('awaitCatalog')
         if not state.ready then coroutine.yield('catalog') end
@@ -136,7 +149,7 @@ local function fixture(options)
     return state, env
 end
 local function data(changes)
-    local value = { firstname='tEST',lastname='nAME',dateofbirth='29/02/2000',sex='M',height='180' }
+    local value = { firstname='tEST',lastname='nAME',dateofbirth='29/02/2000',sex='M',height='180',nationality='Spain' }
     for key,item in pairs(changes or {}) do value[key]=item end
     return value
 end
@@ -194,7 +207,7 @@ for _,case in ipairs(invalids) do
     end)
 end
 test('missing identity fields fail before persistence', function()
-    for _,key in ipairs({'firstname','lastname','dateofbirth','sex','height'}) do
+    for _,key in ipairs({'firstname','lastname','dateofbirth','sex','height','nationality'}) do
         local state=fixture();local payload=data();payload[key]=nil
         assert(state.invoke(payload)==false and state.count('update')==0)
     end
@@ -309,5 +322,42 @@ test('the existing SetPlayerData helper still updates player and state bags', fu
     local state,env=fixture()
     env.SetPlayerData(state.player,{firstName='Custom',lastName='Player',dateOfBirth='01/01/1990',sex='f',height=175})
     assert(state.name=='Custom Player' and state.states.firstName=='Custom' and state.states.sex=='f')
+end)
+test('nationality input uses a canonical country from the server allowlist', function()
+    local state=fixture()
+    local payload=data({nationality='  sPaIn  '})
+    assert(state.invoke(payload)==true and payload.nationality=='Spain')
+    assert(state.player.nationality=='Spain' and state.states.nationality=='Spain')
+    local saved=false
+    for _,entry in ipairs(state.trace) do
+        if entry[1]=='update' then assert(entry[3][6]=='Spain');saved=true end
+    end
+    assert(saved)
+end)
+test('unknown and malformed nationalities never write to the database', function()
+    for _,value in ipairs({'', 'Invalid Country', "Spain'; DROP TABLE users; --", {}, true, 1, string.rep('a',53)}) do
+        local state=fixture()
+        assert(state.invoke(data({nationality=value}))==false and state.count('update')==0)
+    end
+end)
+test('existing characters without nationality still load normally', function()
+    local state=fixture({multichar=false})
+    state.connect();state.flush(row);state.emit('esx:playerLoaded',7,state.player)
+    assert(state.name=='Saved Name' and state.player.nationality==nil)
+    assert(state.count('client','esx_identity:alreadyRegistered')==1)
+end)
+test('saved nationality survives connection cache and player load', function()
+    local state=fixture({multichar=false})
+    local saved=clone(row);saved.nationality='Mexico'
+    state.connect();state.flush(saved);state.emit('esx:playerLoaded',7,state.player)
+    assert(state.player.nationality=='Mexico' and state.states.nationality=='Mexico')
+end)
+test('multichar registration sends the canonical nationality', function()
+    local state=fixture({exists=false})
+    local payload=data({nationality='colombia'})
+    assert(state.invoke(payload)==true and payload.nationality=='Colombia')
+    for _,entry in ipairs(state.trace) do
+        if entry[1]=='event' then assert(entry[4].nationality=='Colombia') end
+    end
 end)
 print(('Passed %d identity regressions%s.'):format(cases, BASELINE and ' with matching baseline traces' or ''))

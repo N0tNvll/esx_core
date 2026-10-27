@@ -38,4 +38,5 @@ return {
     ["invalid_dob_format"] = "Ugyldigt format (DOB): Prøv venligst igen.",
     ["invalid_sex_format"] = "Ugyldigt format (køn): Prøv venligst igen.",
     ["invalid_height_format"] = "Ugyldigt format (højde): Prøv venligst igen.",
+    ["invalid_nationality_format"] = "Vælg et gyldigt land.",
 }
