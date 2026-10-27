@@ -20,6 +20,15 @@ server_scripts {
     '@esx_lib/imports/catalog/bootstrap.lua',
     'locales/*.lua',
     'config.lua',
+    'server/module/registry.lua',
+    'server/module/validation.lua',
+    'server/module/util.lua',
+    'server/module/database.lua',
+    'server/module/identity.lua',
+    'server/module/lifecycle.lua',
+    'server/module/callback.lua',
+    'server/module/commands.lua',
+    'server/module/debugging.lua',
     'server/main.lua',
 }
 
