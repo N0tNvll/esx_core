@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-AddEventHandler("txAdmin:events:scheduledRestart", function(eventData)
+AddEventHandler('txAdmin:events:scheduledRestart', function(eventData)
     if eventData.secondsRemaining == 60 then
         CreateThread(function()
             Wait(50000)
@@ -10,19 +10,19 @@ AddEventHandler("txAdmin:events:scheduledRestart", function(eventData)
     end
 end)
 
-AddEventHandler("txAdmin:events:serverShuttingDown", function()
+AddEventHandler('txAdmin:events:serverShuttingDown', function()
     Core.SavePlayers()
 end)
 
 local forbiddenResources = {
-    ["essentialmode"] = true,
-    ["es_admin2"] = true,
-    ["basic-gamemode"] = true,
-    ["mapmanager"] = true,
-    ["fivem-map-skater"] = true,
-    ["fivem-map-hipster"] = true,
-    ["qb-core"] = true,
-    ["default_spawnpoint"] = true,
+    ['essentialmode'] = true,
+    ['es_admin2'] = true,
+    ['basic-gamemode'] = true,
+    ['mapmanager'] = true,
+    ['fivem-map-skater'] = true,
+    ['fivem-map-hipster'] = true,
+    ['qb-core'] = true,
+    ['default_spawnpoint'] = true,
 }
 
 local artifactWarningStarted = false
@@ -36,7 +36,7 @@ local function ensureSupportedArtifact()
     artifactWarningStarted = true
     CreateThread(function()
         while true do
-            error("ESX Requires a minimum Artifact version of 10188, Please update your server.")
+            error('ESX Requires a minimum Artifact version of 10188, Please update your server.')
             Wait(60 * 1000)
         end
     end)
@@ -47,15 +47,15 @@ local function stopForbiddenResource(resourceName)
         return
     end
 
-    while GetResourceState(resourceName) ~= "started" do
+    while GetResourceState(resourceName) ~= 'started' do
         Wait(0)
     end
 
     StopResource(resourceName)
-    error(("WE STOPPED A RESOURCE THAT WILL BREAK ^1ESX^1, PLEASE REMOVE ^5%s^1"):format(resourceName))
+    error(('WE STOPPED A RESOURCE THAT WILL BREAK ^1ESX^1, PLEASE REMOVE ^5%s^1'):format(resourceName))
 end
 
-AddEventHandler("onResourceStart", function(resourceName)
+AddEventHandler('onResourceStart', function(resourceName)
     stopForbiddenResource(resourceName)
     ensureSupportedArtifact()
 end)
@@ -65,8 +65,8 @@ ensureSupportedArtifact()
 for resourceName in pairs(forbiddenResources) do
     local state = GetResourceState(resourceName)
 
-    if state == "started" or state == "starting" then
+    if state == 'started' or state == 'starting' then
         StopResource(resourceName)
-        error(("WE STOPPED A RESOURCE THAT WILL BREAK ^1ESX^1, PLEASE REMOVE ^5%s^1"):format(resourceName))
+        error(('WE STOPPED A RESOURCE THAT WILL BREAK ^1ESX^1, PLEASE REMOVE ^5%s^1'):format(resourceName))
     end
 end

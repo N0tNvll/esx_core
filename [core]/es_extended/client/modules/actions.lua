@@ -31,13 +31,12 @@ function Actions:GetVehicleData()
     local displayName = GetDisplayNameFromVehicleModel(vehicleModel)
     local netId = NetworkGetEntityIsNetworked(self.vehicle) and VehToNet(self.vehicle) or self.vehicle
     local plate = GetVehicleNumberPlateText(self.vehicle)
-
     return displayName, netId, plate
 end
 
 function Actions:SetVehicleStatus()
-    ESX.SetPlayerData("vehicle", self.vehicle)
-    ESX.SetPlayerData("seat", self.seat)
+    ESX.SetPlayerData('vehicle', self.vehicle)
+    ESX.SetPlayerData('seat', self.seat)
 end
 
 function Actions:TrackPedCoordsOnce()
@@ -60,14 +59,13 @@ function Actions:TrackPedCoordsOnce()
 
         setmetatable(playerData, {
             __index = function(_, key)
-                if key ~= "coords" then
+                if key ~= 'coords' then
                     return
                 end
 
                 local coords = GetEntityCoords(playerData.ped)
-
                 return coords
-            end
+            end,
         })
     end)
 end
@@ -77,10 +75,10 @@ function Actions:TrackPauseMenu()
 
     if isActive ~= self.inPauseMenu then
         self.inPauseMenu = isActive
-        TriggerEvent("esx:pauseMenuActive", isActive)
+        TriggerEvent('esx:pauseMenuActive', isActive)
 
         if Config.EnableDebug then
-            print("[DEBUG] Pause menu active:", isActive)
+            print('[DEBUG] Pause menu active:', isActive)
         end
     end
 end
@@ -91,13 +89,13 @@ function Actions:EnterVehicle()
     local _, netId, plate = self:GetVehicleData()
 
     self.enteringVehicle = true
-    TriggerEvent("esx:enteringVehicle", self.vehicle, plate, self.seat, netId)
-    TriggerServerEvent("esx:enteringVehicle", plate, self.seat, netId)
+    TriggerEvent('esx:enteringVehicle', self.vehicle, plate, self.seat, netId)
+    TriggerServerEvent('esx:enteringVehicle', plate, self.seat, netId)
 
     self:SetVehicleStatus()
 
     if Config.EnableDebug then
-        print("[DEBUG] Entering vehicle:", self.vehicle, plate, self.seat, netId)
+        print('[DEBUG] Entering vehicle:', self.vehicle, plate, self.seat, netId)
     end
 end
 
@@ -113,11 +111,11 @@ end
 function Actions:EnterAborted()
     self:ResetVehicleData()
 
-    TriggerEvent("esx:enteringVehicleAborted")
-    TriggerServerEvent("esx:enteringVehicleAborted")
+    TriggerEvent('esx:enteringVehicleAborted')
+    TriggerServerEvent('esx:enteringVehicleAborted')
 
     if Config.EnableDebug then
-        print("[DEBUG] Entering vehicle aborted")
+        print('[DEBUG] Entering vehicle aborted')
     end
 end
 
@@ -130,11 +128,11 @@ function Actions:WarpEnter()
     local displayName, netId, plate = self:GetVehicleData()
 
     self:SetVehicleStatus()
-    TriggerEvent("esx:enteredVehicle", self.vehicle, plate, self.seat, displayName, netId)
-    TriggerServerEvent("esx:enteredVehicle", plate, self.seat, displayName, netId)
+    TriggerEvent('esx:enteredVehicle', self.vehicle, plate, self.seat, displayName, netId)
+    TriggerServerEvent('esx:enteredVehicle', plate, self.seat, displayName, netId)
 
     if Config.EnableDebug then
-        print("[DEBUG] Entered vehicle:", self.vehicle, plate, self.seat, displayName, netId)
+        print('[DEBUG] Entered vehicle:', self.vehicle, plate, self.seat, displayName, netId)
     end
 end
 
@@ -144,11 +142,11 @@ function Actions:ExitVehicle()
     if currentVehicle ~= self.vehicle or ESX.PlayerData.dead then
         local displayName, netId, plate = self:GetVehicleData()
 
-        TriggerEvent("esx:exitedVehicle", self.vehicle, plate, self.seat, displayName, netId)
-        TriggerServerEvent("esx:exitedVehicle", plate, self.seat, displayName, netId)
+        TriggerEvent('esx:exitedVehicle', self.vehicle, plate, self.seat, displayName, netId)
+        TriggerServerEvent('esx:exitedVehicle', plate, self.seat, displayName, netId)
 
         if Config.EnableDebug then
-            print("[DEBUG] Exited vehicle:", self.vehicle, plate, self.seat, displayName, netId)
+            print('[DEBUG] Exited vehicle:', self.vehicle, plate, self.seat, displayName, netId)
         end
 
         self:ResetVehicleData()
@@ -180,13 +178,14 @@ function Actions:TrackSeat()
     end
 
     local newSeat = self:GetSeatPedIsIn()
+
     if newSeat ~= self.seat then
         self.seat = newSeat
-        ESX.SetPlayerData("seat", self.seat)
-        TriggerEvent("esx:vehicleSeatChanged", self.seat)
+        ESX.SetPlayerData('seat', self.seat)
+        TriggerEvent('esx:vehicleSeatChanged', self.seat)
 
         if Config.EnableDebug then
-            print("[DEBUG] Vehicle seat changed:", self.seat)
+            print('[DEBUG] Vehicle seat changed:', self.seat)
         end
     end
 end
@@ -206,8 +205,8 @@ end
 function Actions:Init()
     -- Re-seed the cached values on every (re)login. The change handlers below are
     -- registered once at file load so a relogin never stacks duplicate handlers.
-    ESX.SetPlayerData("ped", xLib.cache.ped)
-    ESX.SetPlayerData("weapon", xLib.cache.weapon)
+    ESX.SetPlayerData('ped', xLib.cache.ped)
+    ESX.SetPlayerData('weapon', xLib.cache.weapon)
 
     if not ESX.PlayerLoaded or self.playerData == ESX.PlayerData then
         return
@@ -220,21 +219,21 @@ function Actions:Init()
 end
 
 -- Mirror the lib cache into ESX.PlayerData and re-emit the legacy esx: events.
-AddEventHandler("xLib:cache:ped", function(ped)
-    ESX.SetPlayerData("ped", ped)
-    TriggerEvent("esx:playerPedChanged", ped)
+AddEventHandler('xLib:cache:ped', function(ped)
+    ESX.SetPlayerData('ped', ped)
+    TriggerEvent('esx:playerPedChanged', ped)
 
     if Config.EnableDebug then
-        print("[DEBUG] Player ped changed:", ped)
+        print('[DEBUG] Player ped changed:', ped)
     end
 end)
 
-AddEventHandler("xLib:cache:weapon", function(weapon)
-    ESX.SetPlayerData("weapon", weapon)
-    TriggerEvent("esx:weaponChanged", weapon)
+AddEventHandler('xLib:cache:weapon', function(weapon)
+    ESX.SetPlayerData('weapon', weapon)
+    TriggerEvent('esx:weaponChanged', weapon)
 
     if Config.EnableDebug then
-        print("[DEBUG] Weapon changed:", weapon)
+        print('[DEBUG] Weapon changed:', weapon)
     end
 end)
 

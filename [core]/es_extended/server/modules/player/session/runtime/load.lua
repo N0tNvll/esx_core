@@ -84,12 +84,10 @@ local function loadPlayer(identifier, playerId, isNew, loading)
         name = jobObject.name,
         label = jobObject.label,
         type = jobObject.type,
-
         grade = tonumber(grade),
         grade_name = gradeObject.name,
         grade_label = gradeObject.label,
         grade_salary = gradeObject.salary,
-
         skin_male = decodeJsonObject(gradeObject.skin_male, {}),
         skin_female = decodeJsonObject(gradeObject.skin_female, {}),
     }
@@ -156,21 +154,7 @@ local function loadPlayer(identifier, playerId, isNew, loading)
     userData.metadata = (result.metadata and result.metadata ~= '') and json.decode(result.metadata) or {}
     userData.nationality = xLib.nationality.normalize(result.nationality)
 
-    local xPlayer = CreateExtendedPlayer(
-        playerId,
-        identifier,
-        userData.ssn,
-        userData.group,
-        userData.accounts,
-        userData.inventory,
-        userData.weight,
-        userData.job,
-        userData.loadout,
-        GetPlayerName(playerId),
-        userData.coords,
-        userData.metadata,
-        userData.nationality
-    )
+    local xPlayer = CreateExtendedPlayer(playerId, identifier, userData.ssn, userData.group, userData.accounts, userData.inventory, userData.weight, userData.job, userData.loadout, GetPlayerName(playerId), userData.coords, userData.metadata, userData.nationality)
 
     GlobalState['playerCount'] = (GlobalState['playerCount'] or 0) + 1
     ESX.Players[playerId] = xPlayer

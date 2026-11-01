@@ -2,7 +2,7 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 function ESX.DisableSpawnManager()
-    if GetResourceState("spawnmanager") == "started" then
+    if GetResourceState('spawnmanager') == 'started' then
         exports.spawnmanager:setAutoSpawn(false)
     end
 end
@@ -11,6 +11,7 @@ end
 ---@return nil
 function Core.FreezePlayer(freeze)
     local ped = PlayerPedId()
+
     SetPlayerControl(ESX.playerId, not freeze, 0)
 
     if freeze then
@@ -28,9 +29,11 @@ end
 ---@return nil
 function ESX.SpawnPlayer(skin, coords, cb)
     local p = promise.new()
-    TriggerEvent("skinchanger:loadSkin", skin, function()
+
+    TriggerEvent('skinchanger:loadSkin', skin, function()
         p:resolve()
     end)
+
     Citizen.Await(p)
 
     RequestCollisionAtCoord(coords.x, coords.y, coords.z)
@@ -43,11 +46,12 @@ function ESX.SpawnPlayer(skin, coords, cb)
     SetEntityHeading(playerPed, coords.heading)
 
     RequestCollisionAtCoord(coords.x, coords.y, coords.z)
+
     while not HasCollisionLoadedAroundEntity(playerPed) and (GetGameTimer() - timer) < 5000 do
         Wait(0)
     end
 
     NetworkResurrectLocalPlayer(coords.x, coords.y, coords.z, coords.heading, 0, true)
-    TriggerEvent("playerSpawned", coords)
+    TriggerEvent('playerSpawned', coords)
     cb()
 end

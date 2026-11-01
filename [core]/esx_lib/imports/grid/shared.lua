@@ -59,7 +59,6 @@ local function getGridDimensions(point, length, width)
     local maxX = (point.x + width - mapMinX) // xDelta
     local minY = (point.y - length - mapMinY) // yDelta
     local maxY = (point.y + length - mapMinY) // yDelta
-
     return minX, maxX, minY, maxY
 end
 
@@ -68,7 +67,6 @@ end
 function xLib.grid.getCellPosition(point)
     local x = (point.x - mapMinX) // xDelta
     local y = (point.y - mapMinY) // yDelta
-
     return x, y
 end
 
@@ -92,10 +90,7 @@ end
 function xLib.grid.getNearbyEntries(point, filter)
     local minX, maxX, minY, maxY = getGridDimensions(point, xDelta, yDelta)
 
-    if not filter and gridCache.minX == minX and
-        gridCache.maxX == maxX and
-        gridCache.minY == minY and
-        gridCache.maxY == maxY then
+    if not filter and gridCache.minX == minX and gridCache.maxX == maxX and gridCache.minY == minY and gridCache.maxY == maxY then
         return gridCache.entries
     end
 
@@ -137,11 +132,15 @@ end
 
 ---@param entry { coords: vector, length?: number, width?: number, radius?: number, [string]: any }
 function xLib.grid.addEntry(entry)
-    if memberships[entry] then xLib.grid.removeEntry(entry) end
+    if memberships[entry] then
+        xLib.grid.removeEntry(entry)
+    end
 
     entry.length = entry.length or (entry.radius or 0) * 2
     entry.width = entry.width or (entry.radius or 0) * 2
+
     local minX, maxX, minY, maxY = getGridDimensions(entry.coords, entry.length, entry.width)
+
     memberships[entry] = { minX, maxX, minY, maxY }
 
     for y = minY, maxY do
@@ -163,14 +162,20 @@ end
 ---@param entry table A table that was added to the grid previously.
 function xLib.grid.removeEntry(entry)
     local bounds = memberships[entry]
-    if not bounds then return false end
+
+    if not bounds then
+        return false
+    end
+
     local minX, maxX, minY, maxY = table.unpack(bounds)
     local success = false
 
     for y = minY, maxY do
         local row = grid[y]
 
-        if not row then goto continue end
+        if not row then
+            goto continue
+        end
 
         for x = minX, maxX do
             local cell = row[x]

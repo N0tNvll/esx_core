@@ -18,7 +18,7 @@ function StartServerSyncLoops()
 
         if newAmmo ~= currentWeapon.ammo then
             currentWeapon.ammo = newAmmo
-            TriggerServerEvent("esx:updateWeaponAmmo", weaponName, newAmmo)
+            TriggerServerEvent('esx:updateWeaponAmmo', weaponName, newAmmo)
         end
     end
 
@@ -40,6 +40,7 @@ function StartServerSyncLoops()
                     updateCurrentWeaponAmmo(weaponConfig.name)
                 end
             end
+
             Wait(250)
         end
     end)
@@ -52,12 +53,13 @@ function StartServerSyncLoops()
             local parachuteState = GetPedParachuteState(ESX.PlayerData.ped)
 
             if parachuteState == PARACHUTE_OPENING or parachuteState == PARACHUTE_OPEN then
-                TriggerServerEvent("esx:updateWeaponAmmo", "GADGET_PARACHUTE", 0)
+                TriggerServerEvent('esx:updateWeaponAmmo', 'GADGET_PARACHUTE', 0)
 
                 while GetPedParachuteState(ESX.PlayerData.ped) ~= -1 do
                     Wait(1000)
                 end
             end
+
             Wait(500)
         end
     end)

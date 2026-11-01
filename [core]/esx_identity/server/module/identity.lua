@@ -8,22 +8,24 @@ local alreadyRegistered = IdentityModules.state.alreadyRegistered
 ---@param xPlayer StaticPlayer|xPlayer
 ---@param data {firstName:string?, lastName:string?, dateOfBirth:string?, height:number?, nationality:string?, sex:"m"|"f"?}
 function Identity.SetPlayerData(xPlayer, data)
-    local name = ("%s %s"):format(data.firstName, data.lastName)
+    local name = ('%s %s'):format(data.firstName, data.lastName)
+
     xPlayer.setName(name)
-    xPlayer.set("firstName", data.firstName)
-    xPlayer.set("lastName", data.lastName)
-    xPlayer.set("dateofbirth", data.dateOfBirth)
-    xPlayer.set("sex", data.sex)
-    xPlayer.set("height", data.height)
+    xPlayer.set('firstName', data.firstName)
+    xPlayer.set('lastName', data.lastName)
+    xPlayer.set('dateofbirth', data.dateOfBirth)
+    xPlayer.set('sex', data.sex)
+    xPlayer.set('height', data.height)
     xPlayer.setNationality(data.nationality)
 
     local state = Player(xPlayer.getSource()).state
-    state:set("name", name, true)
-    state:set("firstName", data.firstName, true)
-    state:set("lastName", data.lastName, true)
-    state:set("dateofbirth", data.dateOfBirth, true)
-    state:set("sex", data.sex, true)
-    state:set("height", data.height, true)
+
+    state:set('name', name, true)
+    state:set('firstName', data.firstName, true)
+    state:set('lastName', data.lastName, true)
+    state:set('dateofbirth', data.dateOfBirth, true)
+    state:set('sex', data.sex, true)
+    state:set('height', data.height, true)
 end
 
 ---@param xPlayer xPlayer

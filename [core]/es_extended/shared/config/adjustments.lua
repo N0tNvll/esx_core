@@ -44,7 +44,7 @@ Config.Multipliers = {
     ambientVehicleRange = 1.0,
     parkedVehicleDensity = 1.0,
     randomVehicleDensity = 1.0,
-    vehicleDensity = 1.0
+    vehicleDensity = 1.0,
 }
 
 -- Pattern string format
@@ -55,7 +55,7 @@ Config.Multipliers = {
 --^A will lead to a literal A being emitted.
 --Any other character will lead to said character being emitted.
 -- A string shorter than 8 characters will be padded on the right.
-Config.CustomAIPlates = "........" -- Custom plates for AI vehicles
+Config.CustomAIPlates = '........' -- Custom plates for AI vehicles
 
 --[[
     PlaceHolders:
@@ -72,12 +72,12 @@ Config.CustomAIPlates = "........" -- Custom plates for AI vehicles
 
 Config.DiscordActivity = {
     appId = 0, -- Discord Application ID,
-    assetName = "LargeIcon", --image name for the "large" icon.
-    assetText = "{server_name}", -- Text to display on the asset
+    assetName = 'LargeIcon', --image name for the "large" icon.
+    assetText = '{server_name}', -- Text to display on the asset
     buttons = {
-        { label = "Join Server", url = "fivem://connect/{server_endpoint}" },
-        { label = "Discord", url = "https://discord.esx-framework.org" },
+        { label = 'Join Server', url = 'fivem://connect/{server_endpoint}' },
+        { label = 'Discord', url = 'https://discord.esx-framework.org' },
     },
-    presence = "{player_name} [{player_id}] | {server_players}/{server_maxplayers}",
+    presence = '{player_name} [{player_id}] | {server_players}/{server_maxplayers}',
     refresh = 1 * 60 * 1000, -- 1 minute
 }

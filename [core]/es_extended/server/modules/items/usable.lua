@@ -23,7 +23,7 @@ function ESX.RegisterUsableItem(item, cb)
             if inventoryItem.name == item then
                 inventoryItem.usable = true
 
-                TriggerClientEvent("esx:setInventory", xPlayer.source, inventory)
+                TriggerClientEvent('esx:setInventory', xPlayer.source, inventory)
                 break
             end
         end
@@ -57,6 +57,7 @@ end
 ---@return table
 function ESX.GetUsableItems()
     local Usables = {}
+
     for k in pairs(Core.UsableItemsCallbacks) do
         Usables[k] = true
     end

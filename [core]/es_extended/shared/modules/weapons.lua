@@ -16,7 +16,7 @@ end)
 function ESX.GetWeapon(weaponName)
     weaponName = string.upper(weaponName)
 
-    assert(weaponsByName[weaponName], "Invalid weapon name!")
+    assert(weaponsByName[weaponName], 'Invalid weapon name!')
 
     local index = weaponsByName[weaponName]
     return index, Config.Weapons[index]
@@ -25,7 +25,7 @@ end
 ---@param weaponHash number
 ---@return table
 function ESX.GetWeaponFromHash(weaponHash)
-    weaponHash = type(weaponHash) == "string" and joaat(weaponHash) or weaponHash
+    weaponHash = type(weaponHash) == 'string' and joaat(weaponHash) or weaponHash
 
     return weaponsByHash[weaponHash]
 end
@@ -41,10 +41,10 @@ end
 function ESX.GetWeaponLabel(weaponName)
     weaponName = string.upper(weaponName)
 
-    assert(weaponsByName[weaponName], "Invalid weapon name!")
+    assert(weaponsByName[weaponName], 'Invalid weapon name!')
 
     local index = weaponsByName[weaponName]
-    return Config.Weapons[index].label or ""
+    return Config.Weapons[index].label or ''
 end
 
 ---@param weaponName string
@@ -53,7 +53,8 @@ end
 function ESX.GetWeaponComponent(weaponName, weaponComponent)
     weaponName = string.upper(weaponName)
 
-    assert(weaponsByName[weaponName], "Invalid weapon name!")
+    assert(weaponsByName[weaponName], 'Invalid weapon name!')
+
     local weapon = Config.Weapons[weaponsByName[weaponName]]
 
     for _, component in ipairs(weapon.components) do

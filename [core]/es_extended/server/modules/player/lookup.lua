@@ -6,9 +6,10 @@ ESX.GetPlayers = GetPlayers
 local function checkTable(key, val, xPlayer, xPlayers, minimal)
     for valIndex = 1, #val do
         local value = val[valIndex]
+
         xPlayers[value] = xPlayers[value] or {}
 
-        if (key == "job" and xPlayer.job.name == value) or xPlayer[key] == value then
+        if (key == 'job' and xPlayer.job.name == value) or xPlayer[key] == value then
             xPlayers[value][#xPlayers[value] + 1] = (minimal and xPlayer.source or xPlayer)
         end
     end
@@ -28,6 +29,7 @@ function ESX.GetExtendedPlayers(key, val, minimal)
 
         local xPlayers = {}
         local index = 1
+
         for src in pairs(players) do
             xPlayers[index] = src
             index += 1
@@ -37,7 +39,8 @@ function ESX.GetExtendedPlayers(key, val, minimal)
     end
 
     local xPlayers = {}
-    if type(val) == "table" then
+
+    if type(val) == 'table' then
         for _, xPlayer in pairs(players) do
             checkTable(key, val, xPlayer, xPlayers, minimal)
         end
@@ -46,7 +49,7 @@ function ESX.GetExtendedPlayers(key, val, minimal)
     end
 
     for _, xPlayer in pairs(players) do
-        if (key == "job" and xPlayer.job.name == val) or xPlayer[key] == val then
+        if (key == 'job' and xPlayer.job.name == val) or xPlayer[key] == val then
             xPlayers[#xPlayers + 1] = (minimal and xPlayer.source or xPlayer)
         end
     end
@@ -62,9 +65,10 @@ function ESX.GetNumPlayers(key, val)
         return #GetPlayers()
     end
 
-    if type(val) == "table" then
+    if type(val) == 'table' then
         local numPlayers = {}
-        if key == "job" then
+
+        if key == 'job' then
             for _, v in ipairs(val) do
                 numPlayers[v] = (Core.JobsPlayerCount[v] or 0)
             end
@@ -72,13 +76,14 @@ function ESX.GetNumPlayers(key, val)
         end
 
         local filteredPlayers = ESX.GetExtendedPlayers(key, val)
+
         for i, v in pairs(filteredPlayers) do
             numPlayers[i] = (#v or 0)
         end
         return numPlayers
     end
 
-    if key == "job" then
+    if key == 'job' then
         return (Core.JobsPlayerCount[val] or 0)
     end
 

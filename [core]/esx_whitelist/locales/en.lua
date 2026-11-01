@@ -3,7 +3,6 @@
 
 return {
     ['whitelist_title'] = 'Whitelist',
-
     ['admin_only'] = 'This server is currently restricted to administrators.',
     ['not_whitelisted'] = 'You are not whitelisted on this server.',
     ['discord_required'] = 'A linked Discord account is required to join this server.',
@@ -12,11 +11,9 @@ return {
     ['discord_unavailable'] = 'Verification is temporarily unavailable. Please try again shortly.',
     ['verification_timeout'] = 'Verification timed out. Please try again.',
     ['verification_error'] = 'An internal error occurred during verification. Please try again.',
-
     ['checking_whitelist'] = 'Checking whitelist...',
     ['checking_discord_membership'] = 'Checking Discord membership...',
     ['verifying_authorization'] = 'Verifying authorization...',
-
     ['command_no_permission'] = 'You do not have permission to use this command.',
     ['command_usage'] = 'Usage: %s [%s|%s|%s|%s [%s]|%s <id>|%s <identifier> [type]|%s <identifier> [type]]',
     ['command_usage_test'] = 'Usage: %s %s <serverId>',

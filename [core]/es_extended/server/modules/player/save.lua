@@ -1,8 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-local SAVE_QUERY <const> =
-    'UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ?, `nationality` = NULLIF(?, \'\') WHERE `identifier` = ?'
+local SAVE_QUERY <const> = "UPDATE `users` SET `accounts` = ?, `job` = ?, `job_grade` = ?, `group` = ?, `position` = ?, `inventory` = ?, `loadout` = ?, `metadata` = ?, `nationality` = NULLIF(?, '') WHERE `identifier` = ?"
 local SAVE_BATCH_SIZE <const> = 25
 local SAVE_BATCH_INTERVAL <const> = 50
 local saveQueues = {}
@@ -15,7 +14,6 @@ local allSaveSucceeded = true
 
 local function updateHealthAndArmorInMetadata(xPlayer)
     local ped = ESX.Players[xPlayer.source] == xPlayer and GetPlayerPed(xPlayer.source) or 0
-
     local metadata = xPlayer.getMeta()
 
     if ped ~= 0 and DoesEntityExist(ped) and not Player(xPlayer.source).state.isDead then
@@ -73,6 +71,7 @@ local function executePlayerSave(xPlayer, cb, force)
         metadata,
         parameters[9],
     })
+
     local previous = savedFingerprints[xPlayer]
 
     if not force and previous and previous.value == fingerprint and GetGameTimer() - previous.time < 60000 then
@@ -165,7 +164,6 @@ function Core.WithPlayerPersistence(identifier, action, failClosed)
 
     local player
     local operation = false
-
     local ok, result, detail = pcall(function()
         while saveQueues[identifier] and saveQueues[identifier].busy do
             Wait(0)

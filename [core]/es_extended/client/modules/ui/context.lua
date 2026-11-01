@@ -9,25 +9,22 @@ local DISPLAY_FIELDS = {
 }
 
 local function stripHtml(value)
-    if type(value) ~= "string" then
+    if type(value) ~= 'string' then
         return value
     end
 
-    return value
-        :gsub("<.->", "")
-        :gsub("&nbsp;", " ")
-        :gsub("%s+", " ")
-        :gsub("^%s*(.-)%s*$", "%1")
+    return value:gsub('<.->', ''):gsub('&nbsp;', ' '):gsub('%s+', ' '):gsub('^%s*(.-)%s*$', '%1')
 end
 
 local function sanitizeContextElements(elements)
-    if type(elements) ~= "table" then
+    if type(elements) ~= 'table' then
         return elements
     end
 
     for i = 1, #elements do
         local element = elements[i]
-        if type(element) == "table" then
+
+        if type(element) == 'table' then
             for key in pairs(DISPLAY_FIELDS) do
                 element[key] = stripHtml(element[key])
             end
@@ -38,17 +35,17 @@ local function sanitizeContextElements(elements)
 end
 
 function ESX.OpenContext(position, elements, ...)
-    return Core.IsResourceFound("esx_context") and exports["esx_context"]:Open(position, sanitizeContextElements(elements), ...)
+    return Core.IsResourceFound('esx_context') and exports['esx_context']:Open(position, sanitizeContextElements(elements), ...)
 end
 
 function ESX.PreviewContext(...)
-    return Core.IsResourceFound("esx_context") and exports["esx_context"]:Preview(...)
+    return Core.IsResourceFound('esx_context') and exports['esx_context']:Preview(...)
 end
 
 function ESX.CloseContext(...)
-    return Core.IsResourceFound("esx_context") and exports["esx_context"]:Close(...)
+    return Core.IsResourceFound('esx_context') and exports['esx_context']:Close(...)
 end
 
 function ESX.RefreshContext(elements, ...)
-    return Core.IsResourceFound("esx_context") and exports["esx_context"]:Refresh(sanitizeContextElements(elements), ...)
+    return Core.IsResourceFound('esx_context') and exports['esx_context']:Refresh(sanitizeContextElements(elements), ...)
 end

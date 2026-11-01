@@ -31,7 +31,6 @@ end
 
 local initialPed = PlayerPedId()
 local initialVehicle = getVehicle(initialPed)
-
 local cache = setmetatable({
     playerId = playerId,
     ped = initialPed,
@@ -40,26 +39,28 @@ local cache = setmetatable({
     weapon = getWeapon(initialPed),
 }, {
     __index = function(self, key)
-        if key == "coords" then
+        if key == 'coords' then
             return GetEntityCoords(self.ped)
-        elseif key == "serverId" then
+        elseif key == 'serverId' then
             -- resolved lazily: GetPlayerServerId can return -1 before the network
             -- session is ready, so only cache it once it is valid.
             local id = GetPlayerServerId(playerId)
+
             if id and id ~= -1 then
-                rawset(self, "serverId", id)
+                rawset(self, 'serverId', id)
             end
             return id
         end
     end,
 })
 
-local TRACKED_KEYS <const> = { "ped", "vehicle", "seat", "weapon" }
+local TRACKED_KEYS <const> = { 'ped', 'vehicle', 'seat', 'weapon' }
 
 if GetCurrentResourceName() ~= xLib.name then
     for i = 1, #TRACKED_KEYS do
         local key = TRACKED_KEYS[i]
-        AddEventHandler(("xLib:cache:%s"):format(key), function(value)
+
+        AddEventHandler(('xLib:cache:%s'):format(key), function(value)
             rawset(cache, key, value)
         end)
     end
@@ -79,32 +80,36 @@ local function set(key, value)
     end
 
     local previous = cache[key]
+
     rawset(cache, key, value)
-    TriggerEvent(("xLib:cache:%s"):format(key), value, previous)
+    TriggerEvent(('xLib:cache:%s'):format(key), value, previous)
 end
 
 CreateThread(function()
     while true do
         local ped = PlayerPedId()
+
         if ped ~= cache.ped then
-            set("ped", ped)
+            set('ped', ped)
         end
 
         local vehicle = getVehicle(ped)
 
         if vehicle ~= cache.vehicle then
-            set("vehicle", vehicle)
-            set("seat", vehicle and getSeat(ped, vehicle) or false)
+            set('vehicle', vehicle)
+            set('seat', vehicle and getSeat(ped, vehicle) or false)
         elseif vehicle then
             local seat = getSeat(ped, vehicle)
+
             if seat ~= cache.seat then
-                set("seat", seat)
+                set('seat', seat)
             end
         end
 
         local weapon = getWeapon(ped)
+
         if weapon ~= cache.weapon then
-            set("weapon", weapon)
+            set('weapon', weapon)
         end
 
         Wait(100)

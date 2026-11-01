@@ -3,8 +3,11 @@
 
 local Inventory = ESXInventory
 
-local SLOT_KVP <const> = 'esx_inventory:slots'
+if not Inventory then
+    return
+end
 
+local SLOT_KVP <const> = 'esx_inventory:slots'
 local slotMap = {} ---@type table<string, number>
 local slotsChanged = false
 

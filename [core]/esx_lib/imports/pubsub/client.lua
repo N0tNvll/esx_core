@@ -9,7 +9,6 @@ local PUBSUB_EVENT <const> = '__xLib_pubsub' -- must match resource/pubsub/serve
 
 -- topic -> array of handlers
 local handlers = {}
-
 local pubsub = {}
 
 ---Register a handler for a topic. Multiple handlers per topic are allowed.
@@ -21,10 +20,12 @@ function pubsub.on(topic, handler)
     end
 
     local list = handlers[topic]
+
     if not list then
         list = {}
         handlers[topic] = list
     end
+
     list[#list + 1] = handler
 end
 
@@ -38,6 +39,7 @@ function pubsub.off(topic, handler)
     end
 
     local list = handlers[topic]
+
     if not list then
         return
     end
@@ -55,12 +57,14 @@ end
 
 RegisterNetEvent(PUBSUB_EVENT, function(topic, data)
     local list = handlers[topic]
+
     if not list then
         return
     end
 
     -- fast path: a topic almost always has a single handler, so skip the copy
     local n = #list
+
     if n == 1 then
         list[1](data, topic)
         return
@@ -69,6 +73,7 @@ RegisterNetEvent(PUBSUB_EVENT, function(topic, data)
     -- snapshot so a handler that calls off() mid-dispatch cannot shift the list
     -- and skip a sibling that has not run yet
     local snapshot = {}
+
     for i = 1, n do
         snapshot[i] = list[i]
     end

@@ -67,7 +67,7 @@ function ESX.RegisterInput(command_name, label, input_group, key, on_press, on_r
         defaultMapper = input_group,
         defaultKey = key,
         onPressed = on_press,
-        onReleased = on_release
+        onReleased = on_release,
     })
 end
 

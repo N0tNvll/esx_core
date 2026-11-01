@@ -5,19 +5,19 @@
 xLib.nui = {}
 xLib.nui.defer = {}
 
-local DEFER_TIMEOUT_MS <const> = GetConvarInt("xLib:nuiDeferTimeout", 10000)
+local DEFER_TIMEOUT_MS <const> = GetConvarInt('xLib:nuiDeferTimeout', 10000)
 
 ---@param message table|string
 ---@param data? any
 function xLib.nui.send(message, data)
-    if type(message) == "table" then
+    if type(message) == 'table' then
         SendNUIMessage(message)
         return
     end
 
     SendNUIMessage({
         action = message,
-        data = data
+        data = data,
     })
 end
 
@@ -60,7 +60,7 @@ end
 function xLib.nui.ok(data)
     return {
         ok = true,
-        data = data
+        data = data,
     }
 end
 
@@ -71,7 +71,7 @@ function xLib.nui.fail(errorMessage, code)
     return {
         ok = false,
         error = errorMessage,
-        code = code
+        code = code,
     }
 end
 
@@ -80,7 +80,7 @@ end
 function xLib.nui.register(name, handler)
     RegisterNUICallback(name, function(data, cb)
         local replied = false
-        local info = debug and debug.getinfo and debug.getinfo(handler, "u")
+        local info = debug and debug.getinfo and debug.getinfo(handler, 'u')
         local canDefer = info and info.nparams and info.nparams >= 2
 
         local function reply(response)
@@ -95,7 +95,7 @@ function xLib.nui.register(name, handler)
         local ok, response = pcall(handler, data or {}, reply)
 
         if not ok then
-            print(("[xLib:nui] Callback %s failed: %s"):format(name, response))
+            print(('[xLib:nui] Callback %s failed: %s'):format(name, response))
             reply(xLib.nui.fail(response))
             return
         end
@@ -104,8 +104,8 @@ function xLib.nui.register(name, handler)
             if not replied and DEFER_TIMEOUT_MS > 0 then
                 SetTimeout(DEFER_TIMEOUT_MS, function()
                     if not replied then
-                        print(("[xLib:nui] Callback %s timed out"):format(name))
-                        reply(xLib.nui.fail("timeout", "timeout"))
+                        print(('[xLib:nui] Callback %s timed out'):format(name))
+                        reply(xLib.nui.fail('timeout', 'timeout'))
                     end
                 end)
             end

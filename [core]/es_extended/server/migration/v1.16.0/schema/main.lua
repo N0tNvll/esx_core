@@ -30,10 +30,7 @@ local function prepareSSNBatch(users)
             placeholders[#placeholders + 1] = '?'
         end
 
-        local existing = MySQL.query.await(
-            'SELECT `ssn` FROM `users` WHERE `ssn` IN (' .. table.concat(placeholders, ', ') .. ')',
-            candidates
-        )
+        local existing = MySQL.query.await('SELECT `ssn` FROM `users` WHERE `ssn` IN (' .. table.concat(placeholders, ', ') .. ')', candidates)
 
         assert(type(existing) == 'table', 'Unable to check SSN batch uniqueness')
 
@@ -62,20 +59,14 @@ function Core.MigrateSSNSchema()
 
     local column = schema.column('users', 'ssn')
 
-    assert(
-        column.DATA_TYPE == 'varchar' and tonumber(column.CHARACTER_MAXIMUM_LENGTH) == 11,
-        'users.ssn must be VARCHAR(11); migration stopped without replacing existing SSNs'
-    )
+    assert(column.DATA_TYPE == 'varchar' and tonumber(column.CHARACTER_MAXIMUM_LENGTH) == 11, 'users.ssn must be VARCHAR(11); migration stopped without replacing existing SSNs')
 
     local duplicates = MySQL.scalar.await([[
         SELECT EXISTS(SELECT 1 FROM `users` WHERE `ssn` IS NOT NULL
             GROUP BY `ssn` HAVING COUNT(*) > 1)
     ]])
 
-    assert(
-        duplicates ~= nil and tonumber(duplicates) == 0,
-        'Duplicate SSNs found; repair duplicates before restarting es_extended'
-    )
+    assert(duplicates ~= nil and tonumber(duplicates) == 0, 'Duplicate SSNs found; repair duplicates before restarting es_extended')
 
     local indexed = MySQL.scalar.await([[
         SELECT COUNT(*) FROM (
@@ -117,10 +108,7 @@ function Core.MigrateSSNSchema()
         end
 
         local parameters = prepareSSNBatch(users)
-        local saved = MySQL.prepare.await(
-            'UPDATE `users` SET `ssn` = ? WHERE `identifier` = ? AND `ssn` IS NULL',
-            parameters
-        )
+        local saved = MySQL.prepare.await('UPDATE `users` SET `ssn` = ? WHERE `identifier` = ? AND `ssn` IS NULL', parameters)
 
         assert(saved ~= nil and saved ~= false, 'Unable to persist SSN batch')
 
@@ -142,11 +130,7 @@ end
 Core.Migrations['v1.16.0'].ssn = Core.MigrateSSNSchema
 
 Core.Migrations['v1.16.0'].jobTypes = function()
-    return xLib.schema.ensureColumn(
-        'jobs',
-        'type',
-        "VARCHAR(50) NOT NULL DEFAULT 'civ' AFTER `label`"
-    )
+    return xLib.schema.ensureColumn('jobs', 'type', "VARCHAR(50) NOT NULL DEFAULT 'civ' AFTER `label`")
 end
 
 Core.Migrations['v1.16.0'].addonCompatibility = function()
@@ -182,13 +166,7 @@ Core.Migrations['v1.16.0'].addonCompatibility = function()
             assert(indexed ~= nil, 'Unable to inspect character deletion indexes')
 
             if tonumber(indexed) == 0 then
-                MySQL.query.await(
-                    ('CREATE INDEX %s ON %s (%s)'):format(
-                        schema.identifier('esx_1160_' .. tableName .. '_' .. columnName),
-                        schema.identifier(tableName),
-                        schema.identifier(columnName)
-                    )
-                )
+                MySQL.query.await(('CREATE INDEX %s ON %s (%s)'):format(schema.identifier('esx_1160_' .. tableName .. '_' .. columnName), schema.identifier(tableName), schema.identifier(columnName)))
             end
         end
     end

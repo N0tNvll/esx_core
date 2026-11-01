@@ -14,11 +14,7 @@ return function(Util, IdentifierUtil, RuntimeConfig, Log, Database)
             if replacement[row.type] and Util.ValidateAccessIdentifier(row.identifier) then
                 replacement[row.type][Util.NormalizeIdentifier(row.identifier)] = true
             else
-                Log(
-                    'warning',
-                    'Ignoring invalid persisted access identifier: '
-                        .. Util.MaskIdentifier(row.identifier)
-                )
+                Log('warning', 'Ignoring invalid persisted access identifier: ' .. Util.MaskIdentifier(row.identifier))
             end
         end
 
@@ -94,10 +90,7 @@ return function(Util, IdentifierUtil, RuntimeConfig, Log, Database)
         end
 
         -- Unsafe legacy credentials may still be removed by administrators.
-        if
-            not Util.ValidateIdentifier(identifier)
-            or (adding and not Util.ValidateAccessIdentifier(identifier))
-        then
+        if not Util.ValidateIdentifier(identifier) or (adding and not Util.ValidateAccessIdentifier(identifier)) then
             return false, 'invalid or disallowed access identifier'
         end
 
@@ -106,7 +99,6 @@ return function(Util, IdentifierUtil, RuntimeConfig, Log, Database)
         end
 
         local normalized = Util.NormalizeIdentifier(identifier)
-
         return RuntimeConfig:WithWriteLock(function()
             local ok, err
 

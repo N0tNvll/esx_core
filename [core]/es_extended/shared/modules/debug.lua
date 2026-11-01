@@ -9,28 +9,32 @@ function ESX.DumpTable(table, nb)
         nb = 0
     end
 
-    if type(table) == "table" then
-        local s = ""
+    if type(table) == 'table' then
+        local s = ''
+
         for _ = 1, nb + 1, 1 do
-            s = s .. "    "
+            s = s .. '    '
         end
 
-        s = "{\n"
+        s = '{\n'
+
         for k, v in pairs(table) do
-            if type(k) ~= "number" then
+            if type(k) ~= 'number' then
                 k = '"' .. k .. '"'
             end
+
             for _ = 1, nb, 1 do
-                s = s .. "    "
+                s = s .. '    '
             end
-            s = s .. "[" .. k .. "] = " .. ESX.DumpTable(v, nb + 1) .. ",\n"
+
+            s = s .. '[' .. k .. '] = ' .. ESX.DumpTable(v, nb + 1) .. ',\n'
         end
 
         for _ = 1, nb, 1 do
-            s = s .. "    "
+            s = s .. '    '
         end
 
-        return s .. "}"
+        return s .. '}'
     else
         return tostring(table)
     end

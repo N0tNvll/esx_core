@@ -12,7 +12,7 @@ ESX.OneSync = {}
 ---@return number? netId
 function ESX.OneSync.SpawnVehicle(vehicleModel, coords, heading, vehicleProperties, cb, vehicleType)
     if cb and not ESX.IsFunctionReference(cb) then
-        if vehicleType == nil and type(cb) == "string" then
+        if vehicleType == nil and type(cb) == 'string' then
             vehicleType = cb
             cb = nil
         elseif cb == false then
@@ -54,30 +54,34 @@ function ESX.OneSync.SpawnVehicle(vehicleModel, coords, heading, vehicleProperti
         end
 
         if not vehicleType then
-            return reject(("Could not resolve the type of vehicle ^5%s^7! The model is unknown and no player is online to check it, you can also specify the vehicle type manually."):format(vehicleModel))
+            return reject(('Could not resolve the type of vehicle ^5%s^7! The model is unknown and no player is online to check it, you can also specify the vehicle type manually.'):format(vehicleModel))
         end
 
         local createdVehicle = CreateVehicleServerSetter(vehicleModel, vehicleType, coords.x, coords.y, coords.z, heading)
 
         if not createdVehicle or createdVehicle == 0 then
-            return reject(("Could not spawn vehicle - ^5%s^7!"):format(vehicleModel))
+            return reject(('Could not spawn vehicle - ^5%s^7!'):format(vehicleModel))
         end
 
         -- the server owns the entity right after creation regardless of players
         -- in scope, so a plain existence check is enough to know it is ready
         local tries = 0
+
         while not DoesEntityExist(createdVehicle) do
             Wait(50)
             tries = tries + 1
+
             if tries > 40 then
-                return reject(("Could not spawn vehicle - ^5%s^7!"):format(vehicleModel))
+                return reject(('Could not spawn vehicle - ^5%s^7!'):format(vehicleModel))
             end
         end
 
         -- luacheck: ignore
         SetEntityOrphanMode(createdVehicle, 2)
+
         local networkId = NetworkGetNetworkIdFromEntity(createdVehicle)
-        Entity(createdVehicle).state:set("VehicleProperties", vehicleProperties, true)
+
+        Entity(createdVehicle).state:set('VehicleProperties', vehicleProperties, true)
 
         resolve(networkId)
     end)
@@ -93,12 +97,12 @@ end
 ---@param cb? fun(netId: number|false)
 ---@return number? netId
 function ESX.OneSync.SpawnObject(model, coords, heading, cb)
-    if type(model) == "string" then
+    if type(model) == 'string' then
         model = joaat(model)
     end
 
     local promise = not cb and promise.new()
-    local objectCoords = type(coords) == "vector3" and coords or vector3(coords.x, coords.y, coords.z)
+    local objectCoords = type(coords) == 'vector3' and coords or vector3(coords.x, coords.y, coords.z)
 
     local function resolve(result)
         if promise then
@@ -126,11 +130,11 @@ function ESX.OneSync.SpawnObject(model, coords, heading, cb)
 
         while not DoesEntityExist(entity) do
             Wait(200)
-            
+
             tries = tries + 1
 
             if tries > 40 then
-                return reject(("Could not spawn object - ^5%s^7!"):format(entity))
+                return reject(('Could not spawn object - ^5%s^7!'):format(entity))
             end
         end
 
@@ -151,7 +155,7 @@ end
 ---@param cb? fun(netId: number|false)
 ---@return number? netId
 function ESX.OneSync.SpawnPed(model, coords, heading, cb)
-    if type(model) == "string" then
+    if type(model) == 'string' then
         model = joaat(model)
     end
 
@@ -187,11 +191,12 @@ function ESX.OneSync.SpawnPed(model, coords, heading, cb)
             tries = tries + 1
 
             if tries > 40 then
-                return reject(("Could not spawn ped - ^5%s^7!"):format(model))
+                return reject(('Could not spawn ped - ^5%s^7!'):format(model))
             end
         end
 
         local networkId = NetworkGetNetworkIdFromEntity(entity)
+
         resolve(networkId)
     end)
 
@@ -206,7 +211,7 @@ end
 ---@param cb? fun(netId: number|false)
 ---@return number? netId
 function ESX.OneSync.SpawnPedInVehicle(model, vehicle, seat, cb)
-    if type(model) == "string" then
+    if type(model) == 'string' then
         model = joaat(model)
     end
 
@@ -242,11 +247,12 @@ function ESX.OneSync.SpawnPedInVehicle(model, vehicle, seat, cb)
             tries = tries + 1
 
             if tries > 40 then
-                return reject(("Could not spawn ped - ^5%s^7!"):format(model))
+                return reject(('Could not spawn ped - ^5%s^7!'):format(model))
             end
         end
 
         local networkId = NetworkGetNetworkIdFromEntity(entity)
+
         resolve(networkId)
     end)
 

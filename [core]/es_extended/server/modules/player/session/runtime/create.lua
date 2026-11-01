@@ -12,29 +12,32 @@ function Core.PlayerSession.CreateESXPlayer(identifier, playerId, data, loading)
         accounts[account] = money
     end
 
-    local defaultGroup = "user"
+    local defaultGroup = 'user'
+
     if Core.IsPlayerAdmin(playerId) then
-        print(("[^2INFO^0] Player ^5%s^0 Has been granted admin permissions via ^5Ace Perms^7."):format(playerId))
-        defaultGroup = "admin"
+        print(('[^2INFO^0] Player ^5%s^0 Has been granted admin permissions via ^5Ace Perms^7.'):format(playerId))
+        defaultGroup = 'admin'
     end
 
-    local parameters = Config.Multichar and {
-        json.encode(accounts),
-        identifier,
-        Core.generateSSN(),
-        defaultGroup,
-        data.firstname,
-        data.lastname,
-        data.dateofbirth,
-        data.sex,
-        data.height,
-        xLib.nationality.normalize(data.nationality) or '',
-    } or {
-        json.encode(accounts),
-        identifier,
-        Core.generateSSN(),
-        defaultGroup,
-    }
+    local parameters = Config.Multichar
+            and {
+                json.encode(accounts),
+                identifier,
+                Core.generateSSN(),
+                defaultGroup,
+                data.firstname,
+                data.lastname,
+                data.dateofbirth,
+                data.sex,
+                data.height,
+                xLib.nationality.normalize(data.nationality) or '',
+            }
+        or {
+            json.encode(accounts),
+            identifier,
+            Core.generateSSN(),
+            defaultGroup,
+        }
 
     if Config.StartingInventoryItems then
         parameters[#parameters + 1] = json.encode(Config.StartingInventoryItems)

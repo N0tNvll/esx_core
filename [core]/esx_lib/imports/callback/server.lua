@@ -21,12 +21,7 @@ local resource_name = GetCurrentResourceName() --TODO: Add cache
 local function getConfiguredTimeout()
     local value = tonumber(GetConvar('xLib:callbackTimeout', GetConvar('esx:callbackTimeout', '')))
 
-    if
-        value
-        and value == value
-        and value > -math.huge
-        and value < math.huge
-    then
+    if value and value == value and value > -math.huge and value < math.huge then
         return math.max(math.floor(value), 0)
     end
 end
@@ -98,13 +93,7 @@ local function payloadSize(args)
 end
 
 local function runIncoming(cb, playerId, resource, key, args, owner)
-    if
-        type(resource) ~= 'string'
-        or #resource > 100
-        or not resource:match('^[%w_%.%-%[%]]+$')
-        or type(key) ~= 'string'
-        or #key > 300
-    then
+    if type(resource) ~= 'string' or #resource > 100 or not resource:match('^[%w_%.%-%[%]]+$') or type(key) ~= 'string' or #key > 300 then
         return
     end
 
@@ -155,18 +144,14 @@ local function runIncoming(cb, playerId, resource, key, args, owner)
     xLib.releaseCallbackBudget(token)
 
     if not state.cancelled then
-        TriggerClientEvent(
-            cbEvent:format(resource),
-            playerId,
-            key,
-            callbackResponse(table.unpack(results, 1, results.n))
-        )
+        TriggerClientEvent(cbEvent:format(resource), playerId, key, callbackResponse(table.unpack(results, 1, results.n)))
     end
 end
 
 CreateThread(function()
     while true do
         Wait(250)
+
         local now = GetGameTimer()
 
         for _, state in pairs(incoming) do
@@ -208,22 +193,20 @@ local function clearPendingForSource(playerId)
 
     for key, pending in pairs(pendingCallbacks) do
         if pending.source == playerId then
-            expirePendingCallback(
-                key,
-                ("callback event '%s' was cancelled because player %s disconnected"):format(
-                    key,
-                    playerId
-                )
-            )
+            expirePendingCallback(key, ("callback event '%s' was cancelled because player %s disconnected"):format(key, playerId))
         end
     end
 end
 
 local function publishValidCallback(name)
     local registration = registeredCallbackNames[name]
-    if not registration then return false end
+
+    if not registration then
+        return false
+    end
 
     local ok, accepted = pcall(xLib.setValidCallback, name, true, registration.owner)
+
     registration.active = ok and accepted == true
 
     if not ok then
@@ -242,15 +225,18 @@ local function claimCallback(name, cb, owner)
     assert(type(name) == 'string' and name ~= '' and #name <= 200, 'invalid callback name')
 
     local mt = type(cb) == 'table' and getmetatable(cb)
+
     assert(type(cb) == 'function' or (type(mt) == 'table' and type(mt.__call) == 'function'), 'callback must be a function')
     assert(type(owner) == 'string' and owner ~= '' and #owner <= 100, 'invalid callback owner')
 
     local previous = registeredCallbackNames[name]
+
     if previous and previous.owner ~= owner then
         error(("callback '%s' is already owned by resource '%s'"):format(name, previous.owner), 3)
     end
 
     local ok, accepted = pcall(xLib.setValidCallback, name, true, owner)
+
     if not ok or accepted ~= true then
         error(("unable to claim callback '%s': %s"):format(name, ok and 'name already owned' or tostring(accepted)), 3)
     end
@@ -261,7 +247,9 @@ local function claimCallback(name, cb, owner)
     end
 
     compatCallbacks[name] = nil
+
     local registration = { owner = owner, active = true }
+
     registeredCallbackNames[name] = registration
 
     return registration
@@ -293,13 +281,16 @@ AddEventHandler('onResourceStop', function(resource)
     end
 
     for name, registration in pairs(registeredCallbackNames) do
-        if resource == 'esx_lib' then registration.active = false end
+        if resource == 'esx_lib' then
+            registration.active = false
+        end
 
         if registration.owner == resource then
             registration.active = false
             RemoveEventHandler(registration.handler)
             compatCallbacks[name] = nil
             registeredCallbackNames[name] = nil
+
             if GetResourceState('esx_lib') == 'started' then
                 xLib.setValidCallback(name, false, registration.owner)
             end
@@ -399,11 +390,7 @@ end
 xLib.callback = setmetatable({}, {
     __call = function(_, event, playerId, cb, ...)
         if not cb then
-            warn(
-                ("callback event '%s' does not have a function to callback to and will instead await\nuse xLib.callback.await or a regular event to remove this warning"):format(
-                    event
-                )
-            )
+            warn(("callback event '%s' does not have a function to callback to and will instead await\nuse xLib.callback.await or a regular event to remove this warning"):format(event))
         else
             local cbType = type(cb)
 
@@ -429,17 +416,7 @@ end
 callbackResponse = function(success, result, ...)
     if not success then
         if result then
-            print(
-                ('^1SCRIPT ERROR: %s^0\n%s'):format(
-                    result,
-                    Citizen.InvokeNative(
-                        `FORMAT_STACK_TRACE` & 0xFFFFFFFF,
-                        nil,
-                        0,
-                        Citizen.ResultAsString()
-                    ) or ''
-                )
-            )
+            print(('^1SCRIPT ERROR: %s^0\n%s'):format(result, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()) or ''))
         end
 
         return false
@@ -458,12 +435,15 @@ local pcall = pcall
 ---@diagnostic disable-next-line: duplicate-set-field
 function xLib.callback.register(name, cb)
     local event = cbEvent:format(name)
-
     local registration = claimCallback(name, cb)
+
     RegisterNetEvent(event)
 
     registration.handler = AddEventHandler(event, function(resource, key, ...)
-        if not registration.active then return end
+        if not registration.active then
+            return
+        end
+
         runIncoming(function(playerId, state, ...)
             return cb(playerId, ...)
         end, source, resource, key, table.pack(...))
@@ -504,13 +484,17 @@ function xLib.callback.registerCompat(name, cb, owner)
     end
 
     local registration = claimCallback(name, cb, owner)
+
     RegisterNetEvent(event)
 
     registration.handler = AddEventHandler(event, function(resource, key, ...)
-        if not registration.active then return end
+        if not registration.active then
+            return
+        end
+
         runIncoming(compatCb, source, resource, key, table.pack(...), registration.owner)
     end)
-    
+
     compatCallbacks[name] = registration
 end
 

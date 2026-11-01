@@ -18,24 +18,17 @@ function xLib.point:constructor(properties)
     self.leave = properties.leave
     self.inside = properties.inside
 
-    self.handle = xLib.points.create(
-        properties.coords,
-        properties.distance,
-        properties.hidden,
-        function()
-            if self.enter then
-                self:enter()
-            end
-        end,
-        function()
-            if self.leave then
-                self:leave()
-            end
-        end,
-        properties.inside and function(dist)
-            self:inside(dist)
-        end or nil
-    )
+    self.handle = xLib.points.create(properties.coords, properties.distance, properties.hidden, function()
+        if self.enter then
+            self:enter()
+        end
+    end, function()
+        if self.leave then
+            self:leave()
+        end
+    end, properties.inside and function(dist)
+        self:inside(dist)
+    end or nil)
 end
 
 function xLib.point:delete()

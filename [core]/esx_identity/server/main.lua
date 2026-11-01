@@ -5,7 +5,7 @@ ESXCatalog.awaitReady()
 
 IdentityModules.Lifecycle.RegisterHandlers()
 
-xLib.callback.registerCompat("esx_identity:registerIdentity", IdentityModules.Callback.RegisterIdentity)
+xLib.callback.registerCompat('esx_identity:registerIdentity', IdentityModules.Callback.RegisterIdentity)
 
 IdentityModules.Commands.Register()
 IdentityModules.Debugging.Register()

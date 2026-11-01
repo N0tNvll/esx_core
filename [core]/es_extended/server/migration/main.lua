@@ -12,14 +12,11 @@ RegisterCommand('resetmigrations', function(src)
         DeleteResourceKvp(('esx_migration:%s:success_logged'):format(version))
     end
 
-    print(
-        '^2[SUCCESS]^7 Reset all migrations. This will re-run all migrations on the next server start.'
-    )
+    print('^2[SUCCESS]^7 Reset all migrations. This will re-run all migrations on the next server start.')
 end)
 
 local migrationsRan = 0
 local restartRequired = false
-
 local versions = {}
 
 for version in pairs(Core.Migrations or {}) do
@@ -80,13 +77,8 @@ for _, esxVersion in ipairs(versions) do
 
             if not success then
                 local err = result --[[@as string]]
-                error(
-                    ("^1[ERROR]^7 Failed migration ^4['%s.%s']^7: %s"):format(
-                        esxVersion,
-                        migrationName,
-                        err
-                    )
-                )
+
+                error(("^1[ERROR]^7 Failed migration ^4['%s.%s']^7: %s"):format(esxVersion, migrationName, err))
             end
 
             local migrationRequiresRestart = result --[[@as boolean]]
@@ -97,23 +89,17 @@ for _, esxVersion in ipairs(versions) do
         end
 
         SetResourceKvpInt(('esx_migration:%s'):format(esxVersion), 1)
+
         if logSuccess then
-            print(
-                ('^2[SUCCESS]^7 Successfully completed migrations for ESX version %s'):format(
-                    esxVersion
-                )
-            )
+            print(('^2[SUCCESS]^7 Successfully completed migrations for ESX version %s'):format(esxVersion))
             SetResourceKvpInt(logKey, 1)
         end
+
         migrationsRan = migrationsRan + 1
     end
 end
 
 while restartRequired do
-    print(
-        ('^4[INFO]^7 Ran migrations for %d ESX version(s). ^1Server restart required!^7'):format(
-            migrationsRan
-        )
-    )
+    print(('^4[INFO]^7 Ran migrations for %d ESX version(s). ^1Server restart required!^7'):format(migrationsRan))
     Wait(500)
 end

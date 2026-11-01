@@ -10,8 +10,8 @@ local CancelledTimeouts = {}
 ---@param cb function
 ---@return number
 xLib.timeout.setTimeout = function(msec, cb)
-    xLib.verify(cb, "function", true)
-    
+    xLib.verify(cb, 'function', true)
+
     local id <const> = TimeoutCount + 1
 
     SetTimeout(msec, function()
@@ -19,6 +19,7 @@ xLib.timeout.setTimeout = function(msec, cb)
             CancelledTimeouts[id] = nil
             return
         end
+
         cb()
     end)
 

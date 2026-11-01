@@ -22,7 +22,6 @@ IdentifierUtil.KNOWN_PREFIXES = {
 ---@return string? value
 function IdentifierUtil.Split(identifier)
     local prefix, value = identifier:match('^([a-z0-9]+):(.+)$')
-
     return prefix, value
 end
 

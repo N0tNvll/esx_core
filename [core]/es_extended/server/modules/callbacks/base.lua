@@ -56,6 +56,7 @@ xLib.callback.registerCompat('esx:getPlayerNames', function(source, cb, players)
 
     for playerId in pairs(players) do
         local xPlayer = ESX.GetPlayerFromId(playerId)
+
         players[playerId] = xPlayer and xPlayer.getName() or nil
     end
 
@@ -63,16 +64,11 @@ xLib.callback.registerCompat('esx:getPlayerNames', function(source, cb, players)
 end)
 
 local function isFiniteNumber(value)
-    return type(value) == 'number'
-        and value == value
-        and value ~= math.huge
-        and value ~= -math.huge
+    return type(value) == 'number' and value == value and value ~= math.huge and value ~= -math.huge
 end
 
 xLib.callback.registerCompat('esx:spawnVehicle', function(source, cb, vehData)
-    print(
-        '[^3WARNING^7] esx:spawnVehicle callback is deprecated and will be removed in a future update.'
-    )
+    print('[^3WARNING^7] esx:spawnVehicle callback is deprecated and will be removed in a future update.')
 
     if not Core.IsPlayerAdmin(source) then
         return cb(false)
@@ -88,26 +84,14 @@ xLib.callback.registerCompat('esx:spawnVehicle', function(source, cb, vehData)
 
     local model = vehData.model
 
-    if
-        (type(model) ~= 'string' or model == '')
-        and (not isFiniteNumber(model) or model ~= math.floor(model))
-    then
+    if (type(model) ~= 'string' or model == '') and (not isFiniteNumber(model) or model ~= math.floor(model)) then
         model = `ADDER`
     end
 
     local coords = vehData.coords
     local coordinateType = type(coords)
 
-    if
-        (
-            coordinateType ~= 'table'
-            and coordinateType ~= 'vector3'
-            and coordinateType ~= 'vector4'
-        )
-        or not isFiniteNumber(coords.x)
-        or not isFiniteNumber(coords.y)
-        or not isFiniteNumber(coords.z)
-    then
+    if (coordinateType ~= 'table' and coordinateType ~= 'vector3' and coordinateType ~= 'vector4') or not isFiniteNumber(coords.x) or not isFiniteNumber(coords.y) or not isFiniteNumber(coords.z) then
         coords = GetEntityCoords(ped)
         coordinateType = type(coords)
     end
@@ -128,31 +112,18 @@ xLib.callback.registerCompat('esx:spawnVehicle', function(source, cb, vehData)
 
     local props = type(vehData.props) == 'table' and vehData.props or {}
 
-    ESX.OneSync.SpawnVehicle(
-        model,
-        coords,
-        heading,
-        props,
-        function(id)
-            if vehData.warp and id then
-                local vehicle = NetworkGetEntityFromNetworkId(id)
-                local timeout = 0
+    ESX.OneSync.SpawnVehicle(model, coords, heading, props, function(id)
+        if vehData.warp and id then
+            local vehicle = NetworkGetEntityFromNetworkId(id)
+            local timeout = 0
 
-                while
-                    vehicle ~= 0
-                    and DoesEntityExist(vehicle)
-                    and GetPlayerPed(source) == ped
-                    and DoesEntityExist(ped)
-                    and GetVehiclePedIsIn(ped, false) ~= vehicle
-                    and timeout <= 15
-                do
-                    TaskWarpPedIntoVehicle(ped, vehicle, -1)
-                    timeout += 1
-                    Wait(0)
-                end
+            while vehicle ~= 0 and DoesEntityExist(vehicle) and GetPlayerPed(source) == ped and DoesEntityExist(ped) and GetVehiclePedIsIn(ped, false) ~= vehicle and timeout <= 15 do
+                TaskWarpPedIntoVehicle(ped, vehicle, -1)
+                timeout += 1
+                Wait(0)
             end
-
-            cb(id)
         end
-    )
+
+        cb(id)
+    end)
 end)

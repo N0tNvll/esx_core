@@ -12,11 +12,9 @@ version '1.16.3'
 shared_scripts {
     '@esx_lib/imports.lua',
     'locale.lua',
-
     'shared/config/main.lua',
     'shared/config/weapons.lua',
     'shared/config/adjustments.lua',
-
     'shared/main.lua',
     'shared/functions.lua',
     'shared/modules/*.lua',
@@ -27,7 +25,6 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     '@esx_lib/imports/catalog/bootstrap.lua',
     'shared/config/logs.lua',
-
     'server/core.lua',
     'server/functions.lua',
     'server/modules/core/*.lua',
@@ -49,7 +46,6 @@ server_scripts {
     'server/classes/overrides/*.lua',
     'server/modules/onesync.lua',
     'server/modules/paycheck.lua',
-
     'server/main.lua',
     'server/modules/player/session/context.lua',
     'server/modules/player/session/runtime/*.lua',
@@ -59,13 +55,11 @@ server_scripts {
     'server/modules/system/*.lua',
     'server/modules/commands.lua',
     'server/modules/commands/registrations/*.lua',
-
     'server/bridge/**/*.lua',
     'server/modules/npwd.lua',
     'server/modules/createJob.lua',
     'server/migration/**/main.lua',
     'server/migration/main.lua',
-
     'server/compat.lua',
 }
 
@@ -101,13 +95,10 @@ files {
     'locales/*.lua',
     'locale.js',
     'html/ui.html',
-
     'html/css/app.css',
-
     'html/js/mustache.min.js',
     'html/js/wrapper.js',
     'html/js/app.js',
-
     'html/fonts/pdown.ttf',
     'html/fonts/bankgothic.ttf',
     'client/imports/*.lua',

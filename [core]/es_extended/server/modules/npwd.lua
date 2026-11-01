@@ -1,35 +1,36 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-local npwd = GetResourceState("npwd"):find("start") and exports.npwd or nil
+local npwd = GetResourceState('npwd'):find('start') and exports.npwd or nil
 
-AddEventHandler("onServerResourceStart", function(resource)
-    if resource ~= "npwd" then
+AddEventHandler('onServerResourceStart', function(resource)
+    if resource ~= 'npwd' then
         return
     end
 
-    npwd = GetResourceState("npwd"):find("start") and exports.npwd or nil
+    npwd = GetResourceState('npwd'):find('start') and exports.npwd or nil
 
     if not npwd then
         return
     end
+
     for _, xPlayer in pairs(ESX.Players) do
         npwd:newPlayer({
             source = xPlayer.source,
             identifier = xPlayer.identifier,
-            firstname = xPlayer.get("firstName"),
-            lastname = xPlayer.get("lastName"),
+            firstname = xPlayer.get('firstName'),
+            lastname = xPlayer.get('lastName'),
         })
     end
 end)
 
-AddEventHandler("onServerResourceStop", function(resource)
-    if resource == "npwd" then
+AddEventHandler('onServerResourceStop', function(resource)
+    if resource == 'npwd' then
         npwd = nil
     end
 end)
 
-AddEventHandler("esx:playerLoaded", function(playerId, xPlayer)
+AddEventHandler('esx:playerLoaded', function(playerId, xPlayer)
     if not npwd then
         return
     end
@@ -41,12 +42,12 @@ AddEventHandler("esx:playerLoaded", function(playerId, xPlayer)
     npwd:newPlayer({
         source = playerId,
         identifier = xPlayer.identifier,
-        firstname = xPlayer.get("firstName"),
-        lastname = xPlayer.get("lastName"),
+        firstname = xPlayer.get('firstName'),
+        lastname = xPlayer.get('lastName'),
     })
 end)
 
-AddEventHandler("esx:playerLogout", function(playerId)
+AddEventHandler('esx:playerLogout', function(playerId)
     if not npwd then
         return
     end

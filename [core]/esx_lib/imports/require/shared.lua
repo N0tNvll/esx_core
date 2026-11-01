@@ -12,7 +12,6 @@
 
 local LOADED <const> = {}
 local TEMP_DATA <const> = {}
-
 local _require = require --original lua function
 
 package = {
@@ -22,7 +21,7 @@ package = {
         __index = LOADED,
         __newindex = Noop,
         __metatable = false,
-    })
+    }),
 }
 
 ---Gets the resource name and the module's relative path
@@ -35,7 +34,7 @@ local function getModuleInfo(name)
         return resource, name:sub(#resource + 3) -- returns the path without script name
     end
 
-    local idx = 4-- call stack depth (kept slightly lower than expected depth "just in case")
+    local idx = 4 -- call stack depth (kept slightly lower than expected depth "just in case")
     --- When indexing source of 4 it returns @@esx_lib/imports/require
     --- When indexing source of 5 it returns for example @@esx_test/client.lua
     --- Used for identifing resource name.
@@ -64,12 +63,10 @@ end
 ---@diagnostic disable-next-line: duplicate-set-field
 function package.searchpath(name, path)
     local resource, module_name = getModuleInfo(name:gsub('%.', '/'))
-
     local tried <const> = {}
 
     for template in path:gmatch('[^;]+') do
         local file_name = template:gsub('^%./', ''):gsub('?', module_name:gsub('%.', '/') or module_name)
-
         local file = LoadResourceFile(resource, file_name)
 
         if file then
@@ -79,7 +76,7 @@ function package.searchpath(name, path)
             return file_name
         end
 
-        tried[#tried+1] = ('no file "@%s/%s"'):format(resource, file_name)
+        tried[#tried + 1] = ('no file "@%s/%s"'):format(resource, file_name)
     end
 
     return nil, table.concat(tried, '\n\t')
@@ -91,7 +88,7 @@ end
 ---@return function?, string?
 local function loadModule(name, env)
     local file_name, err = package.searchpath(name, package.path)
-    
+
     if file_name then
         local file = TEMP_DATA[1]
         local resource = TEMP_DATA[2]
@@ -112,7 +109,7 @@ end
 
 ---@type PackageSearcher[]
 package.searchers = {
-    function (name)
+    function(name)
         local ok, result = pcall(_require, name)
 
         if ok then
@@ -121,7 +118,7 @@ package.searchers = {
 
         return ok, result
     end,
-    function (name)
+    function(name)
         if package.preload[name] ~= nil then
             return package.preload[name]
         end
@@ -154,8 +151,7 @@ function xLib.loadJson(file_path)
     xLib.verify(file_path, 'string', true)
 
     local res_source, mod_path = getModuleInfo(file_path:gsub('%.', '/'))
-
-    local res_file  = LoadResourceFile(res_source, ('%s.json'):format(mod_path))
+    local res_file = LoadResourceFile(res_source, ('%s.json'):format(mod_path))
 
     if res_file then
         return json.decode(res_file)
@@ -177,7 +173,9 @@ function xLib.require(name)
         error(('^1circular-dependency occurred when loading module "%s"^0'):format(name))
     end
 
-    if module ~= nil then return module end
+    if module ~= nil then
+        return module
+    end
 
     LOADED[name] = 'loading'
 
@@ -187,12 +185,14 @@ function xLib.require(name)
         local result, err_msg = package.searchers[i](name)
 
         if result then
-            if type(result) == 'function' then result = result() end
+            if type(result) == 'function' then
+                result = result()
+            end
+
             LOADED[name] = result or result == nil
 
             return LOADED[name]
         end
-
 
         err[#err + 1] = err_msg
     end

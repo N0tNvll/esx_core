@@ -28,7 +28,6 @@ return function(deps)
     local Logger = deps.Logger
     local Service = deps.Service
     local IsAdmin = deps.IsAdmin
-
     local Command = {}
 
     ---Sends command output to the caller (server console or in-game chat).
@@ -53,38 +52,9 @@ return function(deps)
         local discordStats = Discord:GetStats()
         local configured, problem = Discord:IsConfigured()
 
-        reply(
-            source,
-            locale(
-                'command_status',
-                cfg.Whitelist.Enabled and 'ENABLED' or 'DISABLED',
-                cfg.Whitelist.Mode,
-                cfg.Whitelist.CombinationMode,
-                cfg.AdminOnly.Enabled and 'ON' or 'off'
-            )
-        )
-        reply(
-            source,
-            locale(
-                'command_status_discord',
-                configured and 'ready' or ('NOT READY (' .. tostring(problem) .. ')'),
-                discordStats.requests,
-                discordStats.cacheHits,
-                discordStats.shared,
-                discordStats.rateLimits,
-                discordStats.errors
-            )
-        )
-        reply(
-            source,
-            locale(
-                'command_status_decisions',
-                serviceStats.total,
-                serviceStats.allowed,
-                serviceStats.denied,
-                AdminCache:GetCount()
-            )
-        )
+        reply(source, locale('command_status', cfg.Whitelist.Enabled and 'ENABLED' or 'DISABLED', cfg.Whitelist.Mode, cfg.Whitelist.CombinationMode, cfg.AdminOnly.Enabled and 'ON' or 'off'))
+        reply(source, locale('command_status_discord', configured and 'ready' or ('NOT READY (' .. tostring(problem) .. ')'), discordStats.requests, discordStats.cacheHits, discordStats.shared, discordStats.rateLimits, discordStats.errors))
+        reply(source, locale('command_status_decisions', serviceStats.total, serviceStats.allowed, serviceStats.denied, AdminCache:GetCount()))
     end
 
     ---@param source number
@@ -122,16 +92,8 @@ return function(deps)
         end
 
         local discordStats = Discord:GetStats()
-        reply(
-            source,
-            locale(
-                'command_cache_stats',
-                discordStats.cachedEntries,
-                AdminCache:GetCount(),
-                discordStats.queueLength,
-                discordStats.activeRequests
-            )
-        )
+
+        reply(source, locale('command_cache_stats', discordStats.cachedEntries, AdminCache:GetCount(), discordStats.queueLength, discordStats.activeRequests))
     end
 
     ---@param source number
@@ -141,10 +103,8 @@ return function(deps)
 
         if not target then
             local cfg = RuntimeConfig:Get()
-            reply(
-                source,
-                locale('command_usage_test', cfg.Panel.Command, cfg.Panel.Subcommands.Test)
-            )
+
+            reply(source, locale('command_usage_test', cfg.Panel.Command, cfg.Panel.Subcommands.Test))
 
             return
         end
@@ -165,18 +125,7 @@ return function(deps)
                 return
             end
 
-            reply(
-                source,
-                locale(
-                    'command_test_result',
-                    tostring(GetPlayerName(target)),
-                    target,
-                    result.allowed and 'ALLOWED' or 'DENIED',
-                    tostring(result.method),
-                    tostring(result.reason),
-                    Util.MaskIdentifier(result.identifier or '')
-                )
-            )
+            reply(source, locale('command_test_result', tostring(GetPlayerName(target)), target, result.allowed and 'ALLOWED' or 'DENIED', tostring(result.method), tostring(result.reason), Util.MaskIdentifier(result.identifier or '')))
         end)
     end
 
@@ -217,15 +166,10 @@ return function(deps)
             local identifier = args[2]
             local idType = args[3] or 'whitelist'
 
-            if
-                not identifier
-                or (idType ~= 'whitelist' and idType ~= 'admin_only' and idType ~= 'bypass')
-            then
+            if not identifier or (idType ~= 'whitelist' and idType ~= 'admin_only' and idType ~= 'bypass') then
                 local cfg = RuntimeConfig:Get()
-                reply(
-                    source,
-                    locale('command_usage_add', cfg.Panel.Command, cfg.Panel.Subcommands.Add)
-                )
+
+                reply(source, locale('command_usage_add', cfg.Panel.Command, cfg.Panel.Subcommands.Add))
 
                 return
             end
@@ -252,10 +196,8 @@ return function(deps)
 
             if not identifier then
                 local cfg = RuntimeConfig:Get()
-                reply(
-                    source,
-                    locale('command_usage_remove', cfg.Panel.Command, cfg.Panel.Subcommands.Remove)
-                )
+
+                reply(source, locale('command_usage_remove', cfg.Panel.Command, cfg.Panel.Subcommands.Remove))
 
                 return
             end
@@ -279,21 +221,7 @@ return function(deps)
                 },
             })
         else
-            reply(
-                source,
-                locale(
-                    'command_usage',
-                    RuntimeConfig:Get().Panel.Command,
-                    subcommands.Panel,
-                    subcommands.Status,
-                    subcommands.Reload,
-                    subcommands.Cache,
-                    subcommands.CacheClear,
-                    subcommands.Test,
-                    subcommands.Add,
-                    subcommands.Remove
-                )
-            )
+            reply(source, locale('command_usage', RuntimeConfig:Get().Panel.Command, subcommands.Panel, subcommands.Status, subcommands.Reload, subcommands.Cache, subcommands.CacheClear, subcommands.Test, subcommands.Add, subcommands.Remove))
         end
     end
 

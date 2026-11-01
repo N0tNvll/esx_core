@@ -3,6 +3,10 @@
 
 local Inventory = ESXInventory
 
+if not Inventory then
+    return
+end
+
 ---@param items table[]
 ---@return table[]
 local function applyStorageSlots(items)
@@ -22,18 +26,18 @@ local function applyStorageOps(storage, ops)
     for i = 1, #ops do
         local op = ops[i]
 
-        if type(op) ~= "table" or type(op.name) ~= "string" then
+        if type(op) ~= 'table' or type(op.name) ~= 'string' then
             goto continue
         end
 
-        if op.op == "set" then
+        if op.op == 'set' then
             local found
 
             for j = 1, #items do
                 if items[j].name == op.name then
                     items[j].count = op.count
 
-                    if type(op.label) == "string" then
+                    if type(op.label) == 'string' then
                         items[j].label = op.label
                     end
 
@@ -44,17 +48,17 @@ local function applyStorageOps(storage, ops)
 
             if not found then
                 items[#items + 1] = {
-                    type = "item_standard",
+                    type = 'item_standard',
                     name = op.name,
-                    label = type(op.label) == "string" and op.label or op.name,
+                    label = type(op.label) == 'string' and op.label or op.name,
                     count = op.count,
-                    weight = type(op.weight) == "number" and op.weight or 0,
+                    weight = type(op.weight) == 'number' and op.weight or 0,
                     usable = false,
                     canRemove = true,
-                    image = type(op.image) == "string" and op.image or Config.ItemImageUrl:format(op.name),
+                    image = type(op.image) == 'string' and op.image or Config.ItemImageUrl:format(op.name),
                 }
             end
-        elseif op.op == "remove" then
+        elseif op.op == 'remove' then
             for j = 1, #items do
                 if items[j].name == op.name then
                     table.remove(items, j)
@@ -69,8 +73,8 @@ local function applyStorageOps(storage, ops)
     return applyStorageSlots(items)
 end
 
-RegisterNetEvent("esx_inventory:openStorage", function(storage)
-    if type(storage) ~= "table" or type(storage.id) ~= "string" then
+RegisterNetEvent('esx_inventory:openStorage', function(storage)
+    if type(storage) ~= 'table' or type(storage.id) ~= 'string' then
         return
     end
 
@@ -84,17 +88,17 @@ RegisterNetEvent("esx_inventory:openStorage", function(storage)
 
         if not Inventory.isOpen then
             Inventory.currentStorage = nil
-            TriggerServerEvent("esx_inventory:storageClosed")
+            TriggerServerEvent('esx_inventory:storageClosed')
         end
     end
 end)
 
-RegisterNetEvent("esx_inventory:refreshStorage", function(storage)
-    if not Inventory.isOpen or not Inventory.currentStorage or type(storage) ~= "table" or storage.id ~= Inventory.currentStorage.id then
+RegisterNetEvent('esx_inventory:refreshStorage', function(storage)
+    if not Inventory.isOpen or not Inventory.currentStorage or type(storage) ~= 'table' or storage.id ~= Inventory.currentStorage.id then
         return
     end
 
-    if type(storage.ops) == "table" then
+    if type(storage.ops) == 'table' then
         Inventory.currentStorage.items = applyStorageOps(Inventory.currentStorage, storage.ops)
     else
         applyStorageSlots(storage.items or {})
@@ -104,7 +108,7 @@ RegisterNetEvent("esx_inventory:refreshStorage", function(storage)
     Inventory.pushState()
 end)
 
-RegisterNetEvent("esx_inventory:closeStorage", function()
+RegisterNetEvent('esx_inventory:closeStorage', function()
     if not Inventory.currentStorage then
         return
     end

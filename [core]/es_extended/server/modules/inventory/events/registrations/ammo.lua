@@ -6,17 +6,16 @@ if Config.CustomInventory then
 end
 
 local MAX_AMMO <const> = 100000
-
 local ammoLimiter = xLib.rateLimiter({
     capacity = 10,
     refill = 10,
     interval = 1000,
 })
 
-RegisterNetEvent("esx:updateWeaponAmmo", function(weaponName, ammoCount)
+RegisterNetEvent('esx:updateWeaponAmmo', function(weaponName, ammoCount)
     local playerId = source
 
-    if type(weaponName) ~= "string" or not ammoLimiter:consume(playerId) then
+    if type(weaponName) ~= 'string' or not ammoLimiter:consume(playerId) then
         return
     end
 

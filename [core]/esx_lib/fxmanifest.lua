@@ -36,6 +36,3 @@ client_scripts {
 server_scripts {
     'resource/**/server.lua',
 }
-
-
-

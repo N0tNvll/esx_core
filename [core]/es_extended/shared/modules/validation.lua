@@ -6,12 +6,17 @@
 ---@return boolean, string?
 function ESX.ValidateType(value, ...)
     local types = { ... }
-    if #types == 0 then return true end
+
+    if #types == 0 then
+        return true
+    end
 
     local mapType = {}
+
     for i = 1, #types, 1 do
         local validateType = types[i]
-        assert(type(validateType) == "string", "bad argument types, only expected string")
+
+        assert(type(validateType) == 'string', 'bad argument types, only expected string')
         mapType[validateType] = true
     end
 
@@ -19,9 +24,8 @@ function ESX.ValidateType(value, ...)
     local matches = mapType[valueType] ~= nil
 
     if not matches then
-        local requireTypes = table.concat(types, " or ")
-        local errorMessage = ("bad value (%s expected, got %s)"):format(requireTypes, valueType)
-
+        local requireTypes = table.concat(types, ' or ')
+        local errorMessage = ('bad value (%s expected, got %s)'):format(requireTypes, valueType)
         return false, errorMessage
     end
 
@@ -41,15 +45,14 @@ end
 ---@param val unknown
 function ESX.IsFunctionReference(val)
     local typeVal = type(val)
-
-    return typeVal == "function" or (typeVal == "table" and type(getmetatable(val)?.__call) == "function")
+    return typeVal == 'function' or (typeVal == 'table' and type(getmetatable(val)?.__call) == 'function')
 end
 
 ---@param str string
 ---@param allowDigits boolean? Allow numbers if necessary
 ---@return boolean
 function ESX.IsValidLocaleString(str, allowDigits)
-    if not ESX.ValidateType(str, "string") then
+    if not ESX.ValidateType(str, 'string') then
         return false
     end
 
@@ -58,7 +61,6 @@ function ESX.IsValidLocaleString(str, allowDigits)
     end
 
     local locale = string.lower(Config.Locale)
-
     local defaultRanges = {
         { 0x0041, 0x005A },
         { 0x0061, 0x007A },
@@ -84,7 +86,7 @@ function ESX.IsValidLocaleString(str, allowDigits)
             { 0x0750, 0x077F },
             { 0x08A0, 0x08BD },
         },
-        ["zh-cn"] = { { 0x4E00, 0x9FFF } },
+        ['zh-cn'] = { { 0x4E00, 0x9FFF } },
     }
 
     local validRanges = { table.unpack(defaultRanges) }
@@ -110,6 +112,7 @@ function ESX.IsValidLocaleString(str, allowDigits)
 
         for i = 1, #validRanges do
             local range = validRanges[i]
+
             if code >= range[1] and code <= range[2] then
                 isValid = true
                 break

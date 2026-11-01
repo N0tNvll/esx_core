@@ -24,7 +24,6 @@ end
 local function exposeVersion(name)
     local version = GetResourceMetadata(name, 'version', 0)
     local legacyVersion = GetResourceMetadata(name, 'legacyversion', 0)
-
     local hasVersion = version and version ~= ''
     local hasLegacyVersion = legacyVersion and legacyVersion ~= ''
 
@@ -37,7 +36,7 @@ local function exposeVersion(name)
     if hasVersion and hasLegacyVersion then
         value = json.encode({
             legacyVersion = legacyVersion,
-            version = version
+            version = version,
         })
     else
         value = hasVersion and version or legacyVersion
@@ -56,6 +55,7 @@ CreateThread(function()
             exposeVersion(name)
         end
     end
+
     exposeVersion(SELF)
 end)
 

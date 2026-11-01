@@ -5,7 +5,7 @@ ESX.Players = {}
 ESX.Jobs = {}
 ESX.Items = {}
 
-RegisterNetEvent("esx:onPlayerSpawn", function()
+RegisterNetEvent('esx:onPlayerSpawn', function()
     local xPlayer = ESX.Players[source]
 
     if xPlayer then
@@ -14,13 +14,14 @@ RegisterNetEvent("esx:onPlayerSpawn", function()
 end)
 
 if Config.CustomInventory then
-    SetConvarReplicated("inventory:framework", "esx")
-    SetConvarReplicated("inventory:weight", tostring(Config.MaxWeight * 1000))
+    SetConvarReplicated('inventory:framework', 'esx')
+    SetConvarReplicated('inventory:weight', tostring(Config.MaxWeight * 1000))
 end
 
 local function StartDBSync()
     CreateThread(function()
         local interval <const> = 10 * 60 * 1000
+
         while true do
             Wait(interval)
             Core.SavePlayers()
@@ -39,9 +40,10 @@ MySQL.ready(function()
 
     ESX.RefreshJobs()
 
-    print(("[^2INFO^7] ESX ^5Legacy %s^0 initialized!"):format(GetResourceMetadata(GetCurrentResourceName(), "version", 0)))
+    print(('[^2INFO^7] ESX ^5Legacy %s^0 initialized!'):format(GetResourceMetadata(GetCurrentResourceName(), 'version', 0)))
 
     StartDBSync()
+
     if Config.EnablePaycheck then
         StartPayCheck()
     end

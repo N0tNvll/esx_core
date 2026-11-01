@@ -37,24 +37,17 @@ local function refreshCatalogs(result)
 end
 
 local function initialize()
-    local locale = Config and (Config.SqlCatalogLocale or Config.Locale)
-        or GetConvar('esx:locale', GetConvar('txAdmin-locale', 'en'))
+    local locale = Config and (Config.SqlCatalogLocale or Config.Locale) or GetConvar('esx:locale', GetConvar('txAdmin-locale', 'en'))
 
     if locale == 'custom' or locale == 'invalid' then
         locale = 'en'
     end
 
     if resource == 'es_extended' then
-        local source = assert(
-            LoadResourceFile('esx_lib', 'imports/catalog/server.lua'),
-            'Missing esx_lib catalog service'
-        )
+        local source = assert(LoadResourceFile('esx_lib', 'imports/catalog/server.lua'), 'Missing esx_lib catalog service')
         local chunk = assert(load(source, '@@esx_lib/imports/catalog/server.lua', 't', _ENV))
         local catalog = chunk()
-        local dataSource = assert(
-            LoadResourceFile('esx_lib', 'imports/catalog/data.json'),
-            'Missing SQL catalog data'
-        )
+        local dataSource = assert(LoadResourceFile('esx_lib', 'imports/catalog/data.json'), 'Missing SQL catalog data')
         local data = json.decode(dataSource)
 
         assert(type(data) == 'table', 'Invalid SQL catalog data')
@@ -106,12 +99,7 @@ CreateThread(function()
     readiness:resolve(ok)
 
     if not ok then
-        print(
-            ('[%s] SQL catalog FAILED; resource initialization blocked: %s'):format(
-                resource,
-                tostring(result)
-            )
-        )
+        print(('[%s] SQL catalog FAILED; resource initialization blocked: %s'):format(resource, tostring(result)))
 
         return
     end
@@ -119,13 +107,7 @@ CreateThread(function()
     local logKey = ('esx_sql_catalog:1.16.0:ready:%s'):format(result.locale)
 
     if GetResourceKvpInt(logKey) ~= 1 then
-        print(
-            ('[%s] SQL catalog 1.16.0 ready (%s): %d missing record(s) prepared'):format(
-                resource,
-                result.locale,
-                result.imported
-            )
-        )
+        print(('[%s] SQL catalog 1.16.0 ready (%s): %d missing record(s) prepared'):format(resource, result.locale, result.imported))
         SetResourceKvpInt(logKey, 1)
     end
 end)

@@ -2,7 +2,6 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 local Util = {}
-
 local stringSub = string.sub
 local stringLen = string.len
 local stringMatch = string.match
@@ -64,7 +63,6 @@ end
 function Util.ValidateAccessIdentifier(identifier)
     local valid, prefix = Util.ValidateIdentifier(identifier)
     local allowed = Config.IdentifierTypes or { license2 = true, license = true, fivem = true }
-
     return valid and prefix ~= 'ip' and allowed[prefix] == true
 end
 
@@ -308,6 +306,7 @@ function Util.NewLatencyMetrics()
         120000,
         180000,
     }
+
     local buckets = {}
     local count, maximum = 0, 0
     local metrics = {}
@@ -316,6 +315,7 @@ function Util.NewLatencyMetrics()
         value = math.max(0, value)
         count = count + 1
         maximum = math.max(maximum, value)
+
         local bucket = #bounds + 1
 
         for i = 1, #bounds do

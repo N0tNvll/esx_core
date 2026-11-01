@@ -6,7 +6,7 @@
 ---@param playerIds table|number If a number, represents a single player ID. If a table, represents an array of player IDs.
 ---@param ... any Additional arguments to pass to the event handler.
 function ESX.TriggerClientEvent(eventName, playerIds, ...)
-    if type(playerIds) == "number" then
+    if type(playerIds) == 'number' then
         TriggerClientEvent(eventName, playerIds, ...)
         return
     end

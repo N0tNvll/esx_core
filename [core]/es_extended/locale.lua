@@ -11,13 +11,13 @@ local function localeFallbackEnabled()
         return Config.LocaleFallback
     end
 
-    return GetConvar("esx:localeFallback", "true") ~= "false"
+    return GetConvar('esx:localeFallback', 'true') ~= 'false'
 end
 
 --- Read and execute a locale file, returning its table or false if unreadable.
 local function readLocale(locale)
     local success, result = pcall(function()
-        return assert(load(LoadResourceFile(GetCurrentResourceName(), ("locales/%s.lua"):format(locale))))()
+        return assert(load(LoadResourceFile(GetCurrentResourceName(), ('locales/%s.lua'):format(locale))))()
     end)
 
     return success and result or false
@@ -27,12 +27,14 @@ end
 --- about the gaps, then let the English table go. The locale ends up
 --- self-contained, so no per-call fallback and only one table stays in memory.
 local function backfillFromEnglish(locale, translations)
-    local english = readLocale("en")
+    local english = readLocale('en')
+
     if not english then
         return
     end
 
     local missing = {}
+
     for key, value in pairs(english) do
         if translations[key] == nil then
             translations[key] = value
@@ -41,8 +43,7 @@ local function backfillFromEnglish(locale, translations)
     end
 
     if #missing > 0 then
-        print(("[es_extended] locale [%s] is missing %d translation(s), falling back to English: %s")
-            :format(locale, #missing, table.concat(missing, ", ")))
+        print(('[es_extended] locale [%s] is missing %d translation(s), falling back to English: %s'):format(locale, #missing, table.concat(missing, ', ')))
     end
 end
 
@@ -51,7 +52,7 @@ local function loadLocale(locale)
     if Locales[locale] == nil then
         local translations = readLocale(locale)
 
-        if translations and locale ~= "en" and localeFallbackEnabled() then
+        if translations and locale ~= 'en' and localeFallbackEnabled() then
             backfillFromEnglish(locale, translations)
         end
 
@@ -63,17 +64,18 @@ end
 
 function Translate(str, ...) -- Translate string
     if not str then
-        error(("Resource ^5%s^1 You did not specify a parameter for the Translate function or the value is nil!"):format(GetInvokingResource() or GetCurrentResourceName()))
+        error(('Resource ^5%s^1 You did not specify a parameter for the Translate function or the value is nil!'):format(GetInvokingResource() or GetCurrentResourceName()))
     end
 
     local translations = loadLocale(Config.Locale)
+
     if not translations then
-        if Config.Locale == "en" then
-            return "Locale [en] does not exist"
+        if Config.Locale == 'en' then
+            return 'Locale [en] does not exist'
         end
 
         -- Fall back to English translation if the current locale is not found
-        Config.Locale = "en"
+        Config.Locale = 'en'
         return Translate(str, ...)
     end
 
@@ -81,18 +83,17 @@ function Translate(str, ...) -- Translate string
         local success, result = pcall(string.format, translations[str], ...)
 
         if not success then
-            error(("Translation [%s][%s] in resource [%s] failed with %d argument(s): %s")
-                :format(Config.Locale, str, GetCurrentResourceName(), select("#", ...), result), 2)
+            error(('Translation [%s][%s] in resource [%s] failed with %d argument(s): %s'):format(Config.Locale, str, GetCurrentResourceName(), select('#', ...), result), 2)
         end
-        
+
         return result
     end
 
-    return ("Translation [%s][%s] does not exist"):format(Config.Locale, str)
+    return ('Translation [%s][%s] does not exist'):format(Config.Locale, str)
 end
 
 function TranslateCap(str, ...) -- Translate string first char uppercase
-    return (_(str, ...):gsub("^%l", string.upper))
+    return (_(str, ...):gsub('^%l', string.upper))
 end
 
 _ = Translate

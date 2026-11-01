@@ -6,7 +6,6 @@
 --]]
 
 local loadScreenActive = true
-
 local SHUTDOWN_DELAY <const> = 2500
 
 RegisterNUICallback('loadingComplete', function(_, cb)

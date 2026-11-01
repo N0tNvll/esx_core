@@ -28,14 +28,7 @@ function Schema.ensureColumn(tableName, columnName, definition)
         return false
     end
 
-    local ok, err = pcall(
-        MySQL.query.await,
-        ('ALTER TABLE %s ADD COLUMN %s %s'):format(
-            Schema.identifier(tableName),
-            Schema.identifier(columnName),
-            definition
-        )
-    )
+    local ok, err = pcall(MySQL.query.await, ('ALTER TABLE %s ADD COLUMN %s %s'):format(Schema.identifier(tableName), Schema.identifier(columnName), definition))
 
     if not ok then
         if Schema.column(tableName, columnName) then
@@ -45,10 +38,7 @@ function Schema.ensureColumn(tableName, columnName, definition)
         error(err, 0)
     end
 
-    assert(
-        Schema.column(tableName, columnName),
-        'Column was not created: ' .. tableName .. '.' .. columnName
-    )
+    assert(Schema.column(tableName, columnName), 'Column was not created: ' .. tableName .. '.' .. columnName)
 
     return true
 end
@@ -62,29 +52,16 @@ function Schema.ensureProperty()
         return
     end
 
-    assert(
-        column.DATA_TYPE == 'varchar'
-            or column.DATA_TYPE == 'text'
-            or column.DATA_TYPE == 'mediumtext'
-            or column.DATA_TYPE == 'tinytext',
-        'users.last_property has an incompatible type'
-    )
+    assert(column.DATA_TYPE == 'varchar' or column.DATA_TYPE == 'text' or column.DATA_TYPE == 'mediumtext' or column.DATA_TYPE == 'tinytext', 'users.last_property has an incompatible type')
 
     MySQL.query.await('ALTER TABLE `users` MODIFY COLUMN `last_property` LONGTEXT NULL')
 end
 
 function Schema.ensureMileage()
-    local added =
-        Schema.ensureColumn('owned_vehicles', 'mileage', 'DECIMAL(10,2) NOT NULL DEFAULT 0.00')
+    local added = Schema.ensureColumn('owned_vehicles', 'mileage', 'DECIMAL(10,2) NOT NULL DEFAULT 0.00')
     local column = Schema.column('owned_vehicles', 'mileage')
 
-    if
-        column.DATA_TYPE == 'decimal'
-        and tonumber(column.NUMERIC_PRECISION) == 10
-        and tonumber(column.NUMERIC_SCALE) == 2
-        and column.IS_NULLABLE == 'NO'
-        and tonumber(column.COLUMN_DEFAULT) == 0
-    then
+    if column.DATA_TYPE == 'decimal' and tonumber(column.NUMERIC_PRECISION) == 10 and tonumber(column.NUMERIC_SCALE) == 2 and column.IS_NULLABLE == 'NO' and tonumber(column.COLUMN_DEFAULT) == 0 then
         return added, false
     end
 
@@ -106,15 +83,10 @@ function Schema.ensureMileage()
             WHERE `mileage` < 0 OR ROUND(`mileage`, 2) > 99999999.99)
     ]])
 
-    assert(
-        invalid ~= nil and tonumber(invalid) == 0,
-        'Mileage values outside DECIMAL(10,2) range; repair them before restarting'
-    )
+    assert(invalid ~= nil and tonumber(invalid) == 0, 'Mileage values outside DECIMAL(10,2) range; repair them before restarting')
 
     MySQL.update.await('UPDATE `owned_vehicles` SET `mileage` = 0 WHERE `mileage` IS NULL')
-    MySQL.query.await(
-        'ALTER TABLE `owned_vehicles` MODIFY COLUMN `mileage` DECIMAL(10,2) NOT NULL DEFAULT 0.00'
-    )
+    MySQL.query.await('ALTER TABLE `owned_vehicles` MODIFY COLUMN `mileage` DECIMAL(10,2) NOT NULL DEFAULT 0.00')
 
     return added, true
 end
@@ -126,10 +98,7 @@ function Schema.widenVarchar(tableName, columnName, length, column)
         return false
     end
 
-    assert(
-        column.DATA_TYPE == nil or column.DATA_TYPE == 'varchar',
-        'Expected a VARCHAR identifier'
-    )
+    assert(column.DATA_TYPE == nil or column.DATA_TYPE == 'varchar', 'Expected a VARCHAR identifier')
 
     if tonumber(column.CHARACTER_MAXIMUM_LENGTH) >= length then
         return false
@@ -145,11 +114,7 @@ function Schema.widenVarchar(tableName, columnName, length, column)
         local charset = column.COLLATION_NAME:match('^([^_]+)_')
 
         assert(charset, 'Invalid character set')
-        definition = definition
-            .. ' CHARACTER SET '
-            .. charset
-            .. ' COLLATE '
-            .. column.COLLATION_NAME
+        definition = definition .. ' CHARACTER SET ' .. charset .. ' COLLATE ' .. column.COLLATION_NAME
     end
 
     definition = definition .. (column.IS_NULLABLE == 'NO' and ' NOT NULL' or ' NULL')
@@ -171,13 +136,7 @@ function Schema.widenVarchar(tableName, columnName, length, column)
         end
     end
 
-    MySQL.query.await(
-        ('ALTER TABLE %s MODIFY COLUMN %s %s'):format(
-            Schema.identifier(tableName),
-            Schema.identifier(columnName),
-            definition
-        )
-    )
+    MySQL.query.await(('ALTER TABLE %s MODIFY COLUMN %s %s'):format(Schema.identifier(tableName), Schema.identifier(columnName), definition))
 
     return true
 end

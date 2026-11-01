@@ -3,6 +3,10 @@
 
 local Inventory = ESXInventory
 
+if not Inventory then
+    return
+end
+
 local activeWeaponControls = {}
 local suppressingWeaponControls = false
 local weaponControls = {
@@ -37,13 +41,7 @@ local function suppressWeaponShortcut(keybind)
             for binding, weaponControl in pairs(activeWeaponControls) do
                 DisableControlAction(0, weaponControl, true)
 
-                if not binding:isControlPressed()
-                    or binding.disabled
-                    or not ESX.PlayerLoaded
-                    or ESX.PlayerData.dead
-                    or Inventory.isOpen
-                    or IsPauseMenuActive()
-                then
+                if not binding:isControlPressed() or binding.disabled or not ESX.PlayerLoaded or ESX.PlayerData.dead or Inventory.isOpen or IsPauseMenuActive() then
                     activeWeaponControls[binding] = nil
                 end
             end

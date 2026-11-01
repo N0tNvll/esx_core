@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-ESX = exports["es_extended"]:getSharedObject()
+ESX = exports['es_extended']:getSharedObject()
 ESX.currentResourceName = GetCurrentResourceName()
 
 OnPlayerData = function(key, val, last) end
@@ -15,30 +15,34 @@ local function TrackPedCoordsOnce()
 
     setmetatable(ESX.PlayerData, {
         __index = function(self, key)
-            if key ~= "coords" then
+            if key ~= 'coords' then
                 return
             end
 
             local coords = GetEntityCoords(ESX.PlayerData.ped)
-
             return coords
-        end
+        end,
     })
 end
 
 if not IsDuplicityVersion() then -- Only register this event for the client
-    AddEventHandler("esx:setPlayerData", function(key, val, last)
-        if GetInvokingResource() == "es_extended" then
+    AddEventHandler('esx:setPlayerData', function(key, val, last)
+        if GetInvokingResource() == 'es_extended' then
             ESX.PlayerData[key] = val
+
             if OnPlayerData then
                 OnPlayerData(key, val, last)
             end
         end
     end)
 
-    RegisterNetEvent("esx:playerLoaded", function(xPlayer)
+    RegisterNetEvent('esx:playerLoaded', function(xPlayer)
         ESX.PlayerData = xPlayer
-        while not ESX.PlayerData.ped or not DoesEntityExist(ESX.PlayerData.ped) do Wait(0) end
+
+        while not ESX.PlayerData.ped or not DoesEntityExist(ESX.PlayerData.ped) do
+            Wait(0)
+        end
+
         ESX.PlayerLoaded = true
 
         TrackPedCoordsOnce()
@@ -46,14 +50,14 @@ if not IsDuplicityVersion() then -- Only register this event for the client
 
     TrackPedCoordsOnce()
 
-    ESX.SecureNetEvent("esx:onPlayerLogout", function()
+    ESX.SecureNetEvent('esx:onPlayerLogout', function()
         ESX.PlayerLoaded = false
         ESX.PlayerData = {}
     end)
 
-    if not ESX.GetConfig("CustomInventory") then
-        ESX.SecureNetEvent("esx:addInventoryItem", function(item, count, showNotification, itemData)
-            if type(count) ~= "number" then
+    if not ESX.GetConfig('CustomInventory') then
+        ESX.SecureNetEvent('esx:addInventoryItem', function(item, count, showNotification, itemData)
+            if type(count) ~= 'number' then
                 return
             end
 
@@ -72,20 +76,20 @@ if not IsDuplicityVersion() then -- Only register this event for the client
                 ESX.PlayerData.inventory[#ESX.PlayerData.inventory + 1] = {
                     name = item,
                     count = count,
-                    label = type(itemData) == "table" and itemData.label or item,
-                    weight = type(itemData) == "table" and itemData.weight or 0,
-                    usable = type(itemData) == "table" and itemData.usable == true or false,
-                    rare = type(itemData) == "table" and itemData.rare == true or false,
-                    canRemove = type(itemData) ~= "table" or itemData.canRemove ~= false,
+                    label = type(itemData) == 'table' and itemData.label or item,
+                    weight = type(itemData) == 'table' and itemData.weight or 0,
+                    usable = type(itemData) == 'table' and itemData.usable == true or false,
+                    rare = type(itemData) == 'table' and itemData.rare == true or false,
+                    canRemove = type(itemData) ~= 'table' or itemData.canRemove ~= false,
                 }
             end
 
             if OnPlayerData then
-                OnPlayerData("inventory", ESX.PlayerData.inventory, previous)
+                OnPlayerData('inventory', ESX.PlayerData.inventory, previous)
             end
         end)
 
-        ESX.SecureNetEvent("esx:removeInventoryItem", function(item, count, showNotification)
+        ESX.SecureNetEvent('esx:removeInventoryItem', function(item, count, showNotification)
             local previous = ESX.PlayerData.inventory
 
             for i = 1, #ESX.PlayerData.inventory do
@@ -101,11 +105,11 @@ if not IsDuplicityVersion() then -- Only register this event for the client
             end
 
             if OnPlayerData then
-                OnPlayerData("inventory", ESX.PlayerData.inventory, previous)
+                OnPlayerData('inventory', ESX.PlayerData.inventory, previous)
             end
         end)
 
-        ESX.SecureNetEvent("esx:addLoadoutItem", function(weaponName, weaponLabel, ammo)
+        ESX.SecureNetEvent('esx:addLoadoutItem', function(weaponName, weaponLabel, ammo)
             table.insert(ESX.PlayerData.loadout, {
                 name = weaponName,
                 ammo = ammo,
@@ -115,7 +119,7 @@ if not IsDuplicityVersion() then -- Only register this event for the client
             })
         end)
 
-        ESX.SecureNetEvent("esx:removeLoadoutItem", function(weaponName, weaponLabel)
+        ESX.SecureNetEvent('esx:removeLoadoutItem', function(weaponName, weaponLabel)
             for i = 1, #ESX.PlayerData.loadout do
                 if ESX.PlayerData.loadout[i].name == weaponName then
                     table.remove(ESX.PlayerData.loadout, i)
@@ -125,12 +129,13 @@ if not IsDuplicityVersion() then -- Only register this event for the client
         end)
     end
 
-    local external = { { "Class", "class.lua" } }
+    local external = { { 'Class', 'class.lua' } }
+
     for i = 1, #external do
         local module = external[i]
-        local path = string.format("client/imports/%s", module[2])
+        local path = string.format('client/imports/%s', module[2])
+        local file = LoadResourceFile('es_extended', path)
 
-        local file = LoadResourceFile("es_extended", path)
         if file then
             local fn, err = load(file, ('@@es_extended/%s'):format(path))
 
@@ -152,16 +157,19 @@ else
                 return function(...)
                     return exports.es_extended:RunStaticPlayerMethod(self.src, method, ...)
                 end
-            end
+            end,
         })
     end
 
     ---@param src number|string
     ---@return StaticPlayer?
     function ESX.Player(src)
-        if type(src) ~= "number" then
+        if type(src) ~= 'number' then
             src = ESX.GetPlayerIdFromIdentifier(src)
-            if not src then return end
+
+            if not src then
+                return
+            end
         elseif not ESX.IsPlayerLoaded(src) then
             return
         end
@@ -175,11 +183,13 @@ else
     function ESX.ExtendedPlayers(key, val)
         local playerIds = ESX.GetExtendedPlayers(key, val, true)
 
-        if key and type(val) == "table" then
+        if key and type(val) == 'table' then
             ---@cast playerIds table<any, number[]>
             local retVal = {}
+
             for group, ids in pairs(playerIds) do
                 retVal[group] = {}
+
                 for i = 1, #ids do
                     retVal[group][i] = createStaticPlayer(ids[i])
                 end
@@ -188,6 +198,7 @@ else
         else
             ---@cast playerIds number[]
             local retVal = {}
+
             for i = 1, #playerIds do
                 retVal[i] = createStaticPlayer(playerIds[i])
             end
@@ -196,7 +207,7 @@ else
     end
 end
 
-if GetResourceState("ox_lib") == "missing" then
+if GetResourceState('ox_lib') == 'missing' then
     ---@Credits: https://github.com/overextended/ox_lib/blob/master/imports/require/shared.lua - Licensed under the GNU Lesser General Public License v3.0
     local loaded = {}
     local _require = require
@@ -208,7 +219,7 @@ if GetResourceState("ox_lib") == "missing" then
             __index = loaded,
             __newindex = function() end,
             __metatable = false,
-        })
+        }),
     }
 
     ---@param modName string
@@ -265,7 +276,7 @@ if GetResourceState("ox_lib") == "missing" then
             tried[#tried + 1] = ("no file '@%s/%s'"):format(resource, fileName)
         end
 
-        return nil, table.concat(tried, "\n\t")
+        return nil, table.concat(tried, '\n\t')
     end
 
     ---Attempts to load a module at the given path relative to the resource root directory.\
@@ -296,7 +307,9 @@ if GetResourceState("ox_lib") == "missing" then
         function(modName)
             local ok, result = pcall(_require, modName)
 
-            if ok then return result end
+            if ok then
+                return result
+            end
 
             return ok, result
         end,
@@ -307,7 +320,9 @@ if GetResourceState("ox_lib") == "missing" then
 
             return nil, ("no field package.preload['%s']"):format(modName)
         end,
-        function(modName) return loadModule(modName) end,
+        function(modName)
+            return loadModule(modName)
+        end,
     }
 
     ---@param filePath string
@@ -321,7 +336,9 @@ if GetResourceState("ox_lib") == "missing" then
 
         local result, err = loadModule(filePath, env)
 
-        if result then return result() end
+        if result then
+            return result()
+        end
 
         error(("file '%s' not found\n\t%s"):format(filePath, err))
     end
@@ -359,7 +376,9 @@ if GetResourceState("ox_lib") == "missing" then
             error(("^1circular-dependency occurred when loading module '%s'^0"):format(modName), 2)
         end
 
-        if module ~= nil then return module end
+        if module ~= nil then
+            return module
+        end
 
         loaded[modName] = '__loading'
 
@@ -367,8 +386,12 @@ if GetResourceState("ox_lib") == "missing" then
 
         for i = 1, #package.searchers do
             local result, errMsg = package.searchers[i](modName)
+
             if result then
-                if type(result) == 'function' then result = result() end
+                if type(result) == 'function' then
+                    result = result()
+                end
+
                 loaded[modName] = result or result == nil
 
                 return loaded[modName]
@@ -377,7 +400,7 @@ if GetResourceState("ox_lib") == "missing" then
             err[#err + 1] = errMsg
         end
 
-        error(("%s"):format(table.concat(err, "\n\t")))
+        error(('%s'):format(table.concat(err, '\n\t')))
     end
 
     require = ESX.require

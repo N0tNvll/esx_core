@@ -14,15 +14,11 @@ return function(Util, Log)
     local function safeQuery(fn, query, params, allowEmpty)
         local startedAt = GetGameTimer()
         local ok, result = pcall(fn, query, params)
+
         latency:Observe(GetGameTimer() - startedAt)
 
         if not ok or (result == nil and not allowEmpty) or result == false then
-            Log(
-                'error',
-                ('Whitelist database operation failed: %s'):format(
-                    ok and 'no result' or tostring(result)
-                )
-            )
+            Log('error', ('Whitelist database operation failed: %s'):format(ok and 'no result' or tostring(result)))
 
             return nil, 'database operation failed'
         end
@@ -36,7 +32,6 @@ return function(Util, Log)
         end
 
         local result, err = safeQuery(MySQL.transaction.await, queries)
-
         return result == true, err or (result ~= true and 'database transaction failed' or nil)
     end
 
@@ -66,23 +61,13 @@ return function(Util, Log)
                 end
             end
 
-            local indexes = safeQuery(
-                MySQL.query.await,
-                'SHOW INDEX FROM esx_whitelist_identifiers WHERE Key_name = ?',
-                { 'idx_identifier' }
-            )
+            local indexes = safeQuery(MySQL.query.await, 'SHOW INDEX FROM esx_whitelist_identifiers WHERE Key_name = ?', { 'idx_identifier' })
 
             if not indexes then
                 return
             end
 
-            if
-                #indexes > 0
-                and not safeQuery(
-                    MySQL.query.await,
-                    'ALTER TABLE esx_whitelist_identifiers DROP INDEX idx_identifier'
-                )
-            then
+            if #indexes > 0 and not safeQuery(MySQL.query.await, 'ALTER TABLE esx_whitelist_identifiers DROP INDEX idx_identifier') then
                 return
             end
 
@@ -95,10 +80,7 @@ return function(Util, Log)
     end
 
     function Database:LoadConfig()
-        local rows, err = safeQuery(
-            MySQL.query.await,
-            'SELECT setting_key, setting_value FROM esx_whitelist_config'
-        )
+        local rows, err = safeQuery(MySQL.query.await, 'SELECT setting_key, setting_value FROM esx_whitelist_config')
 
         if not rows then
             return nil, err
@@ -123,30 +105,17 @@ return function(Util, Log)
     end
 
     function Database:SaveConfig(key, valueString)
-        local result, err = safeQuery(
-            MySQL.query.await,
-            'INSERT INTO esx_whitelist_config (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)',
-            { key, valueString }
-        )
-
+        local result, err = safeQuery(MySQL.query.await, 'INSERT INTO esx_whitelist_config (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)', { key, valueString })
         return result ~= nil, err
     end
 
     function Database:ResetConfig()
-        local result, err = safeQuery(
-            MySQL.query.await,
-            'DELETE FROM esx_whitelist_config WHERE setting_key <> ?',
-            { '_identifiers_migrated' }
-        )
-
+        local result, err = safeQuery(MySQL.query.await, 'DELETE FROM esx_whitelist_config WHERE setting_key <> ?', { '_identifiers_migrated' })
         return result ~= nil, err
     end
 
     function Database:LoadIdentifiers()
-        return safeQuery(
-            MySQL.query.await,
-            'SELECT identifier, type FROM esx_whitelist_identifiers'
-        )
+        return safeQuery(MySQL.query.await, 'SELECT identifier, type FROM esx_whitelist_identifiers')
     end
 
     ---Import the old JSON/file lists once, in the same transaction as the marker.
@@ -239,9 +208,7 @@ return function(Util, Log)
             end
 
             queries[#queries + 1] = {
-                query = 'INSERT INTO esx_whitelist_identifiers (identifier, type) VALUES '
-                    .. table.concat(placeholders, ', ')
-                    .. ' ON DUPLICATE KEY UPDATE identifier = VALUES(identifier)',
+                query = 'INSERT INTO esx_whitelist_identifiers (identifier, type) VALUES ' .. table.concat(placeholders, ', ') .. ' ON DUPLICATE KEY UPDATE identifier = VALUES(identifier)',
                 values = values,
             }
         end
@@ -255,9 +222,7 @@ return function(Util, Log)
             end
 
             queries[#queries + 1] = {
-                query = 'DELETE FROM esx_whitelist_identifiers WHERE type = ? AND identifier IN ('
-                    .. table.concat(placeholders, ', ')
-                    .. ')',
+                query = 'DELETE FROM esx_whitelist_identifiers WHERE type = ? AND identifier IN (' .. table.concat(placeholders, ', ') .. ')',
                 values = values,
             }
         end
@@ -266,22 +231,12 @@ return function(Util, Log)
     end
 
     function Database:AddIdentifier(identifier, idType)
-        local result, err = safeQuery(
-            MySQL.query.await,
-            'INSERT INTO esx_whitelist_identifiers (identifier, type) VALUES (?, ?) ON DUPLICATE KEY UPDATE identifier = VALUES(identifier)',
-            { identifier, idType }
-        )
-
+        local result, err = safeQuery(MySQL.query.await, 'INSERT INTO esx_whitelist_identifiers (identifier, type) VALUES (?, ?) ON DUPLICATE KEY UPDATE identifier = VALUES(identifier)', { identifier, idType })
         return result ~= nil, err
     end
 
     function Database:RemoveIdentifier(identifier, idType)
-        local result, err = safeQuery(
-            MySQL.query.await,
-            'DELETE FROM esx_whitelist_identifiers WHERE identifier = ? AND type = ?',
-            { identifier, idType }
-        )
-
+        local result, err = safeQuery(MySQL.query.await, 'DELETE FROM esx_whitelist_identifiers WHERE identifier = ? AND type = ?', { identifier, idType })
         return result ~= nil, err
     end
 
@@ -298,11 +253,7 @@ return function(Util, Log)
             return {}
         end
 
-        return safeQuery(
-            MySQL.query.await,
-            'SELECT identifier, `group` FROM users WHERE `group` IN (?)',
-            { groups }
-        )
+        return safeQuery(MySQL.query.await, 'SELECT identifier, `group` FROM users WHERE `group` IN (?)', { groups })
     end
 
     ---Check the actual ESX record before a discovered admin bypasses authorization.
@@ -335,12 +286,7 @@ return function(Util, Log)
             return nil
         end
 
-        local row, err = safeQuery(
-            MySQL.single.await,
-            "SELECT `group` FROM users WHERE (identifier = ? OR identifier LIKE ? ESCAPE '=') AND `group` IN (?) LIMIT 1",
-            { value, 'char%:' .. value:gsub('[=%%_]', '=%0'), groups },
-            true
-        )
+        local row, err = safeQuery(MySQL.single.await, "SELECT `group` FROM users WHERE (identifier = ? OR identifier LIKE ? ESCAPE '=') AND `group` IN (?) LIMIT 1", { value, 'char%:' .. value:gsub('[=%%_]', '=%0'), groups }, true)
 
         -- A missing row is a valid denial, never an authorization grant.
         return row and row.group or nil, err

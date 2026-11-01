@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-Core.vehicleClass = Core.vehicleClass or { plate = "" }
+Core.vehicleClass = Core.vehicleClass or { plate = '' }
 
 function Core.vehicleClass.getNetId(self)
     if not self:isValid() then

@@ -43,7 +43,7 @@ function ESX.UI.Menu.Open(menuType, namespace, name, data, submit, cancel, chang
 
     menu.type = menuType
     menu.namespace = namespace
-    menu.resourceName = (GetInvokingResource() or "Unknown")
+    menu.resourceName = (GetInvokingResource() or 'Unknown')
     menu.name = name
     menu.data = data
     menu.submit = submit
@@ -132,12 +132,14 @@ function ESX.UI.Menu.Close(menuType, namespace, name, cancel)
                     ESX.UI.Menu.Opened[i].close()
                 else
                     local menu = ESX.UI.Menu.Opened[i]
+
                     ESX.UI.Menu.RegisteredTypes[menu.type].close(menu.namespace, menu.name)
 
-                    if type(menu.cancel) ~= "nil" then
+                    if type(menu.cancel) ~= 'nil' then
                         menu.cancel(menu.data, menu)
                     end
                 end
+
                 ESX.UI.Menu.Opened[i] = nil
             end
         end
@@ -153,12 +155,14 @@ function ESX.UI.Menu.CloseAll(cancel)
                 ESX.UI.Menu.Opened[i].close()
             else
                 local menu = ESX.UI.Menu.Opened[i]
+
                 ESX.UI.Menu.RegisteredTypes[menu.type].close(menu.namespace, menu.name)
 
-                if type(menu.cancel) ~= "nil" then
+                if type(menu.cancel) ~= 'nil' then
                     menu.cancel(menu.data, menu)
                 end
             end
+
             ESX.UI.Menu.Opened[i] = nil
         end
     end
@@ -185,7 +189,7 @@ end
 
 ESX.UI.Menu.IsOpen = ESX.UI.Menu.GetOpened
 
-AddEventHandler("onResourceStop", function(resourceName)
+AddEventHandler('onResourceStop', function(resourceName)
     for i = 1, #ESX.UI.Menu.Opened, 1 do
         if ESX.UI.Menu.Opened[i] then
             if ESX.UI.Menu.Opened[i].resourceName == resourceName or ESX.UI.Menu.Opened[i].namespace == resourceName then

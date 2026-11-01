@@ -9,15 +9,21 @@ local LetterCharset = {}
 local reservedPlates = {}
 local RESERVATION_MS <const> = 30000
 
-for i = 48, 57 do NumberCharset[#NumberCharset + 1] = string.char(i) end
-for i = 65, 90 do LetterCharset[#LetterCharset + 1] = string.char(i) end
+for i = 48, 57 do
+    NumberCharset[#NumberCharset + 1] = string.char(i)
+end
+
+for i = 65, 90 do
+    LetterCharset[#LetterCharset + 1] = string.char(i)
+end
 
 local function trim(value)
-    return tostring(value):match("^%s*(.*%S)") or ""
+    return tostring(value):match('^%s*(.*%S)') or ''
 end
 
 local function getRandomChunk(charset, length)
-    local value = ""
+    local value = ''
+
     length = tonumber(length) or 0
 
     for _ = 1, length do
@@ -45,7 +51,7 @@ function xLib.vehiclePlate.normalize(plate, options)
 
     options = options or {}
 
-    if type(plate) ~= "string" then
+    if type(plate) ~= 'string' then
         if not options.coerce then
             return
         end
@@ -56,18 +62,19 @@ function xLib.vehiclePlate.normalize(plate, options)
     plate = trim(plate)
 
     if options.compact then
-        plate = plate:gsub("%s+", "")
+        plate = plate:gsub('%s+', '')
     end
 
     if options.uppercase ~= false then
         plate = plate:upper()
     end
 
-    if plate == "" and not options.allowEmpty then
+    if plate == '' and not options.allowEmpty then
         return
     end
 
     local maxLength = tonumber(options.maxLength or 8)
+
     if maxLength and maxLength > 0 and #plate > maxLength then
         return
     end
@@ -103,25 +110,25 @@ end
 function xLib.vehiclePlate.generate(options)
     options = options or {}
 
-    local prefix = options.prefix or ""
-    local suffix = options.suffix or ""
+    local prefix = options.prefix or ''
+    local suffix = options.suffix or ''
     local letters = xLib.vehiclePlate.randomLetters(options.letters or options.letterCount or 3)
     local numbers = xLib.vehiclePlate.randomNumbers(options.numbers or options.numberCount or 3)
-    local separator = options.useSpace and " " or ""
-
-    return xLib.vehiclePlate.normalize(("%s%s%s%s%s"):format(prefix, letters, separator, numbers, suffix), options)
+    local separator = options.useSpace and ' ' or ''
+    return xLib.vehiclePlate.normalize(('%s%s%s%s%s'):format(prefix, letters, separator, numbers, suffix), options)
 end
 
 ---@param options? VehiclePlateGenerateOptions|fun(plate: string): boolean
 ---@param exists? fun(plate: string): boolean
 ---@return string|nil
 function xLib.vehiclePlate.generateUnique(options, exists)
-    if type(options) == "function" and not exists then
+    if type(options) == 'function' and not exists then
         exists = options
         options = {}
     end
 
     options = options or {}
+
     local attempts = tonumber(options.attempts or 30) or 30
     local now = GetGameTimer()
 
@@ -166,7 +173,7 @@ function xLib.vehiclePlate.matchesVehicle(vehicle, plate, options)
         return false
     end
 
-    return xLib.vehiclePlate.equals(GetVehicleNumberPlateText(vehicle) or "", plate, options)
+    return xLib.vehiclePlate.equals(GetVehicleNumberPlateText(vehicle) or '', plate, options)
 end
 
 return xLib.vehiclePlate

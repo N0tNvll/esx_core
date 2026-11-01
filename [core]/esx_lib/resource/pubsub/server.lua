@@ -21,10 +21,7 @@ local memberOf = {}
 local ownerOf = {}
 
 local function isValidTopic(topic)
-    return type(topic) == 'string'
-        and #topic > 0
-        and #topic <= MAX_TOPIC_LEN
-        and topic:match(TOPIC_PATTERN) ~= nil
+    return type(topic) == 'string' and #topic > 0 and #topic <= MAX_TOPIC_LEN and topic:match(TOPIC_PATTERN) ~= nil
 end
 
 local function isLivePlayer(src)
@@ -34,8 +31,10 @@ end
 
 local function detach(src, topic)
     local set = subs[topic]
+
     if set then
         set[src] = nil
+
         if next(set) == nil then
             subs[topic] = nil
             ownerOf[topic] = nil
@@ -43,8 +42,10 @@ local function detach(src, topic)
     end
 
     local topics = memberOf[src]
+
     if topics then
         topics[topic] = nil
+
         if next(topics) == nil then
             memberOf[src] = nil
         end
@@ -61,6 +62,7 @@ function xLib.pubsub_subscribe(src, topic)
     end
 
     local set = subs[topic]
+
     if set and set[src] then
         return false -- idempotent: already subscribed
     end
@@ -70,13 +72,16 @@ function xLib.pubsub_subscribe(src, topic)
         subs[topic] = set
         ownerOf[topic] = GetInvokingResource() or resourceName
     end
+
     set[src] = true
 
     local topics = memberOf[src]
+
     if not topics then
         topics = {}
         memberOf[src] = topics
     end
+
     topics[topic] = true
 
     return true
@@ -88,9 +93,11 @@ end
 ---@return boolean removed false if it was not subscribed
 function xLib.pubsub_unsubscribe(src, topic)
     local set = subs[topic]
+
     if not set or not set[src] then
         return false -- idempotent
     end
+
     detach(src, topic)
     return true
 end
@@ -103,11 +110,13 @@ function xLib.pubsub_publish(topic, data)
     -- no isValidTopic() here on purpose: an invalid topic never created a set,
     -- so the lookup below already returns 0 for it without a regex on the hot path
     local set = subs[topic]
+
     if not set then
         return 0
     end
 
     local targets, count = {}, 0
+
     for src in pairs(set) do
         count = count + 1
         targets[count] = src
@@ -122,11 +131,13 @@ end
 ---@return number[] serverIds a fresh copy, empty if the topic has no subscribers
 function xLib.pubsub_subscribers(topic)
     local set = subs[topic]
+
     if not set then
         return {}
     end
 
     local list, i = {}, 0
+
     for src in pairs(set) do
         i = i + 1
         list[i] = src
@@ -147,19 +158,24 @@ end
 ---@return integer count number of subscribers that were removed
 function xLib.pubsub_clear(topic)
     local set = subs[topic]
+
     if not set then
         return 0
     end
 
     local count = 0
+
     for src in pairs(set) do
         local topics = memberOf[src]
+
         if topics then
             topics[topic] = nil
+
             if next(topics) == nil then
                 memberOf[src] = nil
             end
         end
+
         count = count + 1
     end
 
@@ -173,20 +189,24 @@ end
 AddEventHandler('playerDropped', function()
     local src = source
     local topics = memberOf[src]
+
     if not topics then
         return
     end
 
     for topic in pairs(topics) do
         local set = subs[topic]
+
         if set then
             set[src] = nil
+
             if next(set) == nil then
                 subs[topic] = nil
                 ownerOf[topic] = nil
             end
         end
     end
+
     memberOf[src] = nil
 end)
 
@@ -198,6 +218,7 @@ AddEventHandler('onResourceStop', function(stopped)
     end
 
     local orphaned = {}
+
     for topic, owner in pairs(ownerOf) do
         if owner == stopped then
             orphaned[#orphaned + 1] = topic

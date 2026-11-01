@@ -3,6 +3,10 @@
 
 local Inventory = ESXInventory
 
+if not Inventory then
+    return
+end
+
 local uiReady = false
 
 function Inventory.useItem(itemType, name)
@@ -58,13 +62,7 @@ end
 
 ---@return nil
 function Inventory.open()
-    if
-        Inventory.isOpen
-        or not uiReady
-        or not ESX.PlayerLoaded
-        or ESX.PlayerData.dead
-        or IsPauseMenuActive()
-    then
+    if Inventory.isOpen or not uiReady or not ESX.PlayerLoaded or ESX.PlayerData.dead or IsPauseMenuActive() then
         return
     end
 
@@ -88,7 +86,9 @@ function Inventory.close(fromNui)
     end
 
     Inventory.isOpen = false
+
     local hadStorage = Inventory.currentStorage ~= nil
+
     Inventory.currentStorage = nil
 
     xLib.nui.focus(false, false)
@@ -155,11 +155,7 @@ end)
 xLib.nui.register('giveItem', function(data, reply)
     reply({})
 
-    if
-        type(data) ~= 'table'
-        or type(data.name) ~= 'string'
-        or not Inventory.ITEM_TYPES[data.type]
-    then
+    if type(data) ~= 'table' or type(data.name) ~= 'string' or not Inventory.ITEM_TYPES[data.type] then
         return xLib.nui.defer
     end
 
@@ -170,13 +166,7 @@ xLib.nui.register('giveItem', function(data, reply)
         return xLib.nui.defer
     end
 
-    TriggerServerEvent(
-        'esx:giveInventoryItem',
-        math.floor(target),
-        data.type,
-        data.name,
-        math.floor(count)
-    )
+    TriggerServerEvent('esx:giveInventoryItem', math.floor(target), data.type, data.name, math.floor(count))
     return xLib.nui.defer
 end)
 
@@ -208,11 +198,7 @@ end)
 xLib.nui.register('dropItem', function(data, reply)
     reply({})
 
-    if
-        type(data) ~= 'table'
-        or type(data.name) ~= 'string'
-        or not Inventory.ITEM_TYPES[data.type]
-    then
+    if type(data) ~= 'table' or type(data.name) ~= 'string' or not Inventory.ITEM_TYPES[data.type] then
         return xLib.nui.defer
     end
 
@@ -257,12 +243,7 @@ end)
 xLib.nui.register('storagePut', function(data, reply)
     reply({})
 
-    if
-        not Inventory.currentStorage
-        or type(data) ~= 'table'
-        or type(data.name) ~= 'string'
-        or data.type ~= 'item_standard'
-    then
+    if not Inventory.currentStorage or type(data) ~= 'table' or type(data.name) ~= 'string' or data.type ~= 'item_standard' then
         return xLib.nui.defer
     end
 

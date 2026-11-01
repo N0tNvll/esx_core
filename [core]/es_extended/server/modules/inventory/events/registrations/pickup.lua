@@ -5,13 +5,14 @@ if Config.CustomInventory then
     return
 end
 
-RegisterNetEvent("esx:onPickup", function(pickupId)
+RegisterNetEvent('esx:onPickup', function(pickupId)
     pickupId = tonumber(pickupId)
+
     if not pickupId then
         return
     end
 
-    if not Core.InventoryEvents.ConsumeRate("pickup", source) then
+    if not Core.InventoryEvents.ConsumeRate('pickup', source) then
         return
     end
 
@@ -32,29 +33,31 @@ RegisterNetEvent("esx:onPickup", function(pickupId)
     end
 
     local playerPickupDistance = #(pickup.coords - xPlayer.getCoords(true))
+
     if playerPickupDistance > 5.0 then
-        print(("[^3WARNING^7] Player Detected Cheating (Out of range pickup): ^5%s^7"):format(xPlayer.getIdentifier()))
+        print(('[^3WARNING^7] Player Detected Cheating (Out of range pickup): ^5%s^7'):format(xPlayer.getIdentifier()))
         return
     end
 
     pickup.claimed = true
+
     local success = false
 
-    if pickup.type == "item_standard" then
+    if pickup.type == 'item_standard' then
         if not xPlayer.canCarryItem(pickup.name, pickup.count) then
             pickup.claimed = nil
-            return xPlayer.showNotification(TranslateCap("threw_cannot_pickup"))
+            return xPlayer.showNotification(TranslateCap('threw_cannot_pickup'))
         end
 
         xPlayer.addInventoryItem(pickup.name, pickup.count)
         success = true
-    elseif pickup.type == "item_account" then
-        xPlayer.addAccountMoney(pickup.name, pickup.count, "Picked up")
+    elseif pickup.type == 'item_account' then
+        xPlayer.addAccountMoney(pickup.name, pickup.count, 'Picked up')
         success = true
-    elseif pickup.type == "item_weapon" then
+    elseif pickup.type == 'item_weapon' then
         if xPlayer.hasWeapon(pickup.name) then
             pickup.claimed = nil
-            return xPlayer.showNotification(TranslateCap("threw_weapon_already"))
+            return xPlayer.showNotification(TranslateCap('threw_weapon_already'))
         end
 
         xPlayer.addWeapon(pickup.name, pickup.count)

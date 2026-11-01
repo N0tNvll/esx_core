@@ -23,7 +23,6 @@ return function(Util, Log, Database)
 
     local function makeEnumValidator(...)
         local allowed = { ... }
-
         return function(value)
             for i = 1, #allowed do
                 if value == allowed[i] then
@@ -128,11 +127,7 @@ return function(Util, Log, Database)
         local count = 0
 
         for groupName, enabled in pairs(value) do
-            if
-                type(groupName) ~= 'string'
-                or not groupName:match('^[%w_]+$')
-                or #groupName > 32
-            then
+            if type(groupName) ~= 'string' or not groupName:match('^[%w_]+$') or #groupName > 32 then
                 return false, 'invalid group name: ' .. tostring(groupName)
             end
 
@@ -201,7 +196,9 @@ return function(Util, Log, Database)
         end
 
         writeBusy = true
+
         local ok, result, err = pcall(action)
+
         writeBusy = false
 
         if not ok then
@@ -285,6 +282,7 @@ return function(Util, Log, Database)
         if Identifier then
             for key, category in pairs(categories) do
                 local section = key:match('^([^.]+)')
+
                 effective[section].AllowedIdentifiers = Identifier:GetList(category)
             end
         end

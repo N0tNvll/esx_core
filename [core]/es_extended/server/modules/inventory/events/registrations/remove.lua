@@ -5,18 +5,18 @@ if Config.CustomInventory then
     return
 end
 
-RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCount)
+RegisterNetEvent('esx:removeInventoryItem', function(itemType, itemName, itemCount)
     local playerId = source
 
-    if type(itemName) ~= "string" or itemName == "" or #itemName > 100 then
+    if type(itemName) ~= 'string' or itemName == '' or #itemName > 100 then
         return
     end
 
-    if not Core.InventoryEvents.ConsumeRate("remove", playerId) then
+    if not Core.InventoryEvents.ConsumeRate('remove', playerId) then
         return
     end
 
-    if itemType ~= "item_standard" and itemType ~= "item_account" and itemType ~= "item_weapon" then
+    if itemType ~= 'item_standard' and itemType ~= 'item_account' and itemType ~= 'item_weapon' then
         return
     end
 
@@ -26,60 +26,64 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
         return
     end
 
-    if itemType == "item_standard" then
+    if itemType == 'item_standard' then
         local count = Core.InventoryEvents.GetPositiveCount(itemCount)
 
         if not count then
-            return xPlayer.showNotification(TranslateCap("imp_invalid_quantity"))
+            return xPlayer.showNotification(TranslateCap('imp_invalid_quantity'))
         end
 
         local xItem = xPlayer.getInventoryItem(itemName)
+
         if not xItem or xItem.canRemove == false then
             return
         end
 
         if count > xItem.count or xItem.count < 1 then
-            return xPlayer.showNotification(TranslateCap("imp_invalid_quantity"))
+            return xPlayer.showNotification(TranslateCap('imp_invalid_quantity'))
         end
 
         xPlayer.removeInventoryItem(itemName, count)
-        local pickupLabel = ("%s [%s]"):format(xItem.label, count)
-        local ok = ESX.CreatePickup("item_standard", itemName, count, pickupLabel, playerId)
+
+        local pickupLabel = ('%s [%s]'):format(xItem.label, count)
+        local ok = ESX.CreatePickup('item_standard', itemName, count, pickupLabel, playerId)
 
         if not ok then
             xPlayer.addInventoryItem(itemName, count)
-            return xPlayer.showNotification(TranslateCap("threw_cannot_pickup"))
+            return xPlayer.showNotification(TranslateCap('threw_cannot_pickup'))
         end
 
-        xPlayer.showNotification(TranslateCap("threw_standard", count, xItem.label))
-    elseif itemType == "item_account" then
+        xPlayer.showNotification(TranslateCap('threw_standard', count, xItem.label))
+    elseif itemType == 'item_account' then
         local count = Core.InventoryEvents.GetPositiveCount(itemCount)
 
         if not count then
-            return xPlayer.showNotification(TranslateCap("imp_invalid_amount"))
+            return xPlayer.showNotification(TranslateCap('imp_invalid_amount'))
         end
 
         local account = xPlayer.getAccount(itemName)
+
         if not account or not Core.InventoryEvents.IsAccountTransferable(itemName) then
             return
         end
 
         if count > account.money or account.money < 1 then
-            return xPlayer.showNotification(TranslateCap("imp_invalid_amount"))
+            return xPlayer.showNotification(TranslateCap('imp_invalid_amount'))
         end
 
-        xPlayer.removeAccountMoney(itemName, count, "Threw away")
-        local pickupLabel = ("%s [%s]"):format(account.label, TranslateCap("locale_currency", ESX.Math.GroupDigits(count)))
-        local ok = ESX.CreatePickup("item_account", itemName, count, pickupLabel, playerId)
+        xPlayer.removeAccountMoney(itemName, count, 'Threw away')
+
+        local pickupLabel = ('%s [%s]'):format(account.label, TranslateCap('locale_currency', ESX.Math.GroupDigits(count)))
+        local ok = ESX.CreatePickup('item_account', itemName, count, pickupLabel, playerId)
 
         if not ok then
-            xPlayer.addAccountMoney(itemName, count, "Threw away")
-            return xPlayer.showNotification(TranslateCap("threw_cannot_pickup"))
+            xPlayer.addAccountMoney(itemName, count, 'Threw away')
+            return xPlayer.showNotification(TranslateCap('threw_cannot_pickup'))
         end
 
-        xPlayer.showNotification(TranslateCap("threw_account", ESX.Math.GroupDigits(count), string.lower(account.label)))
-    elseif itemType == "item_weapon" then
-        if type(itemName) ~= "string" then
+        xPlayer.showNotification(TranslateCap('threw_account', ESX.Math.GroupDigits(count), string.lower(account.label)))
+    elseif itemType == 'item_weapon' then
+        if type(itemName) ~= 'string' then
             return
         end
 
@@ -90,12 +94,13 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
         end
 
         local _, weapon = xPlayer.getWeapon(itemName)
+
         if not weapon then
             return
         end
 
         local _, weaponObject = ESX.GetWeapon(itemName)
-        local weaponPickupLabel = ""
+        local weaponPickupLabel = ''
         local weaponCount = weapon.ammo
         local weaponComponents = xLib.table.clone(weapon.components)
         local weaponTint = weapon.tintIndex
@@ -104,14 +109,15 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
 
         if weaponObject.ammo and weaponCount > 0 then
             local ammoLabel = weaponObject.ammo.label
-            weaponPickupLabel = ("%s [%s %s]"):format(weapon.label, weaponCount, ammoLabel)
-            xPlayer.showNotification(TranslateCap("threw_weapon_ammo", weapon.label, weaponCount, ammoLabel))
+
+            weaponPickupLabel = ('%s [%s %s]'):format(weapon.label, weaponCount, ammoLabel)
+            xPlayer.showNotification(TranslateCap('threw_weapon_ammo', weapon.label, weaponCount, ammoLabel))
         else
-            weaponPickupLabel = ("%s"):format(weapon.label)
-            xPlayer.showNotification(TranslateCap("threw_weapon", weapon.label))
+            weaponPickupLabel = ('%s'):format(weapon.label)
+            xPlayer.showNotification(TranslateCap('threw_weapon', weapon.label))
         end
 
-        local ok = ESX.CreatePickup("item_weapon", itemName, weaponCount, weaponPickupLabel, playerId, weaponComponents, weaponTint)
+        local ok = ESX.CreatePickup('item_weapon', itemName, weaponCount, weaponPickupLabel, playerId, weaponComponents, weaponTint)
 
         if not ok then
             xPlayer.addWeapon(itemName, weaponCount)
@@ -121,7 +127,7 @@ RegisterNetEvent("esx:removeInventoryItem", function(itemType, itemName, itemCou
                 xPlayer.addWeaponComponent(itemName, component)
             end
 
-            return xPlayer.showNotification(TranslateCap("threw_cannot_pickup"))
+            return xPlayer.showNotification(TranslateCap('threw_cannot_pickup'))
         end
     end
 end)

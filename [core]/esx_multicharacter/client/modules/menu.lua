@@ -4,7 +4,9 @@
 Menu = {}
 
 local function requestAction(event, ...)
-    if Menu.pendingAction then return { success = false, error = 'busy' } end
+    if Menu.pendingAction then
+        return { success = false, error = 'busy' }
+    end
 
     Menu.pendingAction = true
 
@@ -41,11 +43,18 @@ end
 
 function Menu:NewCharacter()
     local slot = GetSlot()
-    if not slot then return { success = false, error = 'invalid_character' } end
+
+    if not slot then
+        return { success = false, error = 'invalid_character' }
+    end
 
     local result = requestAction('esx_multicharacter:chooseCharacter', slot, true)
-    if not result.success then return result end
-    TriggerEvent("esx_identity:showRegisterIdentity")
+
+    if not result.success then
+        return result
+    end
+
+    TriggerEvent('esx_identity:showRegisterIdentity')
 
     local playerPed = PlayerPedId()
 
@@ -56,12 +65,15 @@ function Menu:NewCharacter()
     return result
 end
 
-
 function Menu:InitCharacter()
     local Characters = Multicharacter.Characters
     local Character
+
     for i = 1, Multicharacter.slots do
-        if Characters[i] then Character = i break end
+        if Characters[i] then
+            Character = i
+            break
+        end
     end
 
     Multicharacter.spawned = false
@@ -70,17 +82,18 @@ function Menu:InitCharacter()
     if not Multicharacter.spawned then
         Multicharacter:SetupCharacter(Character)
     end
+
     Wait(500)
-    
+
     xLib.nui.send({
-        action = "ToggleMulticharacter",
+        action = 'ToggleMulticharacter',
         data = {
             show = true,
             Characters = Characters,
             CanDelete = Config.CanDelete,
             AllowedSlot = Multicharacter.slots,
             Locale = Locales[Config.Locale].UI,
-        }
+        },
     })
 
     xLib.nui.focus(true, true)
@@ -94,6 +107,7 @@ function Menu:SelectCharacter(index)
     Multicharacter:SetupCharacter(index)
 
     local playerPed = PlayerPedId()
+
     SetPedAoBlobRendering(playerPed, true)
     ResetEntityAlpha(playerPed)
 
@@ -102,12 +116,16 @@ end
 
 function Menu:PlayCharacter(index)
     index = tonumber(index) or Multicharacter.spawned
+
     if not index or not Multicharacter.Characters[index] then
         return { success = false, error = 'invalid_character' }
     end
 
     local result = requestAction('esx_multicharacter:chooseCharacter', index, false)
-    if not result.success then return result end
+
+    if not result.success then
+        return result
+    end
 
     Multicharacter.spawned = index
     Multicharacter:CloseUI()
@@ -121,6 +139,6 @@ function Menu:DeleteCharacter(index)
     if not index or not Multicharacter.Characters[index] then
         return { success = false, error = 'invalid_character' }
     end
-    
+
     return requestAction('esx_multicharacter:deleteCharacter', index)
 end

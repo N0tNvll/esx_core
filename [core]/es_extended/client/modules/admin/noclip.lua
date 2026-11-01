@@ -11,6 +11,7 @@ local function noclipThread()
 
         if IsControlPressed(1, 34) then
             heading = heading + 1.5
+
             if heading > 360 then
                 heading = 0
             end
@@ -20,6 +21,7 @@ local function noclipThread()
 
         if IsControlPressed(1, 9) then
             heading = heading - 1.5
+
             if heading < 0 then
                 heading = 360
             end
@@ -42,12 +44,13 @@ local function noclipThread()
         if IsControlPressed(1, 173) then
             noclipPos = GetOffsetFromEntityInWorldCoords(ESX.PlayerData.ped, 0.0, 0.0, -1.0)
         end
+
         Wait(0)
     end
 end
 
-RegisterNetEvent("esx:noclip", function()
-    xLib.callback("esx:isUserAdmin", false, function(admin)
+RegisterNetEvent('esx:noclip', function()
+    xLib.callback('esx:isUserAdmin', false, function(admin)
         if not admin then
             return
         end
@@ -58,14 +61,15 @@ RegisterNetEvent("esx:noclip", function()
         end
 
         noclip = not noclip
+
         if noclip then
             CreateThread(noclipThread)
         end
 
         if noclip then
-            ESX.ShowNotification(TranslateCap("noclip_message", Translate("enabled")), "success")
+            ESX.ShowNotification(TranslateCap('noclip_message', Translate('enabled')), 'success')
         else
-            ESX.ShowNotification(TranslateCap("noclip_message", Translate("disabled")), "error")
+            ESX.ShowNotification(TranslateCap('noclip_message', Translate('disabled')), 'error')
         end
     end)
 end)

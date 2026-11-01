@@ -2,7 +2,6 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 local API_BASE <const> = 'https://discord.com/api/v10'
-
 return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
     local Discord = {}
     local latency = Util.NewLatencyMetrics()
@@ -34,7 +33,6 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
 
     local function resolveToken()
         local token = Util.Trim(GetConvar('discord:botToken', ''))
-
         return token ~= '' and token or Util.Trim(discordConfig().BotToken or '')
     end
 
@@ -118,9 +116,7 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
         end
 
         local cfg = job.config
-        local verified = result.status == 'ok'
-            or result.status == 'role_missing'
-            or result.status == 'not_in_guild'
+        local verified = result.status == 'ok' or result.status == 'role_missing' or result.status == 'not_in_guild'
         local ttl = verified and (cfg.CacheTTL or 60) or 15
 
         if ttl <= 0 then
@@ -200,6 +196,7 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
 
             if GetGameTimer() >= untilAt then
                 local perSecond = math.max(1, job.config.RequestsPerSecond or 40)
+
                 nextRequestAt = GetGameTimer() + math.ceil(1000 / perSecond)
 
                 return true
@@ -214,8 +211,8 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
     local function httpGetMember(guildId, userId, token, timeoutMs, job)
         local requestPromise = promise.new()
         local settled = false
-
         local url = ('%s/guilds/%s/members/%s'):format(API_BASE, guildId, userId)
+
         PerformHttpRequest(
             url,
             function(statusCode, body, headers)
@@ -261,6 +258,7 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
         end)
 
         local result = Citizen.Await(requestPromise)
+
         job.cancelHttp = nil
 
         return result
@@ -270,7 +268,6 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
         local cfg = job.config
         local token = job.token
         local allowedRoles = Util.ToSet(cfg.AllowedRoles)
-
         local attempts = cfg.MaxRetries + 1
         local delay = cfg.RetryBaseDelay
 
@@ -284,11 +281,13 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
             end
 
             stats.requests = stats.requests + 1
+
             local response = httpGetMember(cfg.GuildId, job.userId, token, cfg.Timeout, job)
 
             if not alive(job) or response.cancelled then
                 return { allowed = false, status = 'cancelled' }
             end
+
             local status = response.status
 
             -- Proactive rate-limit awareness: if Discord reports an empty
@@ -327,23 +326,17 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
                 -- Token invalid or bot lacks access. Fatal: retrying is
                 -- pointless and would just burn the rate-limit budget.
                 stats.errors = stats.errors + 1
-                Log(
-                    'error',
-                    ('Discord API rejected the request (HTTP %d). Check the bot token and guild access.'):format(
-                        status
-                    )
-                )
+                Log('error', ('Discord API rejected the request (HTTP %d). Check the bot token and guild access.'):format(status))
 
                 return { allowed = false, status = 'misconfigured' }
             elseif status == 429 then
                 stats.rateLimits = stats.rateLimits + 1
-                local waitMs =
-                    DiscordUtil.GetRateLimitWait(status, response.body, response.headers, 2000)
+
+                local waitMs = DiscordUtil.GetRateLimitWait(status, response.body, response.headers, 2000)
+
                 rateLimitedUntil = math.max(rateLimitedUntil, GetGameTimer() + waitMs)
-                Log(
-                    'warning',
-                    ('Discord rate limit hit; pausing outbound requests for %d ms'):format(waitMs)
-                )
+                Log('warning', ('Discord rate limit hit; pausing outbound requests for %d ms'):format(waitMs))
+
                 if attempt < attempts then
                     pause(job, waitMs)
                 end
@@ -372,7 +365,9 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
         waiter.done = true
         job.waiters[waiter] = nil
         job.waiterCount = job.waiterCount - 1
+
         local pending = waiter.promise
+
         waiter.job, waiter.promise = nil, nil
         pending:resolve(result)
 
@@ -411,6 +406,7 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
             end
 
             local job = queueHead
+
             unlink(job)
 
             if alive(job) then
@@ -419,6 +415,7 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
 
                 CreateThread(function()
                     local ok, result = pcall(executeVerification, job)
+
                     activeCount = activeCount - 1
 
                     if not ok then
@@ -448,7 +445,9 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
     function Discord:ClearCache()
         generation = generation + 1
         cache, cacheHead, cacheTail, cacheCount = {}, nil, nil, 0
+
         local jobs = inFlight
+
         inFlight = {}
 
         for _, job in pairs(jobs) do
@@ -471,6 +470,7 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
     ---Every consumer has its own deadline and cancellation handle.
     function Discord:VerifyAsync(userId, timeoutMs)
         local outer = promise.new()
+
         local function immediate(result)
             outer:resolve(result)
 
@@ -483,13 +483,7 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
 
         local cfg = discordConfig()
         local token = resolveToken()
-        local key = tostring(cfg.Enabled)
-            .. ':'
-            .. cfg.GuildId
-            .. ':'
-            .. table.concat(cfg.AllowedRoles, ',')
-            .. ':'
-            .. token
+        local key = tostring(cfg.Enabled) .. ':' .. cfg.GuildId .. ':' .. table.concat(cfg.AllowedRoles, ',') .. ':' .. token
 
         if key ~= policyKey then
             self:ClearCache()
@@ -540,8 +534,10 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
         end
 
         local waiter = { job = job, promise = outer, startedAt = GetGameTimer() }
+
         job.waiters[waiter] = true
         job.waiterCount = job.waiterCount + 1
+
         local deadline = timeoutMs or RuntimeConfig:Get().Performance.VerificationTimeout
 
         SetTimeout(deadline, function()
@@ -571,7 +567,6 @@ return function(Util, DiscordUtil, RuntimeConfig, Log, Database)
 
     function Discord:Verify(userId)
         local pending = self:VerifyAsync(userId)
-
         return Citizen.Await(pending)
     end
 

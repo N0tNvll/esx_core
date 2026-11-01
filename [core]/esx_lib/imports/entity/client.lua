@@ -15,6 +15,7 @@ function xLib.entity.closest(entities, isPlayerEntities, coords, modelFilter)
         coords = vector3(coords.x, coords.y, coords.z)
     else
         local playerPed = PlayerPedId()
+
         coords = GetEntityCoords(playerPed)
     end
 
@@ -51,6 +52,7 @@ function xLib.entity.EnumerateWithinDistance(entities, isPlayerEntities, coords,
         coords = vector3(coords.x, coords.y, coords.z)
     else
         local playerPed = PlayerPedId()
+
         coords = GetEntityCoords(playerPed)
     end
 
@@ -69,9 +71,9 @@ end
 ---@param coords table | vector3 | vector4 The coords to teleport the entity to
 ---@param cb? function The callback function
 function xLib.entity.Teleport(entity, coords, cb)
-
     if DoesEntityExist(entity) then
         RequestCollisionAtCoord(coords.x, coords.y, coords.z)
+
         while not HasCollisionLoadedAroundEntity(entity) do
             Wait(0)
         end

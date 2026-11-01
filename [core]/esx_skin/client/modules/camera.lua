@@ -9,8 +9,9 @@ function Camera:Reset()
 end
 
 function Camera:DisableContols()
-    local controls = {30, 31, 32, 33, 34, 35, 25, 24}
-    for i=1 , #controls do
+    local controls = { 30, 31, 32, 33, 34, 35, 25, 24 }
+
+    for i = 1, #controls do
         DisableControlAction(2, controls[i], true)
     end
 end
@@ -22,7 +23,6 @@ function Camera:PositionLoop()
 
             local ped = PlayerPedId()
             local coords = GetEntityCoords(ped)
-
             local pos, posToLook = Skin:CalcuatePosition(coords)
 
             SetCamCoord(self.cam, pos.x, pos.y, coords.z + Skin.camOffset)
@@ -33,7 +33,7 @@ function Camera:PositionLoop()
 end
 
 function Camera:StartLoops()
-    ESX.TextUI(Translate("drag_rotate_view"))
+    ESX.TextUI(Translate('drag_rotate_view'))
     self:PositionLoop()
 end
 
@@ -45,7 +45,7 @@ function Camera:Create()
     local playerPed = PlayerPedId()
     local playerCoords = GetEntityCoords(playerPed)
 
-    self.cam = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
+    self.cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
     SetCamCoord(self.cam, playerCoords.x, playerCoords.y, playerCoords.z + 1.0)
     SetCamRot(self.cam, 0.0, 0.0, 270.0, 2)
     SetEntityHeading(playerPed, 0.0)

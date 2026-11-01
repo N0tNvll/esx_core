@@ -9,13 +9,13 @@ Multicharacter.Characters = {}
 Multicharacter.hidePlayers = false
 
 function Multicharacter:SetupCamera()
-    self.cam = CreateCam("DEFAULT_SCRIPTED_CAMERA", true)
+    self.cam = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
     SetCamActive(self.cam, true)
     RenderScriptCams(true, false, 1, true, true)
 
     local offset = GetOffsetFromEntityInWorldCoords(self.playerPed, 0, 1.7, 0.4)
 
-    SetCamCoord(self.cam, offset.x + 0.7, offset.y , offset.z)
+    SetCamCoord(self.cam, offset.x + 0.7, offset.y, offset.z)
     PointCamAtCoord(self.cam, self.spawnCoords.x + 0.4, self.spawnCoords.y, self.spawnCoords.z + 1.3)
 end
 
@@ -42,10 +42,12 @@ end
 local HiddenCompents = {}
 
 local function HideComponents(hide)
-    local components = {11, 12, 21}
+    local components = { 11, 12, 21 }
+
     for i = 1, #components do
         if hide then
             local size = GetHudComponentSize(components[i])
+
             if size.x > 0 or size.y > 0 then
                 HiddenCompents[components[i]] = size
                 SetHudComponentSize(components[i], 0.0, 0.0)
@@ -53,11 +55,13 @@ local function HideComponents(hide)
         else
             if HiddenCompents[components[i]] then
                 local size = HiddenCompents[components[i]]
+
                 SetHudComponentSize(components[i], size.x, size.y)
                 HiddenCompents[components[i]] = nil
             end
         end
     end
+
     DisplayRadar(not hide)
 end
 
@@ -75,7 +79,7 @@ function Multicharacter:SetupCharacters()
     self.spawned = false
 
     self.playerPed = PlayerPedId()
-    self.spawnCoords = Config.Spawn[ESX.Math.Random(1,#Config.Spawn)]
+    self.spawnCoords = Config.Spawn[ESX.Math.Random(1, #Config.Spawn)]
 
     SetEntityCoords(self.playerPed, self.spawnCoords.x, self.spawnCoords.y, self.spawnCoords.z, true, false, false, false)
     SetEntityHeading(self.playerPed, self.spawnCoords.w)
@@ -86,18 +90,19 @@ function Multicharacter:SetupCharacters()
 
     ShutdownLoadingScreen()
     ShutdownLoadingScreenNui()
-    TriggerEvent("esx:loadingScreenOff")
+    TriggerEvent('esx:loadingScreenOff')
 
     SetTimeout(200, function()
-        TriggerServerEvent("esx_multicharacter:SetupCharacters")
+        TriggerServerEvent('esx_multicharacter:SetupCharacters')
     end)
 end
 
 function Multicharacter:GetSkin()
     local character = self.Characters[self.tempIndex]
     local skin = character and character.skin or Config.Default
+
     if not character.model then
-        if character.sex == TranslateCap("female") then
+        if character.sex == TranslateCap('female') then
             skin.sex = 1
         else
             skin.sex = 0
@@ -108,7 +113,9 @@ end
 
 function Multicharacter:SpawnTempPed()
     self.canRelog = false
+
     local skin = self:GetSkin()
+
     ESX.SpawnPlayer(skin, self.spawnCoords, function()
         DoScreenFadeIn(600)
         self.playerPed = PlayerPedId()
@@ -120,17 +127,19 @@ function Multicharacter:ChangeExistingPed()
     local spawnedCharacter = self.Characters[self.spawned]
 
     if not newCharacter.model then
-        newCharacter.model = newCharacter.sex == TranslateCap("male") and `mp_m_freemode_01` or `mp_f_freemode_01`
+        newCharacter.model = newCharacter.sex == TranslateCap('male') and `mp_m_freemode_01` or `mp_f_freemode_01`
     end
 
     if spawnedCharacter and spawnedCharacter.model then
         local model = xLib.streaming.requestModel(newCharacter.model)
+
         if model then
             SetPlayerModel(ESX.playerId, newCharacter.model)
             SetModelAsNoLongerNeeded(newCharacter.model)
         end
     end
-    TriggerEvent("skinchanger:loadSkin", newCharacter.skin)
+
+    TriggerEvent('skinchanger:loadSkin', newCharacter.skin)
 end
 
 function Multicharacter:PrepForUI()
@@ -141,16 +150,17 @@ end
 
 function Multicharacter:CloseUI()
     xLib.nui.send({
-        action = "ToggleMulticharacter",
+        action = 'ToggleMulticharacter',
         data = {
-            show = false
-        }
+            show = false,
+        },
     })
     xLib.nui.focus(false, false)
 end
 
 function Multicharacter:SetupCharacter(index)
     local character = self.Characters[index]
+
     self.tempIndex = index
 
     if not self.spawned then
@@ -171,6 +181,7 @@ function Multicharacter:SetupUI(characters, slots)
     self.slots = slots
 
     local Character = next(self.Characters)
+
     if not Character then
         self.canRelog = false
 
@@ -182,8 +193,8 @@ function Multicharacter:SetupUI(characters, slots)
             SetPedAoBlobRendering(self.playerPed, false)
             SetEntityAlpha(self.playerPed, 0, false)
 
-            TriggerServerEvent("esx_multicharacter:CharacterChosen", 1, true)
-            TriggerEvent("esx_identity:showRegisterIdentity")
+            TriggerServerEvent('esx_multicharacter:CharacterChosen', 1, true)
+            TriggerEvent('esx_identity:showRegisterIdentity')
         end)
     else
         Menu:InitCharacter()
@@ -191,12 +202,12 @@ function Multicharacter:SetupUI(characters, slots)
 end
 
 function Multicharacter:LoadSkinCreator(skin)
-    TriggerEvent("skinchanger:loadSkin", skin, function()
+    TriggerEvent('skinchanger:loadSkin', skin, function()
         DoScreenFadeIn(600)
         SetPedAoBlobRendering(self.playerPed, true)
         ResetEntityAlpha(self.playerPed)
 
-        TriggerEvent("esx_skin:openSaveableMenu", function()
+        TriggerEvent('esx_skin:openSaveableMenu', function()
             Multicharacter.finishedCreation = true
         end, function()
             Multicharacter.finishedCreation = true
@@ -205,9 +216,9 @@ function Multicharacter:LoadSkinCreator(skin)
 end
 
 function Multicharacter:SetDefaultSkin(playerData)
-
     local skin = Config.Default[playerData.sex]
-    skin.sex = playerData.sex == "m" and 0 or 1
+
+    skin.sex = playerData.sex == 'm' and 0 or 1
 
     local model = skin.sex == 0 and `mp_m_freemode_01` or `mp_f_freemode_01`
     ---@diagnostic disable-next-line: cast-local-type
@@ -255,12 +266,11 @@ function Multicharacter:PlayerLoaded(playerData, isNew, skin)
             Wait(200)
         end
 
-        skin = exports["skinchanger"]:GetSkin()
+        skin = exports['skinchanger']:GetSkin()
         DoScreenFadeOut(500)
         self:AwaitFadeOut()
-
     elseif not isNew then
-        TriggerEvent("skinchanger:loadSkin", skin or self.Characters[self.spawned].skin)
+        TriggerEvent('skinchanger:loadSkin', skin or self.Characters[self.spawned].skin)
     end
 
     self:DestoryCamera()
@@ -276,9 +286,9 @@ function Multicharacter:PlayerLoaded(playerData, isNew, skin)
 
         self:AwaitFadeIn()
 
-        TriggerServerEvent("esx:onPlayerSpawn")
-        TriggerEvent("esx:onPlayerSpawn")
-        TriggerEvent("esx:restoreLoadout")
+        TriggerServerEvent('esx:onPlayerSpawn')
+        TriggerEvent('esx:onPlayerSpawn')
+        TriggerEvent('esx:restoreLoadout')
 
         self:Reset()
     end)

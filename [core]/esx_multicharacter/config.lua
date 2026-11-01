@@ -2,7 +2,7 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 Config = {}
-Config.Locale = GetConvar("esx:locale", "en")
+Config.Locale = GetConvar('esx:locale', 'en')
 
 -- Allows players to delete their characters
 Config.CanDelete = true
@@ -16,7 +16,7 @@ if IsDuplicityVersion() then
     --------------------
 
     -- Text to prepend to each character (char#:identifier) - keep it short
-    Config.Prefix = "char"
+    Config.Prefix = 'char'
 else
     -- Sets the location for the character selection scene
     -- To set the spawn location for new characters, modify the default value in the users SQL table
@@ -27,7 +27,7 @@ else
 
     -- Default appearance for new characters
     Config.Default = {
-        ["m"] = {
+        ['m'] = {
             mom = 43,
             dad = 29,
             grandparents = 0,
@@ -126,7 +126,7 @@ else
             beard_3 = 0,
             beard_4 = 0,
         },
-        ["f"] = {
+        ['f'] = {
             mom = 28,
             dad = 6,
             grandparents = 0,

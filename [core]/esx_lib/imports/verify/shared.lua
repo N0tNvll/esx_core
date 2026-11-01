@@ -12,9 +12,10 @@ local function isArray(value)
     end
 
     local i = 0
-    
+
     for _ in pairs(value) do
         i = i + 1
+
         if value[i] == nil then
             return false
         end
@@ -47,7 +48,7 @@ local function isCallable(value)
     if value_type == 'function' then
         return true
     end
-    
+
     if value_type == 'table' then
         local mt = getmetatable(value)
 
@@ -55,7 +56,7 @@ local function isCallable(value)
             return true
         end
     end
-    
+
     return false
 end
 
@@ -65,12 +66,12 @@ local function validateModel(model)
     end
 
     local players = GetPlayers()
+
     if #players == 0 then
         return false
     end
 
     local source = tonumber(players[math.random(1, #players)])
-
     return xLib.callback.await('xLib:validateModel', source, model)
 end
 
@@ -89,13 +90,13 @@ local function verifyType(value, valid_type)
         return math.type(value) == 'float'
     elseif valid_type == 'uint' then
         return math.type(value) == 'integer' and value >= 0
-    elseif valid_type == 'char' then 
+    elseif valid_type == 'char' then
         return type(value) == 'string' and #value == 1
-    elseif valid_type == 'ped' then 
+    elseif valid_type == 'ped' then
         return GetEntityType(value) == 1
-    elseif valid_type == 'vehicle' then 
+    elseif valid_type == 'vehicle' then
         return GetEntityType(value) == 2
-    elseif valid_type == 'prop' then 
+    elseif valid_type == 'prop' then
         return GetEntityType(value) == 3
     elseif valid_type == 'playerId' then
         return isPlayerId(value)
@@ -106,7 +107,7 @@ local function verifyType(value, valid_type)
 
         return getmetatable(value)?._isClass == true
     elseif valid_type == 'model' then
-        if xLib.side == "server" then 
+        if xLib.side == 'server' then
             return validateModel(value)
         end
 
@@ -135,7 +136,7 @@ xLib.verify = setmetatable({
             end
 
             if throw_error and not match then
-                error(('[xLib] Couldn\'t match %s to types %s'):format(value, json.encode(valid_types)))
+                error(("[xLib] Couldn't match %s to types %s"):format(value, json.encode(valid_types)))
             else
                 return match
             end
@@ -144,25 +145,24 @@ xLib.verify = setmetatable({
         match = verifyType(value, valid_types)
 
         if throw_error and not match then
-            error(('[xLib] Couldn\'t match %s to type %s'):format(value, valid_types))
+            error(("[xLib] Couldn't match %s to type %s"):format(value, valid_types))
         else
             return match
         end
-    end
+    end,
 }, {
     __index = function(self, k)
         if k == 'debug' and xLib.debug then
-            return rawget(self, 'fn'
-        )
+            return rawget(self, 'fn')
         elseif k ~= 'debug' then
             return rawget(self, k)
-        else 
+        else
             return Noop
         end
     end,
     __call = function(self, ...)
         return rawget(self, 'fn')(...)
-    end
+    end,
 })
 
 return xLib.verify

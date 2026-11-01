@@ -24,7 +24,7 @@ function Core.InventoryEvents.GetPositiveCount(count)
 end
 
 function Core.InventoryEvents.WarnInvalidTransfer(playerId)
-    print(("[^3WARNING^7] Player Detected Cheating: ^5%s^7"):format(GetPlayerName(playerId)))
+    print(('[^3WARNING^7] Player Detected Cheating: ^5%s^7'):format(GetPlayerName(playerId)))
 end
 
 function Core.InventoryEvents.GetTransferPlayers(playerId, target)
@@ -53,6 +53,7 @@ function Core.InventoryEvents.GetTransferPlayers(playerId, target)
     end
 
     local distance = #(GetEntityCoords(sourcePed) - GetEntityCoords(targetPed))
+
     if distance > Config.DistanceGive then
         return nil, nil
     end
@@ -84,6 +85,5 @@ end
 ---@return boolean
 function Core.InventoryEvents.IsAccountTransferable(accountName)
     local account = Config.Accounts[accountName]
-
     return account ~= nil and account.transferable ~= false
 end

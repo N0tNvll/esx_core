@@ -42,8 +42,7 @@ function DiscordUtil.GetRateLimitWait(statusCode, body, headers, fallbackMs)
         end
     end
 
-    local retryAfter = DiscordUtil.GetHeader(headers, 'retry-after')
-        or DiscordUtil.GetHeader(headers, 'x-ratelimit-reset-after')
+    local retryAfter = DiscordUtil.GetHeader(headers, 'retry-after') or DiscordUtil.GetHeader(headers, 'x-ratelimit-reset-after')
 
     if retryAfter then
         local seconds = tonumber(retryAfter)

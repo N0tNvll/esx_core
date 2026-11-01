@@ -17,11 +17,13 @@ end
 ---@return table | number
 function ESX.SearchInventory(items, count)
     local item
-    if type(items) == "string" then
+
+    if type(items) == 'string' then
         item, items = items, { items }
     end
 
     local data = {}
+
     for i = 1, #ESX.PlayerData.inventory do
         local inventoryItem = ESX.PlayerData.inventory[i]
 
@@ -51,10 +53,11 @@ end
 ---@return nil
 function ESX.SetPlayerData(key, val)
     local current = ESX.PlayerData[key]
+
     ESX.PlayerData[key] = val
 
-    if key ~= "loadout" and (type(val) == "table" or val ~= current) then
-        TriggerEvent("esx:setPlayerData", key, val, current)
+    if key ~= 'loadout' and (type(val) == 'table' or val ~= current) then
+        TriggerEvent('esx:setPlayerData', key, val, current)
     end
 end
 

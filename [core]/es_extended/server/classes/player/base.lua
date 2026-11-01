@@ -6,9 +6,9 @@ Core.PlayerClass = Core.PlayerClass or {}
 local function getCoordinateHeading(coordinates)
     local coordinateType = type(coordinates)
 
-    if coordinateType == "vector4" then
+    if coordinateType == 'vector4' then
         return coordinates.w
-    elseif coordinateType == "table" then
+    elseif coordinateType == 'table' then
         if coordinates.w ~= nil then
             return coordinates.w
         end
@@ -22,7 +22,7 @@ local function getCoordinateHeading(coordinates)
 end
 
 local function isFiniteNumber(value)
-    return type(value) == "number" and value == value and value ~= math.huge and value ~= -math.huge
+    return type(value) == 'number' and value == value and value ~= math.huge and value ~= -math.huge
 end
 
 local function areCoordinateComponentsValid(x, y, z, heading)
@@ -32,14 +32,13 @@ local function areCoordinateComponentsValid(x, y, z, heading)
         limit = 10000.0
     end
 
-    return isFiniteNumber(x) and isFiniteNumber(y) and isFiniteNumber(z) and isFiniteNumber(heading)
-        and math.abs(x) <= limit and math.abs(y) <= limit and math.abs(z) <= limit
+    return isFiniteNumber(x) and isFiniteNumber(y) and isFiniteNumber(z) and isFiniteNumber(heading) and math.abs(x) <= limit and math.abs(y) <= limit and math.abs(z) <= limit
 end
 
 function Core.PlayerClass.IsValidCoordinates(coordinates)
     local coordinateType = type(coordinates)
 
-    if coordinateType ~= "table" and coordinateType ~= "vector3" and coordinateType ~= "vector4" then
+    if coordinateType ~= 'table' and coordinateType ~= 'vector3' and coordinateType ~= 'vector4' then
         return false
     end
 
@@ -60,7 +59,6 @@ function Core.PlayerClass.GetDefaultCoordinates()
     end
 
     local coordinates = spawns[ESX.Math.Random(1, #spawns)]
-
     return {
         x = coordinates.x,
         y = coordinates.y,
@@ -74,7 +72,7 @@ local function updateCachedCoordinates(player, x, y, z, heading)
         return false
     end
 
-    if type(player.coords) ~= "table" then
+    if type(player.coords) ~= 'table' then
         player.coords = {}
     end
 
@@ -107,7 +105,7 @@ function Core.PlayerClass.AttachBase(self)
     end
 
     function self.triggerEvent(eventName, ...)
-        assert(type(eventName) == "string", "eventName should be string!")
+        assert(type(eventName) == 'string', 'eventName should be string!')
         TriggerClientEvent(eventName, self.source, ...)
     end
 
@@ -136,25 +134,10 @@ function Core.PlayerClass.AttachBase(self)
 
         local entityHeading = getCoordinateHeading(coordinates)
 
-        SetEntityCoords(
-            ped,
-            coordinates.x,
-            coordinates.y,
-            coordinates.z,
-            false,
-            false,
-            false,
-            false
-        )
+        SetEntityCoords(ped, coordinates.x, coordinates.y, coordinates.z, false, false, false, false)
         SetEntityHeading(ped, entityHeading)
 
-        updateCachedCoordinates(
-            self,
-            coordinates.x,
-            coordinates.y,
-            coordinates.z,
-            entityHeading
-        )
+        updateCachedCoordinates(self, coordinates.x, coordinates.y, coordinates.z, entityHeading)
         rememberCoordinates(self.coords)
     end
 
@@ -165,13 +148,7 @@ function Core.PlayerClass.AttachBase(self)
             local entityCoords = GetEntityCoords(ped)
 
             if Core.PlayerClass.IsValidCoordinates(entityCoords) then
-                updateCachedCoordinates(
-                    self,
-                    entityCoords.x,
-                    entityCoords.y,
-                    entityCoords.z,
-                    GetEntityHeading(ped)
-                )
+                updateCachedCoordinates(self, entityCoords.x, entityCoords.y, entityCoords.z, GetEntityHeading(ped))
             end
         end
 
@@ -182,7 +159,7 @@ function Core.PlayerClass.AttachBase(self)
                 coordinates = Core.PlayerClass.GetDefaultCoordinates()
             end
 
-            assert(coordinates, ("No valid player position or Config.DefaultSpawns for player %s"):format(self.source))
+            assert(coordinates, ('No valid player position or Config.DefaultSpawns for player %s'):format(self.source))
             updateCachedCoordinates(self, coordinates.x, coordinates.y, coordinates.z, getCoordinateHeading(coordinates))
         end
 
@@ -230,10 +207,8 @@ function Core.PlayerClass.AttachBase(self)
         end
 
         local savedPlaytime = self.metadata and tonumber(self.metadata.lastPlaytime)
-
         return savedPlaytime or lastPlaytime
     end
-
 
     function self.getIdentifier()
         return self.identifier
@@ -246,15 +221,15 @@ function Core.PlayerClass.AttachBase(self)
     function self.setGroup(newGroup)
         local lastGroup = self.group
 
-        ExecuteCommand(("remove_principal identifier.%s group.%s"):format(self.license, self.group))
+        ExecuteCommand(('remove_principal identifier.%s group.%s'):format(self.license, self.group))
 
         self.group = newGroup
 
-        TriggerEvent("esx:setGroup", self.source, self.group, lastGroup)
-        self.triggerEvent("esx:setGroup", self.group, lastGroup)
-        Player(self.source).state:set("group", self.group, true)
+        TriggerEvent('esx:setGroup', self.source, self.group, lastGroup)
+        self.triggerEvent('esx:setGroup', self.group, lastGroup)
+        Player(self.source).state:set('group', self.group, true)
 
-        ExecuteCommand(("add_principal identifier.%s group.%s"):format(self.license, self.group))
+        ExecuteCommand(('add_principal identifier.%s group.%s'):format(self.license, self.group))
     end
 
     function self.getGroup()
@@ -273,7 +248,6 @@ function Core.PlayerClass.AttachBase(self)
         return self.variables[k]
     end
 
-
     function self.getName()
         return self.name
     end
@@ -284,7 +258,11 @@ function Core.PlayerClass.AttachBase(self)
 
     function self.setNationality(value)
         local nationality = xLib.nationality.normalize(value)
-        if value ~= nil and not nationality then return false end
+
+        if value ~= nil and not nationality then
+            return false
+        end
+
         self.nationality = nationality
         Player(self.source).state:set('nationality', nationality, true)
         self.triggerEvent('esx:updatePlayerData', 'nationality', nationality)
@@ -293,22 +271,21 @@ function Core.PlayerClass.AttachBase(self)
 
     function self.setName(newName)
         self.name = newName
-        Player(self.source).state:set("name", self.name, true)
+        Player(self.source).state:set('name', self.name, true)
     end
-
 
     function self.getSource()
         return self.source
     end
+
     self.getPlayerId = self.getSource
 
     function self.executeCommand(command)
-        if type(command) ~= "string" then
-            error("xPlayer.executeCommand must be of type string!")
+        if type(command) ~= 'string' then
+            error('xPlayer.executeCommand must be of type string!')
             return
         end
 
-        self.triggerEvent("esx:executeCommand", command)
+        self.triggerEvent('esx:executeCommand', command)
     end
-
 end

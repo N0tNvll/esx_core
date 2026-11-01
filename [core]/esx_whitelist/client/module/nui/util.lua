@@ -34,22 +34,10 @@ function NuiUtil.ReadTheme()
     end
 
     return {
-        primaryColor = sanitizeColor(
-            GetConvar('esx:ui:primaryColor', ''),
-            NuiUtil.THEME_DEFAULTS.primaryColor
-        ),
-        secondaryColor = sanitizeColor(
-            GetConvar('esx:ui:secondaryColor', ''),
-            NuiUtil.THEME_DEFAULTS.secondaryColor
-        ),
-        backgroundColor = sanitizeColor(
-            GetConvar('esx:ui:backgroundColor', ''),
-            NuiUtil.THEME_DEFAULTS.backgroundColor
-        ),
-        accentColor = sanitizeColor(
-            GetConvar('esx:ui:accentColor', ''),
-            NuiUtil.THEME_DEFAULTS.accentColor
-        ),
+        primaryColor = sanitizeColor(GetConvar('esx:ui:primaryColor', ''), NuiUtil.THEME_DEFAULTS.primaryColor),
+        secondaryColor = sanitizeColor(GetConvar('esx:ui:secondaryColor', ''), NuiUtil.THEME_DEFAULTS.secondaryColor),
+        backgroundColor = sanitizeColor(GetConvar('esx:ui:backgroundColor', ''), NuiUtil.THEME_DEFAULTS.backgroundColor),
+        accentColor = sanitizeColor(GetConvar('esx:ui:accentColor', ''), NuiUtil.THEME_DEFAULTS.accentColor),
         logoUrl = logoUrl,
     }
 end

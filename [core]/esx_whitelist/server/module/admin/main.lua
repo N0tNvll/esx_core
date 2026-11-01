@@ -78,10 +78,7 @@ return function(Util, RuntimeConfig, Log, Database)
 
         if key then
             liveGroups[key] = group
-            entries[key] = RuntimeConfig:Get().Admin.Cache.Enabled
-                    and groups()[group]
-                    and { group = group }
-                or nil
+            entries[key] = RuntimeConfig:Get().Admin.Cache.Enabled and groups()[group] and { group = group } or nil
         end
 
         return key
@@ -130,6 +127,7 @@ return function(Util, RuntimeConfig, Log, Database)
     function AdminCache:Remove(identifier)
         local key = Util.NormalizeIdentifier(identifier)
         local removed = entries[key] ~= nil
+
         entries[key] = nil
 
         return removed

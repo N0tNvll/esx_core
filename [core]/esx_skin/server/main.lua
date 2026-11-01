@@ -15,6 +15,7 @@ local saveLimiter = xLib.rateLimiter({
     refill = 1,
     interval = Config.SkinSaveCooldown,
 })
+
 local readLimiter = xLib.rateLimiter({ capacity = 2, refill = 1, interval = 1000 })
 
 local function isCurrentPlayer(playerId, player)
@@ -47,6 +48,7 @@ local function validateSkin(skin)
 
     for name, value in pairs(skin) do
         count = count + 1
+
         local bounds = Config.SkinFields[name]
         local field = type(name) == 'string' and name:sub(1, 48):gsub('[^%w_]', '?') or type(name)
         local reason
@@ -118,11 +120,7 @@ exports('SetBackpackCapacity', function(playerId, bag)
         player.setMeta('authorizedBackpack', bag)
     end
 
-    applyBackpackWeight(
-        playerId,
-        player.identifier,
-        cache[player.identifier] and cache[player.identifier].skin
-    )
+    applyBackpackWeight(playerId, player.identifier, cache[player.identifier] and cache[player.identifier].skin)
     return true
 end)
 
@@ -135,6 +133,7 @@ AddEventHandler('esx:playerLoaded', function(playerId)
 
     if player then
         local pending = { player = player, done = promise.new() }
+
         pendingEdits[playerId] = pending
 
         local ok, err = pcall(beginSkinEdit, playerId, true, pending)
@@ -151,11 +150,7 @@ AddEventHandler('esx:playerLoaded', function(playerId)
         local skin
 
         if Config.AllowClothingBackpackCapacity then
-            local ok, stored = pcall(
-                MySQL.scalar.await,
-                'SELECT skin FROM users WHERE identifier = ?',
-                { player.identifier }
-            )
+            local ok, stored = pcall(MySQL.scalar.await, 'SELECT skin FROM users WHERE identifier = ?', { player.identifier })
 
             if ok then
                 skin = decodeSkin(stored)
@@ -214,11 +209,7 @@ dispatchSave = function(identifier, queue)
         local success = type(rows) == 'number' and rows > 0
 
         if rows == 0 then
-            local ok, stored = pcall(
-                MySQL.scalar.await,
-                'SELECT skin FROM users WHERE identifier = ?',
-                { identifier }
-            )
+            local ok, stored = pcall(MySQL.scalar.await, 'SELECT skin FROM users WHERE identifier = ?', { identifier })
 
             success = ok and sameSkin(decodeSkin(stored), request.skin)
         end
@@ -230,6 +221,7 @@ dispatchSave = function(identifier, queue)
                 encoded = request.encoded,
                 expires = GetGameTimer() + Config.SkinCacheTTL,
             }
+
             local ok, err = pcall(applyBackpackWeight, request.playerId, identifier, request.skin)
 
             if not ok then
@@ -253,12 +245,7 @@ dispatchSave = function(identifier, queue)
         end
     end
 
-    local ok = pcall(
-        MySQL.update,
-        'UPDATE users SET skin = ? WHERE identifier = ?',
-        { request.encoded, identifier },
-        finish
-    )
+    local ok = pcall(MySQL.update, 'UPDATE users SET skin = ? WHERE identifier = ?', { request.encoded, identifier }, finish)
 
     if not ok then
         finish(nil)
@@ -326,9 +313,11 @@ local function readStoredSkin(playerId)
     end
 
     local skin
+
     getPlayerSkin(playerId, function(value)
         skin = value
     end)
+
     local entry = cache[player.identifier]
 
     if not isCurrentPlayer(playerId, player) or not entry or entry.expires < GetGameTimer() then
@@ -340,11 +329,13 @@ end
 
 beginSkinEdit = function(playerId, initialOnly, pending)
     local player = ESX.GetPlayerFromId(playerId)
+
     if not player or (editSessions[playerId] and editSessions[playerId].inFlight) then
         return false
     end
 
     local _, ready = readStoredSkin(playerId)
+
     if not ready or not isCurrentPlayer(playerId, player) then
         return false
     end
@@ -354,11 +345,12 @@ beginSkinEdit = function(playerId, initialOnly, pending)
     end
 
     local entry = cache[player.identifier]
+
     if initialOnly and entry.encoded ~= nil and entry.encoded ~= '' then
         return false
     end
-    editSessions[playerId] =
-        { player = player, expires = GetGameTimer() + Config.SkinEditSessionTTL }
+
+    editSessions[playerId] = { player = player, expires = GetGameTimer() + Config.SkinEditSessionTTL }
 
     return true
 end
@@ -373,11 +365,7 @@ local function saveClientSkin(playerId, skin, callback)
 
     local session = editSessions[playerId]
 
-    if
-        not session
-        or not isCurrentPlayer(playerId, session.player)
-        or not isCurrentPlayer(playerId, player)
-    then
+    if not session or not isCurrentPlayer(playerId, session.player) or not isCurrentPlayer(playerId, player) then
         reply(callback, false, 'edit_session_missing')
         return false
     end
@@ -402,6 +390,7 @@ local function saveClientSkin(playerId, skin, callback)
                 session.inFlight = false
             end
         end
+
         reply(callback, success, reason)
     end)
 end
@@ -470,6 +459,7 @@ end
 RegisterNetEvent('esx_skin:save', function(skin)
     local playerId = source
     local player = ESX.GetPlayerFromId(playerId)
+
     saveClientSkin(playerId, skin, function(success)
         if not success and isCurrentPlayer(playerId, player) then
             TriggerClientEvent('esx_skin:saveFailed', playerId)
@@ -500,12 +490,14 @@ exports('SaveOutfit', function(playerId, clothes, callback)
 
     local player = ESX.GetPlayerFromId(playerId)
     local stored, ready = readStoredSkin(playerId)
+
     if not ready or not stored or not isCurrentPlayer(playerId, player) then
         reply(callback, false)
         return false
     end
 
     local skin = decodeSkin(json.encode(stored))
+
     for name in pairs(Config.SkinEditFields.outfit) do
         if clothes[name] ~= nil then
             skin[name] = clothes[name]
@@ -520,7 +512,6 @@ exports('SaveOutfit', function(playerId, clothes, callback)
 end)
 
 RegisterNetEvent('esx_skin:setWeight', function() end)
-
 getPlayerSkin = function(source, cb)
     local player = ESX.GetPlayerFromId(source)
 
@@ -546,11 +537,8 @@ getPlayerSkin = function(source, cb)
 
             pending = promise.new()
             reads[identifier] = pending
-            local ok, stored = pcall(
-                MySQL.scalar.await,
-                'SELECT skin FROM users WHERE identifier = ?',
-                { identifier }
-            )
+
+            local ok, stored = pcall(MySQL.scalar.await, 'SELECT skin FROM users WHERE identifier = ?', { identifier })
 
             while writes[identifier] do
                 Citizen.Await(writes[identifier].done)
@@ -584,6 +572,7 @@ getPlayerSkin = function(source, cb)
     end
 
     local job = player.getJob()
+
     cb(entry and entry.skin, { skin_male = job.skin_male, skin_female = job.skin_female })
 end
 
@@ -591,7 +580,9 @@ xLib.callback.registerCompat('esx_skin:getPlayerSkin', getPlayerSkin)
 
 AddEventHandler('esx:playerDropped', function(playerId)
     editSessions[playerId] = nil
+
     local pending = pendingEdits[playerId]
+
     pendingEdits[playerId] = nil
 
     if pending then
@@ -608,21 +599,15 @@ end)
 CreateThread(function()
     while true do
         Wait(30000)
+
         for playerId, session in pairs(editSessions) do
-            if
-                session.expires <= GetGameTimer()
-                or not isCurrentPlayer(playerId, session.player)
-            then
+            if session.expires <= GetGameTimer() or not isCurrentPlayer(playerId, session.player) then
                 editSessions[playerId] = nil
             end
         end
 
         for identifier, entry in pairs(cache) do
-            if
-                entry.expires < GetGameTimer()
-                and not writes[identifier]
-                and not reads[identifier]
-            then
+            if entry.expires < GetGameTimer() and not writes[identifier] and not reads[identifier] then
                 cache[identifier] = nil
             end
         end
@@ -638,6 +623,7 @@ ESX.RegisterCommand(
         end
 
         local playerId = args.playerId.source or args.playerId.getSource()
+
         if beginSkinEdit(playerId, false) then
             args.playerId.triggerEvent('esx_skin:openSaveableMenu')
         end

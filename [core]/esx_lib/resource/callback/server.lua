@@ -8,16 +8,19 @@ local requestLimiter = xLib.rateLimiter({
     refill = setting('callbackRate', 30),
     interval = 1000,
 })
+
 local byteLimiter = xLib.rateLimiter({
     capacity = setting('callbackByteBurst', 262144),
     refill = setting('callbackByteRate', 65536),
     interval = 1000,
 })
+
 local replyLimiter = xLib.rateLimiter({
     capacity = 5,
     refill = 5,
     interval = 1000,
 })
+
 local maxPerPlayer = setting('callbackMaxInFlight', 8)
 local maxGlobal = setting('callbackMaxGlobalInFlight', 4096)
 local leases = {}
@@ -27,34 +30,22 @@ local sequence = 0
 local instance = xLib.string.randomHex(32)
 
 function xLib.acquireCallbackBudget(playerId, bytes)
-    if
-        type(playerId) ~= 'number'
-        or playerId <= 0
-        or playerId % 1 ~= 0
-        or not GetPlayerName(playerId)
-    then
+    if type(playerId) ~= 'number' or playerId <= 0 or playerId % 1 ~= 0 or not GetPlayerName(playerId) then
         return nil, false
     end
 
-    if
-        type(bytes) ~= 'number'
-        or bytes < 0
-        or bytes > setting('callbackMaxPayloadBytes', 65536)
-    then
+    if type(bytes) ~= 'number' or bytes < 0 or bytes > setting('callbackMaxPayloadBytes', 65536) then
         return nil, replyLimiter:consume(playerId)
     end
 
-    if
-        not requestLimiter:consume(playerId)
-        or not byteLimiter:consume(playerId, math.max(1, bytes))
-        or (counts[playerId] or 0) >= maxPerPlayer
-        or total >= maxGlobal
-    then
+    if not requestLimiter:consume(playerId) or not byteLimiter:consume(playerId, math.max(1, bytes)) or (counts[playerId] or 0) >= maxPerPlayer or total >= maxGlobal then
         return nil, replyLimiter:consume(playerId)
     end
 
     sequence = sequence + 1
+
     local token = instance .. ':' .. tostring(sequence)
+
     leases[token] = { source = playerId, owner = GetInvokingResource() or GetCurrentResourceName() }
     counts[playerId] = (counts[playerId] or 0) + 1
     total = total + 1
@@ -89,12 +80,7 @@ function xLib.chargeCallbackBytes(token, bytes)
         return false
     end
 
-    if
-        type(bytes) ~= 'number'
-        or bytes ~= bytes
-        or bytes < 0
-        or bytes > setting('callbackMaxPayloadBytes', 65536)
-    then
+    if type(bytes) ~= 'number' or bytes ~= bytes or bytes < 0 or bytes > setting('callbackMaxPayloadBytes', 65536) then
         return false
     end
 
@@ -121,6 +107,7 @@ end
 
 AddEventHandler('playerDropped', function()
     local playerId = source
+
     counts[playerId] = nil
 
     for _, lease in pairs(leases) do

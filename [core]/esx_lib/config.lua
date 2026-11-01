@@ -16,12 +16,12 @@ Config = {}
 
 ---@type MedalConfig
 Config.Medal = {
-	enabled = true,
-	publicKey = 'pub_82qkpMKV77AkpqLSgWsxLlDyfzpPI7Vw',
-	eventName = 'Death',
-	clipOptions = {
-		duration = 30,
-		captureDelayMs = 0,
-		alertType = 'Default'
-	}
+    enabled = true,
+    publicKey = 'pub_82qkpMKV77AkpqLSgWsxLlDyfzpPI7Vw',
+    eventName = 'Death',
+    clipOptions = {
+        duration = 30,
+        captureDelayMs = 0,
+        alertType = 'Default',
+    },
 }

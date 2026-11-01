@@ -4,13 +4,13 @@
 local Util = {}
 
 function Util.FormatDate(str)
-    local d, m, y = string.match(str, "(%d+)/(%d+)/(%d+)")
+    local d, m, y = string.match(str, '(%d+)/(%d+)/(%d+)')
     local date = str
 
-    if Config.DateFormat == "MM/DD/YYYY" then
-        date = m .. "/" .. d .. "/" .. y
-    elseif Config.DateFormat == "YYYY/MM/DD" then
-        date = y .. "/" .. m .. "/" .. d
+    if Config.DateFormat == 'MM/DD/YYYY' then
+        date = m .. '/' .. d .. '/' .. y
+    elseif Config.DateFormat == 'YYYY/MM/DD' then
+        date = y .. '/' .. m .. '/' .. d
     end
 
     return date
@@ -21,7 +21,7 @@ local function convertToLowerCase(str)
 end
 
 local function convertFirstLetterToUpper(str)
-    return str:gsub("^%l", string.upper)
+    return str:gsub('^%l', string.upper)
 end
 
 function Util.FormatName(name)

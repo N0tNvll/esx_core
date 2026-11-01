@@ -11,12 +11,12 @@
 
 local registeredCallbacks = {}
 local resource_name = GetCurrentResourceName() --TODO: Add cache
-local IS_DEBUG <const> = GetConvar("xLib:debug", "false") == "true"
+local IS_DEBUG <const> = GetConvar('xLib:debug', 'false') == 'true'
 
 ---@return integer
 local function getValidationGrace()
-    local grace = GetConvarInt("xLib:callbackValidationGrace", 15000)
-    local timeout = tonumber(GetConvar("xLib:callbackTimeout", GetConvar("esx:callbackTimeout", "")))
+    local grace = GetConvarInt('xLib:callbackValidationGrace', 15000)
+    local timeout = tonumber(GetConvar('xLib:callbackTimeout', GetConvar('esx:callbackTimeout', '')))
 
     if timeout and timeout > 0 and timeout < math.huge and grace * 2 > timeout then
         return math.floor(timeout / 2)
@@ -26,8 +26,8 @@ local function getValidationGrace()
 end
 
 local VALIDATION_GRACE_MS <const> = getValidationGrace()
-local VALIDATION_WINDOW_MS <const> = GetConvarInt("xLib:callbackValidationWindow", 5000)
-local VALIDATION_MAX_REQUESTS <const> = GetConvarInt("xLib:callbackValidationMaxRequests", 30)
+local VALIDATION_WINDOW_MS <const> = GetConvarInt('xLib:callbackValidationWindow', 5000)
+local VALIDATION_MAX_REQUESTS <const> = GetConvarInt('xLib:callbackValidationMaxRequests', 30)
 local MAX_CALLBACK_NAME_LEN <const> = 200
 local MAX_RESOURCE_NAME_LEN <const> = 100
 local MAX_CALLBACK_KEY_LEN <const> = 300
@@ -53,9 +53,10 @@ local function consumeInvalidValidation()
     return bucket.count <= VALIDATION_MAX_REQUESTS
 end
 
-
 AddEventHandler(IsDuplicityVersion() and 'onResourceStop' or 'onClientResourceStop', function(resourceName)
-    if resource_name == resourceName then return end
+    if resource_name == resourceName then
+        return
+    end
 
     for callbackName, resource in pairs(registeredCallbacks) do
         if resource.resource == resourceName or resource.owner == resourceName then
@@ -73,10 +74,10 @@ end)
 ---@return boolean accepted
 function xLib.setValidCallback(callbackName, isValid, owner)
     local resourceName = GetInvokingResource() or resource_name
+
     owner = owner or resourceName
 
-    if type(callbackName) ~= 'string' or callbackName == '' or #callbackName > MAX_CALLBACK_NAME_LEN
-        or type(owner) ~= 'string' or owner == '' or #owner > MAX_RESOURCE_NAME_LEN then
+    if type(callbackName) ~= 'string' or callbackName == '' or #callbackName > MAX_CALLBACK_NAME_LEN or type(owner) ~= 'string' or owner == '' or #owner > MAX_RESOURCE_NAME_LEN then
         return false
     end
 
@@ -91,13 +92,14 @@ function xLib.setValidCallback(callbackName, isValid, owner)
     end
 
     if callbackResource then
-        if callbackResource.resource == resourceName and callbackResource.owner == owner then return true end
+        if callbackResource.resource == resourceName and callbackResource.owner == owner then
+            return true
+        end
 
         if IS_DEBUG then
             local errMessage = ("^1resource '%s' attempted to overwrite callback '%s' owned by resource '%s'^0"):format(resourceName, callbackName, callbackResource.owner)
 
-            print(('^1SCRIPT ERROR: %s^0\n%s'):format(errMessage,
-                Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()) or ''))
+            print(('^1SCRIPT ERROR: %s^0\n%s'):format(errMessage, Citizen.InvokeNative(`FORMAT_STACK_TRACE` & 0xFFFFFFFF, nil, 0, Citizen.ResultAsString()) or ''))
         end
 
         return false
@@ -118,17 +120,32 @@ end
 local cbEvent = '__xLib_cb_%s'
 
 RegisterNetEvent('xLib:validateCallback', function(callbackName, invokingResource, key)
-    if type(callbackName) ~= "string" or #callbackName > MAX_CALLBACK_NAME_LEN then return end
-    if type(invokingResource) ~= "string" or #invokingResource > MAX_RESOURCE_NAME_LEN then return end
-    if type(key) ~= "string" or #key > MAX_CALLBACK_KEY_LEN then return end
+    if type(callbackName) ~= 'string' or #callbackName > MAX_CALLBACK_NAME_LEN then
+        return
+    end
 
-    if registeredCallbacks[callbackName] then return end
-    if not consumeInvalidValidation() then return end
+    if type(invokingResource) ~= 'string' or #invokingResource > MAX_RESOURCE_NAME_LEN then
+        return
+    end
+
+    if type(key) ~= 'string' or #key > MAX_CALLBACK_KEY_LEN then
+        return
+    end
+
+    if registeredCallbacks[callbackName] then
+        return
+    end
+
+    if not consumeInvalidValidation() then
+        return
+    end
 
     local source = source
 
     local function rejectInvalidCallback()
-        if registeredCallbacks[callbackName] then return end
+        if registeredCallbacks[callbackName] then
+            return
+        end
 
         local event = cbEvent:format(invokingResource)
 

@@ -40,13 +40,14 @@ function xLib.Raycast.Start(depth, ...)
 
     self.refreshRate = refreshRate
     self.depth = depth
-    self.args = {...}
+    self.args = { ... }
 
     self.active = true
 
     self._thread = CreateThread(function()
         while self.active do
             local target, hit, coords, normal, material, entity = xLib.Raycast.FromScreen(self.depth, unpack(self.args))
+
             self.result = {
                 hit = hit,
                 coords = coords,
@@ -63,8 +64,12 @@ end
 
 -- Stop raycasting
 function xLib.Raycast:Stop()
-    if not self and not self.active then return end
+    if not self and not self.active then
+        return
+    end
+
     self.active = false
+
     if self._thread then
         self._thread = nil
     end
@@ -73,7 +78,9 @@ end
 -- Check if the raycating is active
 ---@return boolean
 function xLib.Raycast:IsActive()
-    if not self and not self.active then return end
+    if not self and not self.active then
+        return
+    end
     return self.active
 end
 

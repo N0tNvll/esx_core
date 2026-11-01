@@ -6,7 +6,6 @@
 ---@param RuntimeConfig table
 return function(Util, LoggerUtil, RuntimeConfig)
     local Logger = {}
-
     local queue = {}
     local drainScheduled = false
     local dropped = 0
@@ -27,7 +26,6 @@ return function(Util, LoggerUtil, RuntimeConfig)
 
         local cfg = loggingConfig()
         local fallback = cfg and cfg.Webhook or ''
-
         return Util.Trim(fallback)
     end
 
@@ -99,13 +97,7 @@ return function(Util, LoggerUtil, RuntimeConfig)
                 sent = sent + #events
             else
                 failed = failed + #events
-                Logger:Console(
-                    'warning',
-                    ('Webhook delivery failed (HTTP %d), %d event(s) dropped'):format(
-                        status,
-                        #events
-                    )
-                )
+                Logger:Console('warning', ('Webhook delivery failed (HTTP %d), %d event(s) dropped'):format(status, #events))
             end
         end, 'POST', payload, { ['Content-Type'] = 'application/json' })
     end
@@ -173,6 +165,7 @@ return function(Util, LoggerUtil, RuntimeConfig)
         end
 
         local title = result.allowed and 'Connection accepted' or 'Connection denied'
+
         self:Event(level, title, {
             { name = 'Player', value = tostring(playerName), inline = true },
             { name = 'Method', value = tostring(result.method), inline = true },
@@ -183,15 +176,7 @@ return function(Util, LoggerUtil, RuntimeConfig)
                 inline = true,
             },
         })
-        self:Console(
-            'debug',
-            ('%s for %s (method=%s reason=%s)'):format(
-                title,
-                tostring(playerName),
-                tostring(result.method),
-                tostring(result.reason)
-            )
-        )
+        self:Console('debug', ('%s for %s (method=%s reason=%s)'):format(title, tostring(playerName), tostring(result.method), tostring(result.reason)))
     end
 
     ---@return table

@@ -13,7 +13,6 @@ return function(deps)
     local Logger = deps.Logger
     local Service = deps.Service
     local IsAdmin = deps.IsAdmin
-
     local Panel = {}
 
     -- Per-player token buckets for management events.
@@ -83,19 +82,13 @@ return function(deps)
             Logger:Event('security', 'Unauthorized panel access attempt', {
                 { name = 'Source', value = tostring(source), inline = true },
             })
-            Logger:Console(
-                'warning',
-                ('Rejected panel action from non-admin source %s'):format(tostring(source))
-            )
+            Logger:Console('warning', ('Rejected panel action from non-admin source %s'):format(tostring(source)))
 
             return false
         end
 
         if not consumeRateToken(source) then
-            Logger:Console(
-                'warning',
-                ('Rate-limited panel action from source %s'):format(tostring(source))
-            )
+            Logger:Console('warning', ('Rate-limited panel action from source %s'):format(tostring(source)))
 
             return false
         end
@@ -153,11 +146,7 @@ return function(deps)
         end
 
         if type(payload) ~= 'table' or type(payload.key) ~= 'string' then
-            TriggerClientEvent(
-                EVENT_PREFIX .. 'cl:configAck',
-                source,
-                { ok = false, error = 'malformed payload' }
-            )
+            TriggerClientEvent(EVENT_PREFIX .. 'cl:configAck', source, { ok = false, error = 'malformed payload' })
 
             return
         end
@@ -194,11 +183,7 @@ return function(deps)
                 Discord:ClearCache()
             end
 
-            if
-                key == 'Admin.Groups'
-                or key == 'AdminOnly.Groups'
-                or key == 'Admin.Cache.Enabled'
-            then
+            if key == 'Admin.Groups' or key == 'AdminOnly.Groups' or key == 'Admin.Cache.Enabled' then
                 AdminCache:Load()
             end
 

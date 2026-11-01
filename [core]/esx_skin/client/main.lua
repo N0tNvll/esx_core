@@ -16,12 +16,12 @@ function Skin:CalcualteHeading(angle)
     elseif angle < 0 then
         angle = angle + 360
     end
+
     angle = angle * self.customPI
     return angle
 end
 
 function Skin:CalcuatePosition(coords)
-
     local angle = self.heading * self.customPI
     local theta = {
         x = math.cos(angle),
@@ -34,7 +34,6 @@ function Skin:CalcuatePosition(coords)
     }
 
     local angleToLook = self:CalcualteHeading(self.heading - 140.0)
-
     local thetaToLook = {
         x = math.cos(angleToLook),
         y = math.sin(angleToLook),

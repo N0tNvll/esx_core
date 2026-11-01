@@ -50,10 +50,7 @@ function Catalog.service(db, data, onReady)
             { name }
         )
 
-        assert(
-            engine and engine:lower() == 'innodb',
-            'Catalog table ' .. name .. ' must use InnoDB'
-        )
+        assert(engine and engine:lower() == 'innodb', 'Catalog table ' .. name .. ' must use InnoDB')
     end
 
     local function ensureColumn(column)
@@ -70,19 +67,12 @@ function Catalog.service(db, data, onReady)
         assert(count ~= nil, 'Unable to inspect catalog column ' .. column.name)
 
         if tonumber(count) == 0 then
-            db.query.await(
-                ('ALTER TABLE %s ADD COLUMN %s %s'):format(
-                    identifier(column.table),
-                    identifier(column.name),
-                    column.definition
-                )
-            )
+            db.query.await(('ALTER TABLE %s ADD COLUMN %s %s'):format(identifier(column.table), identifier(column.name), column.definition))
         end
     end
 
     local function reconcile(resource, locale)
-        local definition =
-            assert(data.resources[resource], 'Unknown SQL catalog resource: ' .. tostring(resource))
+        local definition = assert(data.resources[resource], 'Unknown SQL catalog resource: ' .. tostring(resource))
 
         assert(type(locale) == 'string' and #locale <= 32, 'Invalid catalog locale')
 
@@ -92,13 +82,8 @@ function Catalog.service(db, data, onReady)
             locale = 'br'
         end
 
-        local selected = definition.locales[locale] and locale
-            or (definition.locales[locale:match('^[^-]+') or locale] and locale:match('^[^-]+'))
-            or (definition.locales.en and 'en')
-            or 'default'
-
-        local sourceSeeds = selected == 'default' and definition.seeds
-            or definition.locales[selected]
+        local selected = definition.locales[locale] and locale or (definition.locales[locale:match('^[^-]+') or locale] and locale:match('^[^-]+')) or (definition.locales.en and 'en') or 'default'
+        local sourceSeeds = selected == 'default' and definition.seeds or definition.locales[selected]
         local seeds = {}
         local sortKeys = {}
 
@@ -179,9 +164,7 @@ function Catalog.service(db, data, onReady)
                     columns[i] = identifier(keys[i])
                 end
 
-                local rows = db.query.await(
-                    ('SELECT %s FROM %s'):format(table.concat(columns, ', '), identifier(name))
-                )
+                local rows = db.query.await(('SELECT %s FROM %s'):format(table.concat(columns, ', '), identifier(name)))
 
                 assert(rows, 'Unable to read existing catalog keys for ' .. name)
 
@@ -231,13 +214,7 @@ function Catalog.service(db, data, onReady)
                 end
 
                 queries[#queries + 1] = {
-                    query = ('INSERT INTO %s (%s) SELECT %s FROM (SELECT COUNT(*) AS matches FROM %s WHERE %s) AS catalog_existing WHERE catalog_existing.matches = 0'):format(
-                        identifier(name),
-                        table.concat(fields, ', '),
-                        table.concat(placeholders, ', '),
-                        identifier(name),
-                        table.concat(conditions, ' AND ')
-                    ),
+                    query = ('INSERT INTO %s (%s) SELECT %s FROM (SELECT COUNT(*) AS matches FROM %s WHERE %s) AS catalog_existing WHERE catalog_existing.matches = 0'):format(identifier(name), table.concat(fields, ', '), table.concat(placeholders, ', '), identifier(name), table.concat(conditions, ' AND ')),
                     values = values,
                 }
 
@@ -247,17 +224,9 @@ function Catalog.service(db, data, onReady)
         end
 
         local imported = #queries
-        local marker = db.single.await(
-            'SELECT `version`, `locale` FROM `esx_catalog_imports` WHERE `resource` = ?',
-            { resource }
-        )
+        local marker = db.single.await('SELECT `version`, `locale` FROM `esx_catalog_imports` WHERE `resource` = ?', { resource })
 
-        if
-            imported > 0
-            or not marker
-            or marker.version ~= data.version
-            or marker.locale ~= selected
-        then
+        if imported > 0 or not marker or marker.version ~= data.version or marker.locale ~= selected then
             queries[#queries + 1] = {
                 query = [[INSERT INTO `esx_catalog_imports` (`resource`, `version`, `locale`) VALUES (?, ?, ?)
                     ON DUPLICATE KEY UPDATE `version` = VALUES(`version`), `locale` = VALUES(`locale`), `updated_at` = CURRENT_TIMESTAMP]],

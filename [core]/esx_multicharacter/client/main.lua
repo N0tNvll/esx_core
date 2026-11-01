@@ -18,13 +18,14 @@ end)
 
 -- Events
 
-ESX.SecureNetEvent("esx_multicharacter:SetupUI", function(data, slots)
+ESX.SecureNetEvent('esx_multicharacter:SetupUI', function(data, slots)
     if not nuiReady then
         print('[WARNING]', 'NUI not ready yet, awaiting...')
         xLib.waitFor(function()
             return nuiReady == true
         end, 'NUI Failed to load after 10000ms', 10000)
     end
+
     Multicharacter:SetupUI(data, slots)
 end)
 
@@ -39,7 +40,7 @@ ESX.SecureNetEvent('esx:onPlayerLogout', function()
     Multicharacter.spawned = false
 
     Multicharacter:SetupCharacters()
-    TriggerEvent("esx_skin:resetFirstSpawn")
+    TriggerEvent('esx_skin:resetFirstSpawn')
 end)
 
 -- Relog
@@ -47,12 +48,13 @@ end)
 if Config.Relog then
     local relogPending = false
 
-    RegisterCommand("relog", function()
+    RegisterCommand('relog', function()
         if ESX.PlayerLoaded and not relogPending then
             relogPending = true
             Multicharacter.canRelog = false
 
             local ok, result = pcall(xLib.callback.await, 'esx_multicharacter:relog', false)
+
             relogPending = false
 
             if not ok or type(result) ~= 'table' or not result.success then

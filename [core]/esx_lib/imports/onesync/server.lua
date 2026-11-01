@@ -14,31 +14,32 @@ local function getNearbyPlayers(source, closest, distance, ignore, routingBucket
     local count = 0
     local playerPed
     local playerCoords
+
     ignore = ignore or {}
 
     if not distance then
         distance = 100
     end
 
-    if type(source) == "number" then
+    if type(source) == 'number' then
         playerPed = GetPlayerPed(source)
 
         if not source then
-            error("Received invalid first argument (source); should be playerId")
+            error('Received invalid first argument (source); should be playerId')
         end
 
         playerCoords = GetEntityCoords(playerPed)
 
         if not playerCoords then
-            error("Received nil value (playerCoords); perhaps source is nil at first place?")
+            error('Received nil value (playerCoords); perhaps source is nil at first place?')
         end
     end
 
-    if type(source) == "vector3" then
+    if type(source) == 'vector3' then
         playerCoords = source
 
         if not playerCoords then
-            error("Received nil value (playerCoords); perhaps source is nil at first place?")
+            error('Received nil value (playerCoords); perhaps source is nil at first place?')
         end
     end
 
@@ -53,6 +54,7 @@ local function getNearbyPlayers(source, closest, distance, ignore, routingBucket
 
             if not closest then
                 local dist = #(playerCoords - coords)
+
                 if dist <= distance then
                     count = count + 1
                     result[count] = { id = playerId, ped = NetworkGetNetworkIdFromEntity(entity), coords = coords, dist = dist }
@@ -60,6 +62,7 @@ local function getNearbyPlayers(source, closest, distance, ignore, routingBucket
             else
                 if playerId ~= source then
                     local dist = #(playerCoords - coords)
+
                     if dist <= (result.dist or distance) then
                         result = { id = playerId, ped = NetworkGetNetworkIdFromEntity(entity), coords = coords, dist = dist }
                     end
@@ -89,11 +92,14 @@ end
 
 local function getNearbyEntities(entities, coords, modelFilter, maxDistance, isPed)
     local nearbyEntities = {}
-    coords = type(coords) == "number" and GetEntityCoords(GetPlayerPed(coords)) or vector3(coords.x, coords.y, coords.z)
+
+    coords = type(coords) == 'number' and GetEntityCoords(GetPlayerPed(coords)) or vector3(coords.x, coords.y, coords.z)
+
     for _, entity in pairs(entities) do
         if not isPed or (isPed and not IsPedAPlayer(entity)) then
             if not modelFilter or modelFilter[GetEntityModel(entity)] then
                 local entityCoords = GetEntityCoords(entity)
+
                 if not maxDistance or #(coords - entityCoords) <= maxDistance then
                     nearbyEntities[#nearbyEntities + 1] = NetworkGetNetworkIdFromEntity(entity)
                 end
@@ -130,13 +136,15 @@ end
 
 local function getClosestEntity(entities, coords, modelFilter, isPed)
     local distance, closestEntity, closestCoords = 100, 0, vector3(0, 0, 0)
-    coords = type(coords) == "number" and GetEntityCoords(GetPlayerPed(coords)) or vector3(coords.x, coords.y, coords.z)
+
+    coords = type(coords) == 'number' and GetEntityCoords(GetPlayerPed(coords)) or vector3(coords.x, coords.y, coords.z)
 
     for _, entity in pairs(entities) do
         if not isPed or (isPed and not IsPedAPlayer(entity)) then
             if not modelFilter or modelFilter[GetEntityModel(entity)] then
                 local entityCoords = GetEntityCoords(entity)
                 local dist = #(coords - entityCoords)
+
                 if dist < distance then
                     closestEntity, distance, closestCoords = entity, dist, entityCoords
                 end

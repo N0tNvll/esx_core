@@ -61,7 +61,7 @@ end
 local function normalizeKey(key)
     local keyType = type(key)
 
-    if keyType == "number" or keyType == "string" then
+    if keyType == 'number' or keyType == 'string' then
         return tostring(key)
     end
 end
@@ -73,7 +73,7 @@ local function normalizeCost(cost)
         return 1
     end
 
-    if type(cost) ~= "number" or cost ~= cost or cost <= 0 then
+    if type(cost) ~= 'number' or cost ~= cost or cost <= 0 then
         return nil
     end
 
@@ -83,21 +83,19 @@ end
 ---@param options RateLimiterOptions
 ---@return RateLimiter
 local function createRateLimiter(options)
-    if type(options) ~= "table" then
-        error("[xLib] rateLimiter requires an options table", 2)
+    if type(options) ~= 'table' then
+        error('[xLib] rateLimiter requires an options table', 2)
     end
 
-    local capacity = positiveNumber("capacity", options.capacity, nil)
-    local refill = positiveNumber("refill", options.refill, nil)
-    local interval = positiveNumber("interval", options.interval, nil, true)
-    local maxEntries = positiveNumber("maxEntries", options.maxEntries, positiveConvarInt("xLib:rateLimiterMaxEntries", 4096), true)
-    local staleMs = positiveNumber("staleMs", options.staleMs, math.max(60000, math_ceil((capacity / refill) * interval * 4)), true)
-    local pruneInterval = positiveNumber("pruneInterval", options.pruneInterval, staleMs, true)
-
+    local capacity = positiveNumber('capacity', options.capacity, nil)
+    local refill = positiveNumber('refill', options.refill, nil)
+    local interval = positiveNumber('interval', options.interval, nil, true)
+    local maxEntries = positiveNumber('maxEntries', options.maxEntries, positiveConvarInt('xLib:rateLimiterMaxEntries', 4096), true)
+    local staleMs = positiveNumber('staleMs', options.staleMs, math.max(60000, math_ceil((capacity / refill) * interval * 4)), true)
+    local pruneInterval = positiveNumber('pruneInterval', options.pruneInterval, staleMs, true)
     local buckets = {}
     local bucketCount = 0
     local lastPrune = 0
-
     local limiter = {}
 
     local function removeBucket(key)
@@ -200,9 +198,11 @@ local function createRateLimiter(options)
         end
 
         local now = nowMs()
+
         prune(now, false)
 
         local bucket = getBucket(bucketKey, now)
+
         if not bucket then
             return false, 0
         end
@@ -233,11 +233,13 @@ local function createRateLimiter(options)
         end
 
         local bucket = buckets[bucketKey]
+
         if not bucket then
             return 0
         end
 
         local now = nowMs()
+
         refillBucket(bucket, now)
 
         if bucket.tokens >= cost then
@@ -267,7 +269,7 @@ local function createRateLimiter(options)
         return bucketCount
     end
 
-    AddEventHandler("playerDropped", function()
+    AddEventHandler('playerDropped', function()
         limiter:reset(source)
     end)
 

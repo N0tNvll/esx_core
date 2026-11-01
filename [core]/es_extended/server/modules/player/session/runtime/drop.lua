@@ -33,11 +33,7 @@ function Core.PlayerSession.OnPlayerDropped(playerId, reason, cb)
 
     local function finishDrop(success)
         if not success then
-            print(
-                ('[es_extended] Final save failed for %s; retaining session and retrying'):format(
-                    xPlayer.identifier
-                )
-            )
+            print(('[es_extended] Final save failed for %s; retaining session and retrying'):format(xPlayer.identifier))
             return SetTimeout(5000, function()
                 Core.SavePlayer(xPlayer, finishDrop, true)
             end)

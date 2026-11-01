@@ -7,7 +7,7 @@
     Copyright © 2025 Linden <https://github.com/thelindat>
 ]]
 
-local glm = require 'glm'
+local glm = require('glm')
 
 ---@class ZoneProperties
 ---@field debug? boolean
@@ -29,8 +29,12 @@ local Zones = {}
 local nextZoneId = 0
 
 local function invoke(zone, name)
-    if not zone or Zones[zone.id] ~= zone or not zone[name] then return end
+    if not zone or Zones[zone.id] ~= zone or not zone[name] then
+        return
+    end
+
     local ok, err = pcall(zone[name], zone)
+
     if not ok then
         print(('^1Zone %s from %s on %s: %s^0'):format(zone.id, zone.resource, name, err))
     end
@@ -123,34 +127,49 @@ local tick
 
 ---@param zone CZone
 local function removeZone(zone)
-    if Zones[zone.id] ~= zone then return end
+    if Zones[zone.id] ~= zone then
+        return
+    end
+
     Zones[zone.id] = nil
 
     xLib.grid.removeEntry(zone)
 
-    if IsDuplicityVersion() then return end
+    if IsDuplicityVersion() then
+        return
+    end
 
     insideZones[zone.id] = nil
 
     zone.insideZone = false
+
     for _, list in ipairs({ exitingZones, enteringZones, nearbyZones }) do
         local index = list:indexOf(zone)
-        if index then table.remove(list, index) end
+
+        if index then
+            table.remove(list, index)
+        end
     end
 end
 
 AddEventHandler('onResourceStop', function(resource)
     for _, zone in pairs(Zones) do
-        if zone.resource == resource then removeZone(zone) end
+        if zone.resource == resource then
+            removeZone(zone)
+        end
     end
 end)
 
 CreateThread(function()
-    if IsDuplicityVersion() then return end
+    if IsDuplicityVersion() then
+        return
+    end
 
     while true do
         local coords = GetEntityCoords(PlayerPedId())
-        local zones = xLib.grid.getNearbyEntries(coords, function(entry) return entry.remove == removeZone end) --[[@as Array<CZone>]]
+        local zones = xLib.grid.getNearbyEntries(coords, function(entry)
+            return entry.remove == removeZone
+        end) --[[@as Array<CZone>]]
 
         for i = 1, #nearbyZones do
             local zone = nearbyZones[i]
@@ -206,6 +225,7 @@ CreateThread(function()
         local exitingSize = #exitingZones
         local enteringSize = #enteringZones
         local exits, enters = exitingZones, enteringZones
+
         exitingZones, enteringZones = xLib.table.array:new(), xLib.table.array:new()
 
         if exitingSize > 0 then
@@ -244,8 +264,10 @@ CreateThread(function()
                                 invoke(zone, 'inside')
                             end
                         end
+
                         Wait(0)
                     end
+
                     tick = nil
                 end)
             end
@@ -261,17 +283,18 @@ local DrawPoly = DrawPoly
 local function debugPoly(self)
     for i = 1, #self.triangles do
         local triangle = self.triangles[i]
-        DrawPoly(triangle[1].x, triangle[1].y, triangle[1].z, triangle[2].x, triangle[2].y, triangle[2].z, triangle[3].x, triangle[3].y, triangle[3].z,
-            self.debugColour.r, self.debugColour.g, self.debugColour.b, self.debugColour.a)
-        DrawPoly(triangle[2].x, triangle[2].y, triangle[2].z, triangle[1].x, triangle[1].y, triangle[1].z, triangle[3].x, triangle[3].y, triangle[3].z,
-            self.debugColour.r, self.debugColour.g, self.debugColour.b, self.debugColour.a)
+
+        DrawPoly(triangle[1].x, triangle[1].y, triangle[1].z, triangle[2].x, triangle[2].y, triangle[2].z, triangle[3].x, triangle[3].y, triangle[3].z, self.debugColour.r, self.debugColour.g, self.debugColour.b, self.debugColour.a)
+        DrawPoly(triangle[2].x, triangle[2].y, triangle[2].z, triangle[1].x, triangle[1].y, triangle[1].z, triangle[3].x, triangle[3].y, triangle[3].z, self.debugColour.r, self.debugColour.g, self.debugColour.b, self.debugColour.a)
     end
+
     for i = 1, #self.polygon do
         local thickness = vec(0, 0, self.thickness / 2)
         local a = self.polygon[i] + thickness
         local b = self.polygon[i] - thickness
         local c = (self.polygon[i + 1] or self.polygon[1]) + thickness
         local d = (self.polygon[i + 1] or self.polygon[1]) - thickness
+
         DrawLine(a.x, a.y, a.z, b.x, b.y, b.z, self.debugColour.r, self.debugColour.g, self.debugColour.b, 225)
         DrawLine(a.x, a.y, a.z, c.x, c.y, c.z, self.debugColour.r, self.debugColour.g, self.debugColour.b, 225)
         DrawLine(b.x, b.y, b.z, d.x, d.y, d.z, self.debugColour.r, self.debugColour.g, self.debugColour.b, 225)
@@ -283,13 +306,39 @@ local function debugPoly(self)
 end
 
 local function debugSphere(self)
-    DrawMarker(28, self.coords.x, self.coords.y, self.coords.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, self.radius, self.radius, self.radius, self.debugColour.r,
+    DrawMarker(
+        28,
+        self.coords.x,
+        self.coords.y,
+        self.coords.z,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        self.radius,
+        self.radius,
+        self.radius,
+        self.debugColour.r,
         ---@diagnostic disable-next-line: param-type-mismatch
-        self.debugColour.g, self.debugColour.b, self.debugColour.a, false, false, 0, false, false, false, false)
+        self.debugColour.g,
+        self.debugColour.b,
+        self.debugColour.a,
+        false,
+        false,
+        0,
+        false,
+        false,
+        false,
+        false
+    )
 end
 
 local function contains(self, coords, updateDistance)
-    if updateDistance then self.distance = #(self.coords - coords) end
+    if updateDistance then
+        self.distance = #(self.coords - coords)
+    end
 
     return glm_polygon_contains(self.polygon, coords, self.thickness / 4)
 end
@@ -297,7 +346,9 @@ end
 local function insideSphere(self, coords, updateDistance)
     local distance = #(self.coords - coords)
 
-    if updateDistance then self.distance = distance end
+    if updateDistance then
+        self.distance = distance
+    end
 
     return distance < self.radius
 end
@@ -321,13 +372,14 @@ local function setDebug(self, bool, colour)
         insideZones[self.id] = nil
     end
 
-    self.debugColour = bool and
-        {
-            r = glm.tointeger((colour and colour.r) or (self.debugColour and self.debugColour.r) or 255),
-            g = glm.tointeger((colour and colour.g) or (self.debugColour and self.debugColour.g) or 42),
-            b = glm.tointeger((colour and colour.b) or (self.debugColour and self.debugColour.b) or 24),
-            a = glm.tointeger((colour and colour.a) or (self.debugColour and self.debugColour.a) or 100)
-        } or nil
+    self.debugColour = bool
+            and {
+                r = glm.tointeger((colour and colour.r) or (self.debugColour and self.debugColour.r) or 255),
+                g = glm.tointeger((colour and colour.g) or (self.debugColour and self.debugColour.g) or 42),
+                b = glm.tointeger((colour and colour.b) or (self.debugColour and self.debugColour.b) or 24),
+                a = glm.tointeger((colour and colour.a) or (self.debugColour and self.debugColour.a) or 100),
+            }
+        or nil
 
     if not bool then
         self.triangles = nil
@@ -335,10 +387,11 @@ local function setDebug(self, bool, colour)
         return
     end
 
-    if bool and self.debug and self.debug ~= true then return end
+    if bool and self.debug and self.debug ~= true then
+        return
+    end
 
-    self.triangles = self.__type == 'poly' and getTriangles(self.polygon) or
-        self.__type == 'box' and { mat(self.polygon[1], self.polygon[2], self.polygon[3]), mat(self.polygon[1], self.polygon[3], self.polygon[4]) } or nil
+    self.triangles = self.__type == 'poly' and getTriangles(self.polygon) or self.__type == 'box' and { mat(self.polygon[1], self.polygon[2], self.polygon[3]), mat(self.polygon[1], self.polygon[3], self.polygon[4]) } or nil
     self.debug = self.__type == 'sphere' and debugSphere or debugPoly or nil
 end
 
@@ -408,7 +461,7 @@ function xLib.zones.poly(data)
         for coord, count in pairs(zCoords) do
             coordsArray[#coordsArray + 1] = {
                 coord = coord,
-                count = count
+                count = count,
             }
         end
 
@@ -469,14 +522,17 @@ function xLib.zones.box(data)
     data.length = data.size.y * 2
     -- Rotated corners can extend beyond either unrotated dimension.
     local extent = math.sqrt(data.size.x * data.size.x + data.size.y * data.size.y)
+
     data.width = math.max(data.width, extent)
     data.length = math.max(data.length, extent)
-    data.polygon = (data.rotation * glm.polygon.new({
-        vec3(data.size.x, data.size.y, 0),
-        vec3(-data.size.x, data.size.y, 0),
-        vec3(-data.size.x, -data.size.y, 0),
-        vec3(data.size.x, -data.size.y, 0),
-    }) + data.coords)
+    data.polygon = (
+        data.rotation * glm.polygon.new({
+            vec3(data.size.x, data.size.y, 0),
+            vec3(-data.size.x, data.size.y, 0),
+            vec3(-data.size.x, -data.size.y, 0),
+            vec3(data.size.x, -data.size.y, 0),
+        }) + data.coords
+    )
 
     return setZone(data)
 end
@@ -496,10 +552,16 @@ function xLib.zones.sphere(data)
     return setZone(data)
 end
 
-function xLib.zones.getAllZones() return Zones end
+function xLib.zones.getAllZones()
+    return Zones
+end
 
-function xLib.zones.getCurrentZones() return insideZones end
+function xLib.zones.getCurrentZones()
+    return insideZones
+end
 
-function xLib.zones.getNearbyZones() return nearbyZones end
+function xLib.zones.getNearbyZones()
+    return nearbyZones
+end
 
 return xLib.zones

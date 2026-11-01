@@ -5,7 +5,6 @@ if not Config.CustomInventory then
     local STREAM_DISTANCE <const> = 150.0
     local CELL_SIZE <const> = 100.0
     local CELL_RANGE <const> = math.ceil(STREAM_DISTANCE / CELL_SIZE)
-
     local PICKUP_TTL_MS <const> = 30 * 60 * 1000
     local MAX_PICKUP_ID <const> = 65635
     local MAX_ACTIVE_PER_PLAYER <const> = 50
@@ -45,8 +44,7 @@ if not Config.CustomInventory then
     local function getCellKey(coords)
         local cx = math.floor(coords.x / CELL_SIZE)
         local cy = math.floor(coords.y / CELL_SIZE)
-
-        return ("%d:%d"):format(cx, cy)
+        return ('%d:%d'):format(cx, cy)
     end
 
     ---@param coords vector3|table
@@ -58,7 +56,7 @@ if not Config.CustomInventory then
 
         for dx = -CELL_RANGE, CELL_RANGE do
             for dy = -CELL_RANGE, CELL_RANGE do
-                keys[#keys + 1] = ("%d:%d"):format(cx + dx, cy + dy)
+                keys[#keys + 1] = ('%d:%d'):format(cx + dx, cy + dy)
             end
         end
 
@@ -68,7 +66,7 @@ if not Config.CustomInventory then
     ---@param playerId number
     ---@return string
     local function getOwnerKey(playerId)
-        return GetPlayerIdentifierByType(tostring(playerId), "license") or ("source:%s"):format(playerId)
+        return GetPlayerIdentifierByType(tostring(playerId), 'license') or ('source:%s'):format(playerId)
     end
 
     ---@param value any
@@ -76,11 +74,11 @@ if not Config.CustomInventory then
     local function toVector3(value)
         local valueType = type(value)
 
-        if valueType == "vector3" or valueType == "vector4" then
+        if valueType == 'vector3' or valueType == 'vector4' then
             return value.xyz
         end
 
-        if valueType == "table" then
+        if valueType == 'table' then
             local x, y, z = tonumber(value.x), tonumber(value.y), tonumber(value.z)
 
             if x and y and z then
@@ -135,6 +133,7 @@ if not Config.CustomInventory then
 
             if pickup.owner then
                 local ownerCount = (cell.owners[pickup.owner] or 1) - 1
+
                 cell.owners[pickup.owner] = ownerCount > 0 and ownerCount or nil
             end
         end
@@ -162,13 +161,14 @@ if not Config.CustomInventory then
 
         if pickup.owner then
             local ownerCount = (ownerPickupCounts[pickup.owner] or 1) - 1
+
             ownerPickupCounts[pickup.owner] = ownerCount > 0 and ownerCount or nil
         end
 
         activePickupCount = activePickupCount - 1
 
         if targets and #targets > 0 then
-            xLib.triggerClientEvent("esx:removePickup", targets, pickupId)
+            xLib.triggerClientEvent('esx:removePickup', targets, pickupId)
         end
     end
 
@@ -183,7 +183,7 @@ if not Config.CustomInventory then
 
         local targets
 
-        if type(notify) == "table" then
+        if type(notify) == 'table' then
             targets = notify
         elseif notify then
             targets = getPlayersInStreamRange(pickup.coords, pickup.bucket)
@@ -257,7 +257,7 @@ if not Config.CustomInventory then
             owner = owner,
         }
 
-        if itemType == "item_weapon" then
+        if itemType == 'item_weapon' then
             pickup.components = components
             pickup.tintIndex = tintIndex
         end
@@ -270,16 +270,16 @@ if not Config.CustomInventory then
             ownerPickupCounts[owner] = (ownerPickupCounts[owner] or 0) + 1
         end
 
-        xLib.triggerClientEvent("esx:createPickup", getPlayersInStreamRange(pickupCoords, pickupBucket), pickupId, label, pickupCoords, itemType, name, components, tintIndex)
+        xLib.triggerClientEvent('esx:createPickup', getPlayersInStreamRange(pickupCoords, pickupBucket), pickupId, label, pickupCoords, itemType, name, components, tintIndex)
         Core.PickupId = pickupId
 
         return pickupId
     end
 
-    RegisterNetEvent("esx:requestPickups", function()
+    RegisterNetEvent('esx:requestPickups', function()
         local playerId = source
 
-        if not Core.InventoryEvents.ConsumeRate("pickup", playerId) then
+        if not Core.InventoryEvents.ConsumeRate('pickup', playerId) then
             return
         end
 
@@ -316,7 +316,7 @@ if not Config.CustomInventory then
             end
         end
 
-        TriggerClientEvent("esx:createMissingPickups", playerId, nearbyPickups)
+        TriggerClientEvent('esx:createMissingPickups', playerId, nearbyPickups)
     end)
 
     CreateThread(function()

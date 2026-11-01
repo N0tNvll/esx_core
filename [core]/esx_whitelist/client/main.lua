@@ -3,7 +3,6 @@
 
 local RESOURCE_NAME <const> = GetCurrentResourceName()
 local EVENT_PREFIX <const> = 'esxwl:'
-
 local NuiUtil = xLib.require('@esx_whitelist.client.module.nui.util')
 local Nui = xLib.require('@esx_whitelist.client.module.nui.main')()
 

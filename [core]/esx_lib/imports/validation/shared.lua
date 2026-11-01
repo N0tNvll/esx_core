@@ -13,7 +13,7 @@ end
 ---@param number number
 ---@return number
 local function roundHalfAway(number)
-    if math.type(number) == "integer" then
+    if math.type(number) == 'integer' then
         return number
     end
 
@@ -26,7 +26,7 @@ end
 ---@param value any
 ---@return boolean
 function xLib.validation.isSafeNumber(value)
-    return type(value) == "number" and isFinite(value) and math.abs(value) <= MAX_SAFE_INTEGER
+    return type(value) == 'number' and isFinite(value) and math.abs(value) <= MAX_SAFE_INTEGER
 end
 
 ---@param value any
@@ -68,10 +68,10 @@ function xLib.validation.integer(value, min, max, mode)
         return
     end
 
-    if math.type(number) ~= "integer" then
-        if mode == "ceil" then
+    if math.type(number) ~= 'integer' then
+        if mode == 'ceil' then
             number = math.ceil(number)
-        elseif mode == "floor" then
+        elseif mode == 'floor' then
             number = math.floor(number)
         else
             number = roundHalfAway(number)
@@ -99,7 +99,7 @@ end
 ---@param max? number
 ---@return integer|nil
 function xLib.validation.count(value, max)
-    return xLib.validation.integer(value, 1, max or MAX_SAFE_INTEGER, "round")
+    return xLib.validation.integer(value, 1, max or MAX_SAFE_INTEGER, 'round')
 end
 
 ---@param value any
@@ -107,24 +107,24 @@ end
 ---@param max? number
 ---@return integer|nil
 function xLib.validation.money(value, min, max)
-    return xLib.validation.integer(value, min or 0, max or MAX_SAFE_INTEGER, "round")
+    return xLib.validation.integer(value, min or 0, max or MAX_SAFE_INTEGER, 'round')
 end
 
 ---@param value any
 ---@param options? table
 ---@return string|nil
 function xLib.validation.string(value, options)
-    if type(value) ~= "string" then
+    if type(value) ~= 'string' then
         return
     end
 
     options = options or {}
 
     if options.trim ~= false then
-        value = value:match("^%s*(.*%S)") or ""
+        value = value:match('^%s*(.*%S)') or ''
     end
 
-    if value == "" and not options.allowEmpty then
+    if value == '' and not options.allowEmpty then
         return
     end
 
@@ -147,7 +147,7 @@ end
 ---@param values table
 ---@return boolean
 function xLib.validation.oneOf(value, values)
-    if type(values) ~= "table" then
+    if type(values) ~= 'table' then
         return false
     end
 

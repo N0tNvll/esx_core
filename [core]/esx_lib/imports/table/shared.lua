@@ -7,12 +7,12 @@ xLib.table = setmetatable({}, { __index = table })
 ---@param tbl table
 ---@return boolean
 function xLib.table.isArray(tbl)
-    xLib.verify(tbl, "table", true)
+    xLib.verify(tbl, 'table', true)
 
     local count, maxIndex = 0, 0
 
     for k, _ in pairs(tbl) do
-        if type(k) ~= "number" or k < 1 or k % 1 ~= 0 then
+        if type(k) ~= 'number' or k < 1 or k % 1 ~= 0 then
             return false
         end
 
@@ -26,7 +26,7 @@ end
 ---@param item any
 ---@return any
 function xLib.table.searchForKey(tbl, item)
-    xLib.verify(tbl, "table", true)
+    xLib.verify(tbl, 'table', true)
 
     for k, v in pairs(tbl) do
         if v == item then
@@ -41,8 +41,8 @@ end
 ---@param filter fun(value:any, key:any):boolean
 ---@return table
 function xLib.table.filter(tbl, filter)
-    xLib.verify(tbl, "table", true)
-    xLib.verify(filter, "function", true)
+    xLib.verify(tbl, 'table', true)
+    xLib.verify(filter, 'function', true)
 
     local result = {}
 
@@ -59,7 +59,7 @@ end
 ---@param copies? table
 ---@return table
 function xLib.table.deepcopy(tbl, copies)
-    xLib.verify(tbl, "table", true)
+    xLib.verify(tbl, 'table', true)
 
     copies = copies or {}
 
@@ -68,12 +68,13 @@ function xLib.table.deepcopy(tbl, copies)
     end
 
     local copy = {}
+
     copies[tbl] = copy
 
     for k, v in pairs(tbl) do
-        copy[k] = type(v) == "table" and xLib.table.deepcopy(v, copies) or v
+        copy[k] = type(v) == 'table' and xLib.table.deepcopy(v, copies) or v
 
-        if type(v) == "table" and getmetatable(v) then
+        if type(v) == 'table' and getmetatable(v) then
             setmetatable(copy[k], getmetatable(v))
         end
     end
@@ -87,11 +88,12 @@ end
 ---@param addDuplicateNumbers boolean
 ---@return table
 function xLib.table.merge(t1, t2, addDuplicateNumbers)
-    xLib.verify(t1, "table", true)
-    xLib.verify(t2, "table", true)
-    xLib.verify(addDuplicateNumbers, "boolean", true)
+    xLib.verify(t1, 'table', true)
+    xLib.verify(t2, 'table', true)
+    xLib.verify(addDuplicateNumbers, 'boolean', true)
 
     addDuplicateNumbers = addDuplicateNumbers == nil or addDuplicateNumbers
+
     for k, v2 in pairs(t2) do
         local v1 = t1[k]
         local type1 = type(v1)
@@ -112,14 +114,18 @@ end
 function xLib.table.dump(tbl)
     if xLib.verify(tbl, 'table') then
         local s = '{ '
-        for k,v in pairs(tbl) do
-           if type(k) ~= 'number' then k = '"'..k..'"' end
-           s = s .. '['..k..'] = ' .. xLib.table.dump(v) .. ','
+
+        for k, v in pairs(tbl) do
+            if type(k) ~= 'number' then
+                k = '"' .. k .. '"'
+            end
+
+            s = s .. '[' .. k .. '] = ' .. xLib.table.dump(v) .. ','
         end
         return s .. '} '
-     else
+    else
         return tostring(tbl)
-     end
+    end
 end
 
 -- nil proof alternative to #table
@@ -139,6 +145,7 @@ end
 ---@return table
 function xLib.table.set(t)
     local set = {}
+
     for _, v in ipairs(t) do
         set[v] = true
     end
@@ -225,7 +232,7 @@ end
 ---@param t table
 ---@return table
 function xLib.table.clone(t)
-    if type(t) ~= "table" then
+    if type(t) ~= 'table' then
         return t
     end
 
@@ -233,7 +240,7 @@ function xLib.table.clone(t)
     local target = {}
 
     for k, v in pairs(t) do
-        if type(v) == "table" then
+        if type(v) == 'table' then
             target[k] = xLib.table.clone(v)
         else
             target[k] = v
@@ -262,11 +269,11 @@ end
 ---@param sep string
 ---@return string
 function xLib.table.join(t, sep)
-    local str = ""
+    local str = ''
 
     for i = 1, #t, 1 do
         if i > 1 then
-            str = str .. (sep or ",")
+            str = str .. (sep or ',')
         end
 
         str = str .. t[i]
@@ -280,7 +287,7 @@ end
 ---@param val any
 ---@return boolean
 function xLib.table.contains(tab, val)
-    if type(val) == "table" then
+    if type(val) == 'table' then
         for _, value in pairs(tab) do
             if xLib.table.contains(val, value) then
                 return true
@@ -322,9 +329,9 @@ function xLib.table.sort(t, order)
 
     -- return the iterator function
     local i = 0
-
     return function()
         i = i + 1
+
         if keys[i] then
             return keys[i], t[keys[i]]
         end
@@ -335,6 +342,7 @@ end
 ---@return Array
 function xLib.table.toArray(t)
     local array = {}
+
     for _, v in pairs(t) do
         array[#array + 1] = v
     end
@@ -347,17 +355,21 @@ function xLib.table.wipe(t)
     return table.wipe(t)
 end
 
-
 -- Array API from esx-framework/esx_core#1755. Keep the existing table helpers isolated from Lua's global table.
 -- Based on overextended/ox_lib, LGPL-3.0-or-later, Copyright 2025 Linden.
 xLib.table.array = xLib.class()
+
 local table_unpack = table.unpack
 local table_remove = table.remove
 local table_clone = function(value)
     local copy = {}
-    for key, item in pairs(value) do copy[key] = item end
+
+    for key, item in pairs(value) do
+        copy[key] = item
+    end
     return copy
 end
+
 local table_concat = table.concat
 
 --- https://github.com/overextended/ox_lib/blob/master/imports/array/shared.lua
@@ -372,7 +384,9 @@ end
 
 ---@private
 function xLib.table.array:__newindex(index, value)
-    if type(index) ~= 'number' then error(("Cannot insert non-number index '%s' into an array."):format(index)) end
+    if type(index) ~= 'number' then
+        error(("Cannot insert non-number index '%s' into an array."):format(index))
+    end
 
     rawset(self, index, value)
 end
@@ -454,11 +468,17 @@ end
 ---@param endIndex? number
 function xLib.table.array:fill(value, start, endIndex)
     local length = #self
+
     start = start or 1
     endIndex = endIndex or length
 
-    if start < 1 then start = 1 end
-    if endIndex > length then endIndex = length end
+    if start < 1 then
+        start = 1
+    end
+
+    if endIndex > length then
+        endIndex = length
+    end
 
     for i = start, endIndex do
         self[i] = value
@@ -549,7 +569,9 @@ end
 ---@param fromIndex? number The position in the array to begin searching from.
 function xLib.table.array:includes(element, fromIndex)
     for i = (fromIndex or 1), #self do
-        if self[i] == element then return true end
+        if self[i] == element then
+            return true
+        end
     end
 
     return false
@@ -604,11 +626,15 @@ function xLib.table.array:reduce(reducer, initialValue, reverse)
     local hasInitial = initialValue ~= nil
     local initialIndex = hasInitial and 1 or 2
     local accumulator = initialValue
-    if not hasInitial then accumulator = self[reverse and length or 1] end
+
+    if not hasInitial then
+        accumulator = self[reverse and length or 1]
+    end
 
     if reverse then
         for i = initialIndex, length do
             local index = length - i + 1
+
             accumulator = reducer(accumulator, self[index], index)
         end
     else
@@ -643,13 +669,25 @@ end
 ---@param finish? number
 function xLib.table.array:slice(start, finish)
     local length = #self
+
     start = start or 1
     finish = finish or length
 
-    if start < 0 then start = length + start + 1 end
-    if finish < 0 then finish = length + finish + 1 end
-    if start < 1 then start = 1 end
-    if finish > length then finish = length end
+    if start < 0 then
+        start = length + start + 1
+    end
+
+    if finish < 0 then
+        finish = length + finish + 1
+    end
+
+    if start < 1 then
+        start = 1
+    end
+
+    if finish > length then
+        finish = length
+    end
 
     local arr = xLib.table.array:new()
     local index = 0

@@ -3,33 +3,29 @@
 
 local OxInventory
 
-if Config.CustomInventory ~= "ox" then
+if Config.CustomInventory ~= 'ox' then
     return
 end
 
 local requiredMethods = {
-    "GetItem",
-    "AddItem",
-    "RemoveItem",
-    "SetItem",
-    "CanCarryItem",
-    "CanSwapItem",
-    "SetMaxWeight",
+    'GetItem',
+    'AddItem',
+    'RemoveItem',
+    'SetItem',
+    'CanCarryItem',
+    'CanSwapItem',
+    'SetMaxWeight',
 }
 
 ---Parses the inventory:accounts convar to build a lookup table.
 ---Uses the same default and JSON format as ox_inventory ["money", "black_money"].
 ---@return table<string, boolean>
 local function getAccountList()
-    local convar = GetConvar("inventory:accounts", '["money", "black_money"]')
+    local convar = GetConvar('inventory:accounts', '["money", "black_money"]')
     local ok, list = pcall(json.decode, convar)
 
-    if not ok or type(list) ~= "table" then
-        error(
-            ("[es_extended] Invalid inventory:accounts convar: %s")
-                :format(tostring(convar)),
-            2
-        )
+    if not ok or type(list) ~= 'table' then
+        error(('[es_extended] Invalid inventory:accounts convar: %s'):format(tostring(convar)), 2)
     end
 
     local accounts = {}
@@ -37,7 +33,7 @@ local function getAccountList()
     for i = 1, #list do
         local account = list[i]
 
-        if type(account) == "string" and account ~= "" then
+        if type(account) == 'string' and account ~= '' then
             accounts[account] = true
         end
     end
@@ -57,19 +53,11 @@ local function resolveExport(resourceExports, method)
     end)
 
     if not ok then
-        error(
-            ("[es_extended] Missing required ox_inventory export '%s': %s")
-                :format(method, tostring(exportFn)),
-            2
-        )
+        error(("[es_extended] Missing required ox_inventory export '%s': %s"):format(method, tostring(exportFn)), 2)
     end
 
-    if type(exportFn) ~= "function" then
-        error(
-            ("[es_extended] Invalid ox_inventory export '%s' (expected function, got %s)")
-                :format(method, type(exportFn)),
-            2
-        )
+    if type(exportFn) ~= 'function' then
+        error(("[es_extended] Invalid ox_inventory export '%s' (expected function, got %s)"):format(method, type(exportFn)), 2)
     end
 
     return exportFn
@@ -81,7 +69,7 @@ local function createOxInventoryProxy()
     local proxy = {}
     local resourceExports = exports.ox_inventory
 
-    print("^3[es_extended] ox_inventory: using direct export proxy (Inventory() interface unavailable or incomplete)^7")
+    print('^3[es_extended] ox_inventory: using direct export proxy (Inventory() interface unavailable or incomplete)^7')
 
     for i = 1, #requiredMethods do
         local method = requiredMethods[i]
@@ -101,17 +89,17 @@ end
 ---@param module table
 ---@return boolean
 local function isValidModule(module)
-    if type(module) ~= "table" then
+    if type(module) ~= 'table' then
         return false
     end
 
     for i = 1, #requiredMethods do
-        if type(module[requiredMethods[i]]) ~= "function" then
+        if type(module[requiredMethods[i]]) ~= 'function' then
             return false
         end
     end
 
-    if type(module.accounts) ~= "table" then
+    if type(module.accounts) ~= 'table' then
         return false
     end
 
@@ -126,14 +114,10 @@ local function getOxInventory()
         return OxInventory
     end
 
-    local state = GetResourceState("ox_inventory")
+    local state = GetResourceState('ox_inventory')
 
-    if state ~= "started" then
-        error(
-            ("[es_extended] ox_inventory not started; current status: %s")
-                :format(tostring(state)),
-            2
-        )
+    if state ~= 'started' then
+        error(('[es_extended] ox_inventory not started; current status: %s'):format(tostring(state)), 2)
     end
 
     local success, module = pcall(function()
@@ -155,17 +139,16 @@ end
 local function getAccountInventory(accountName)
     local inventory = OxInventory
 
-    if not inventory and GetResourceState("ox_inventory") == "started" then
+    if not inventory and GetResourceState('ox_inventory') == 'started' then
         inventory = getOxInventory()
     end
 
     local accounts = inventory and inventory.accounts or getAccountList()
-
     return inventory, accounts[accountName] ~= nil
 end
 
 -- Standard method used when ox_inventory finishes loading.
-AddEventHandler("ox_inventory:loadInventory", function(module)
+AddEventHandler('ox_inventory:loadInventory', function(module)
     if isValidModule(module) then
         OxInventory = module
     else
@@ -174,8 +157,8 @@ AddEventHandler("ox_inventory:loadInventory", function(module)
 end)
 
 -- Standard method used when ox_inventory is stopped.
-AddEventHandler("onResourceStop", function(resourceName)
-    if resourceName == "ox_inventory" then
+AddEventHandler('onResourceStop', function(resourceName)
+    if resourceName == 'ox_inventory' then
         OxInventory = nil
     end
 end)
@@ -210,7 +193,7 @@ Core.PlayerFunctionOverrides.OxInventory = {
                 if item.count and item.count > 0 then
                     local metadata = item.metadata
 
-                    if type(metadata) == "table" and next(metadata) == nil then
+                    if type(metadata) == 'table' and next(metadata) == nil then
                         metadata = nil
                     end
 
@@ -226,16 +209,14 @@ Core.PlayerFunctionOverrides.OxInventory = {
             return result
         end
     end,
-
     getLoadout = function()
         return function()
             return {}
         end
     end,
-
     setAccountMoney = function(self)
         return function(accountName, money, reason)
-            reason = reason or "unknown"
+            reason = reason or 'unknown'
 
             if not isValidMoney(money) or money < 0 then
                 return false
@@ -269,22 +250,15 @@ Core.PlayerFunctionOverrides.OxInventory = {
                 self.accounts[account.index].money = money
             end
 
-            self.triggerEvent("esx:setAccountMoney", account)
-            TriggerEvent(
-                "esx:setAccountMoney",
-                self.source,
-                accountName,
-                money,
-                reason
-            )
+            self.triggerEvent('esx:setAccountMoney', account)
+            TriggerEvent('esx:setAccountMoney', self.source, accountName, money, reason)
 
             return true
         end
     end,
-
     addAccountMoney = function(self)
         return function(accountName, money, reason)
-            reason = reason or "unknown"
+            reason = reason or 'unknown'
 
             if not isValidMoney(money) or money < 1 then
                 return false
@@ -313,24 +287,17 @@ Core.PlayerFunctionOverrides.OxInventory = {
 
                 self.accounts[account.index].money = balance
 
-                self.triggerEvent("esx:setAccountMoney", account)
+                self.triggerEvent('esx:setAccountMoney', account)
             end
 
-            TriggerEvent(
-                "esx:addAccountMoney",
-                self.source,
-                accountName,
-                money,
-                reason
-            )
+            TriggerEvent('esx:addAccountMoney', self.source, accountName, money, reason)
 
             return true
         end
     end,
-
     removeAccountMoney = function(self)
         return function(accountName, money, reason)
-            reason = reason or "unknown"
+            reason = reason or 'unknown'
 
             if not isValidMoney(money) or money < 1 then
                 return false
@@ -360,113 +327,58 @@ Core.PlayerFunctionOverrides.OxInventory = {
                     return false
                 end
             else
-                self.accounts[account.index].money =
-                    self.accounts[account.index].money - money
+                self.accounts[account.index].money = self.accounts[account.index].money - money
 
-                self.triggerEvent("esx:setAccountMoney", account)
+                self.triggerEvent('esx:setAccountMoney', account)
             end
 
-            TriggerEvent(
-                "esx:removeAccountMoney",
-                self.source,
-                accountName,
-                money,
-                reason
-            )
+            TriggerEvent('esx:removeAccountMoney', self.source, accountName, money, reason)
 
             return true
         end
     end,
-
     getInventoryItem = function(self)
         return function(name, metadata)
-            return getOxInventory().GetItem(
-                self.source,
-                name,
-                metadata
-            )
+            return getOxInventory().GetItem(self.source, name, metadata)
         end
     end,
-
     addInventoryItem = function(self)
         return function(name, count, metadata, slot)
-            return getOxInventory().AddItem(
-                self.source,
-                name,
-                count or 1,
-                metadata,
-                slot
-            )
+            return getOxInventory().AddItem(self.source, name, count or 1, metadata, slot)
         end
     end,
-
     removeInventoryItem = function(self)
         return function(name, count, metadata, slot)
-            return getOxInventory().RemoveItem(
-                self.source,
-                name,
-                count or 1,
-                metadata,
-                slot
-            )
+            return getOxInventory().RemoveItem(self.source, name, count or 1, metadata, slot)
         end
     end,
-
     setInventoryItem = function(self)
         return function(name, count, metadata)
-            return getOxInventory().SetItem(
-                self.source,
-                name,
-                count,
-                metadata
-            )
+            return getOxInventory().SetItem(self.source, name, count, metadata)
         end
     end,
-
     canCarryItem = function(self)
         return function(name, count, metadata)
-            return getOxInventory().CanCarryItem(
-                self.source,
-                name,
-                count,
-                metadata
-            )
+            return getOxInventory().CanCarryItem(self.source, name, count, metadata)
         end
     end,
-
     canSwapItem = function(self)
         return function(firstItem, firstItemCount, testItem, testItemCount)
-            return getOxInventory().CanSwapItem(
-                self.source,
-                firstItem,
-                firstItemCount,
-                testItem,
-                testItemCount
-            )
+            return getOxInventory().CanSwapItem(self.source, firstItem, firstItemCount, testItem, testItemCount)
         end
     end,
-
     setMaxWeight = function(self)
         return function(newWeight)
-            if
-                type(newWeight) ~= "number"
-                or newWeight ~= newWeight
-                or newWeight < 0
-                or newWeight == math.huge
-            then
+            if type(newWeight) ~= 'number' or newWeight ~= newWeight or newWeight < 0 or newWeight == math.huge then
                 return false
             end
 
             self.maxWeight = newWeight
-            self.triggerEvent("esx:setMaxWeight", self.maxWeight)
+            self.triggerEvent('esx:setMaxWeight', self.maxWeight)
 
-            return getOxInventory().SetMaxWeight(
-                self.source,
-                newWeight
-            )
+            return getOxInventory().SetMaxWeight(self.source, newWeight)
         end
     end,
-
     addWeapon = emptyMethod,
     addWeaponComponent = emptyMethod,
     addWeaponAmmo = emptyMethod,
@@ -476,17 +388,11 @@ Core.PlayerFunctionOverrides.OxInventory = {
     removeWeapon = emptyMethod,
     removeWeaponComponent = emptyMethod,
     removeWeaponAmmo = emptyMethod,
-
     hasWeaponComponent = falseMethod,
     hasWeapon = falseMethod,
-
     hasItem = function(self)
         return function(name, metadata)
-            local item = getOxInventory().GetItem(
-                self.source,
-                name,
-                metadata
-            )
+            local item = getOxInventory().GetItem(self.source, name, metadata)
 
             if not item or not item.count or item.count < 1 then
                 return false
@@ -495,9 +401,7 @@ Core.PlayerFunctionOverrides.OxInventory = {
             return item, item.count
         end
     end,
-
     getWeapon = emptyMethod,
-
     syncInventory = function(self)
         return function(weight, maxWeight, items, money)
             self.weight = weight
@@ -514,14 +418,8 @@ Core.PlayerFunctionOverrides.OxInventory = {
                 if account and ESX.Math.Round(account.money) ~= amount then
                     account.money = amount
 
-                    self.triggerEvent("esx:setAccountMoney", account)
-                    TriggerEvent(
-                        "esx:setAccountMoney",
-                        self.source,
-                        accountName,
-                        amount,
-                        "Sync account with item"
-                    )
+                    self.triggerEvent('esx:setAccountMoney', account)
+                    TriggerEvent('esx:setAccountMoney', self.source, accountName, amount, 'Sync account with item')
                 end
             end
         end

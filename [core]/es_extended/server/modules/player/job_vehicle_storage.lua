@@ -49,13 +49,7 @@ exports('StoreJobVehicle', function(playerId, plates, locations)
     for _, entity in ipairs(GetAllVehicles()) do
         local plate = xLib.vehiclePlate.normalize(GetVehicleNumberPlateText(entity))
 
-        if
-            allowed[plate]
-            and not storing[plate]
-            and DoesEntityExist(entity)
-            and GetEntityRoutingBucket(entity) == GetPlayerRoutingBucket(playerId)
-            and #(GetEntityCoords(entity) - coords) <= 30.0
-        then
+        if allowed[plate] and not storing[plate] and DoesEntityExist(entity) and GetEntityRoutingBucket(entity) == GetPlayerRoutingBucket(playerId) and #(GetEntityCoords(entity) - coords) <= 30.0 then
             storing[plate] = true
 
             local ok, result = pcall(function()
@@ -72,14 +66,7 @@ exports('StoreJobVehicle', function(playerId, plates, locations)
                 local decoded, props = pcall(json.decode, row.vehicle or '')
                 local currentPed = GetPlayerPed(playerId)
 
-                if
-                    ESX.GetPlayerFromId(playerId) ~= player
-                    or currentPed == 0
-                    or #(GetEntityCoords(entity) - GetEntityCoords(currentPed)) > 30.0
-                    or GetEntityRoutingBucket(entity) ~= GetPlayerRoutingBucket(playerId)
-                    or not decoded
-                    or props.model ~= GetEntityModel(entity)
-                then
+                if ESX.GetPlayerFromId(playerId) ~= player or currentPed == 0 or #(GetEntityCoords(entity) - GetEntityCoords(currentPed)) > 30.0 or GetEntityRoutingBucket(entity) ~= GetPlayerRoutingBucket(playerId) or not decoded or props.model ~= GetEntityModel(entity) then
                     return false
                 end
 

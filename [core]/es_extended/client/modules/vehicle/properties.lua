@@ -2,15 +2,17 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 ---@diagnostic disable-next-line: param-type-mismatch
-AddStateBagChangeHandler("VehicleProperties", nil, function(bagName, _, value)
-    if type(value) ~= "table" or not bagName:find("^entity:") then
+AddStateBagChangeHandler('VehicleProperties', nil, function(bagName, _, value)
+    if type(value) ~= 'table' or not bagName:find('^entity:') then
         return
     end
 
-    bagName = bagName:gsub("entity:", "")
+    bagName = bagName:gsub('entity:', '')
+
     local netId = tonumber(bagName)
+
     if not netId then
-        error("Tried to set vehicle properties with invalid netId")
+        error('Tried to set vehicle properties with invalid netId')
         return
     end
 
@@ -19,8 +21,9 @@ AddStateBagChangeHandler("VehicleProperties", nil, function(bagName, _, value)
     while not NetworkDoesEntityExistWithNetworkId(netId) do
         Wait(200)
         tries += 1
+
         if tries > 20 then
-            return error(("Invalid entity - ^5%s^7!"):format(netId))
+            return error(('Invalid entity - ^5%s^7!'):format(netId))
         end
     end
 
@@ -33,7 +36,7 @@ AddStateBagChangeHandler("VehicleProperties", nil, function(bagName, _, value)
     xLib.game.setVehicleProperties(vehicle, value)
 end)
 
-xLib.callback.registerCompat("esx:GetVehicleType", function(cb, model)
+xLib.callback.registerCompat('esx:GetVehicleType', function(cb, model)
     cb(ESX.GetVehicleTypeClient(model))
 end)
 
@@ -42,28 +45,19 @@ local PRELOAD_MAX_MODELS <const> = 10000
 local PRELOAD_MAX_MODEL_LENGTH <const> = 64
 local modelSnapshot
 
-xLib.callback.registerCompat("esx:GetVehicleTypes", function(cb, offset, snapshotId)
-    if
-        type(offset) ~= "number"
-        or offset ~= math.floor(offset)
-        or offset < 0
-        or offset > PRELOAD_MAX_MODELS
-        or type(snapshotId) ~= "number"
-        or snapshotId ~= math.floor(snapshotId)
-        or snapshotId < 1
-        or snapshotId == math.huge
-    then
+xLib.callback.registerCompat('esx:GetVehicleTypes', function(cb, offset, snapshotId)
+    if type(offset) ~= 'number' or offset ~= math.floor(offset) or offset < 0 or offset > PRELOAD_MAX_MODELS or type(snapshotId) ~= 'number' or snapshotId ~= math.floor(snapshotId) or snapshotId < 1 or snapshotId == math.huge then
         return cb(false)
     end
 
     if offset == 0 then
-        if type(GetAllVehicleModels) ~= "function" then
+        if type(GetAllVehicleModels) ~= 'function' then
             return cb(false)
         end
 
         local models = GetAllVehicleModels()
 
-        if type(models) ~= "table" then
+        if type(models) ~= 'table' then
             return cb(false)
         end
 
@@ -91,14 +85,10 @@ xLib.callback.registerCompat("esx:GetVehicleTypes", function(cb, offset, snapsho
     for i = offset + 1, last do
         local modelName = models[i]
 
-        if
-            type(modelName) == "string"
-            and #modelName > 0
-            and #modelName <= PRELOAD_MAX_MODEL_LENGTH
-        then
+        if type(modelName) == 'string' and #modelName > 0 and #modelName <= PRELOAD_MAX_MODEL_LENGTH then
             local vehicleType = ESX.GetVehicleTypeClient(modelName)
 
-            if type(vehicleType) == "string" then
+            if type(vehicleType) == 'string' then
                 types[modelName] = vehicleType
             end
         end

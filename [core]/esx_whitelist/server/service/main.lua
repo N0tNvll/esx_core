@@ -28,10 +28,8 @@ local MESSAGES <const> = {
 return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
     local Service = {}
     local latency = Util.NewLatencyMetrics()
-
     local Method <const> = Enum.AuthMethod
     local Reason <const> = Enum.Reason
-
     local stats = {
         total = 0,
         allowed = 0,
@@ -65,6 +63,7 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
         end
 
         local method = result.method or Method.DENIED
+
         stats.byMethod[method] = (stats.byMethod[method] or 0) + 1
     end
 
@@ -91,25 +90,13 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
         end
 
         if not discordIdentifier then
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.DISCORD_NO_IDENTIFIER,
-                firstIdentifier(identifiers),
-                MESSAGES.discord_missing
-            )
+            return buildResult(false, Method.DENIED, Reason.DISCORD_NO_IDENTIFIER, firstIdentifier(identifiers), MESSAGES.discord_missing)
         end
 
         local userId = Util.ExtractDiscordId(discordIdentifier)
 
         if not userId then
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.DISCORD_NO_IDENTIFIER,
-                discordIdentifier,
-                MESSAGES.discord_missing
-            )
+            return buildResult(false, Method.DENIED, Reason.DISCORD_NO_IDENTIFIER, discordIdentifier, MESSAGES.discord_missing)
         end
 
         local configured, problem = Discord:IsConfigured()
@@ -117,13 +104,7 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
         if not configured then
             Log('error', 'Discord verification requested but not configured: ' .. tostring(problem))
 
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.DISCORD_MISCONFIGURED,
-                discordIdentifier,
-                MESSAGES.discord_unavailable
-            )
+            return buildResult(false, Method.DENIED, Reason.DISCORD_MISCONFIGURED, discordIdentifier, MESSAGES.discord_unavailable)
         end
 
         if progress then
@@ -151,13 +132,7 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
         end
 
         if not verification or verification.status == 'timeout' then
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.TIMEOUT,
-                discordIdentifier,
-                MESSAGES.timeout
-            )
+            return buildResult(false, Method.DENIED, Reason.TIMEOUT, discordIdentifier, MESSAGES.timeout)
         end
 
         if verification.allowed then
@@ -167,38 +142,14 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
         local status = verification.status
 
         if status == 'role_missing' then
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.DISCORD_ROLE_MISSING,
-                discordIdentifier,
-                MESSAGES.discord_role
-            )
+            return buildResult(false, Method.DENIED, Reason.DISCORD_ROLE_MISSING, discordIdentifier, MESSAGES.discord_role)
         elseif status == 'not_in_guild' then
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.DISCORD_NOT_IN_GUILD,
-                discordIdentifier,
-                MESSAGES.discord_guild
-            )
+            return buildResult(false, Method.DENIED, Reason.DISCORD_NOT_IN_GUILD, discordIdentifier, MESSAGES.discord_guild)
         elseif status == 'misconfigured' then
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.DISCORD_MISCONFIGURED,
-                discordIdentifier,
-                MESSAGES.discord_unavailable
-            )
+            return buildResult(false, Method.DENIED, Reason.DISCORD_MISCONFIGURED, discordIdentifier, MESSAGES.discord_unavailable)
         end
 
-        return buildResult(
-            false,
-            Method.DENIED,
-            Reason.DISCORD_UNAVAILABLE,
-            discordIdentifier,
-            MESSAGES.discord_unavailable
-        )
+        return buildResult(false, Method.DENIED, Reason.DISCORD_UNAVAILABLE, discordIdentifier, MESSAGES.discord_unavailable)
     end
 
     ---Full authorization pipeline for a connecting player.
@@ -216,10 +167,7 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
             identifiers[i] = Util.NormalizeIdentifier(rawIdentifiers[i])
         end
 
-        local stableIdentifier = Util.PickStableIdentifier(
-            identifiers,
-            cfg.Admin.IdentifierPriority
-        ) or identifiers[1]
+        local stableIdentifier = Util.PickStableIdentifier(identifiers, cfg.Admin.IdentifierPriority) or identifiers[1]
 
         -- 0. Master switch.
         if not cfg.Whitelist.Enabled then
@@ -234,32 +182,16 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
         -- 2. Admin-only mode replaces the whole remaining pipeline.
         if cfg.AdminOnly.Enabled then
             if Identifier:MatchAdminOnly(identifiers) then
-                return buildResult(
-                    true,
-                    Method.ADMIN_IDENTIFIER,
-                    Reason.ADMIN_ONLY_GRANTED,
-                    stableIdentifier
-                )
+                return buildResult(true, Method.ADMIN_IDENTIFIER, Reason.ADMIN_ONLY_GRANTED, stableIdentifier)
             end
 
             local cachedGroup = AdminCache:GetGroup(identifiers, cfg.AdminOnly.Groups)
 
             if cachedGroup and cfg.AdminOnly.Groups[cachedGroup] then
-                return buildResult(
-                    true,
-                    Method.ADMIN_GROUP,
-                    Reason.ADMIN_ONLY_GRANTED,
-                    stableIdentifier
-                )
+                return buildResult(true, Method.ADMIN_GROUP, Reason.ADMIN_ONLY_GRANTED, stableIdentifier)
             end
 
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.ADMIN_ONLY_DENIED,
-                stableIdentifier,
-                MESSAGES.admin_only
-            )
+            return buildResult(false, Method.DENIED, Reason.ADMIN_ONLY_DENIED, stableIdentifier, MESSAGES.admin_only)
         end
 
         -- 3. Discovered administrators must pass a current ESX group check.
@@ -279,13 +211,7 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
                 return buildResult(true, Method.IDENTIFIER, Reason.IDENTIFIER_MATCH, match)
             end
 
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.IDENTIFIER_NO_MATCH,
-                stableIdentifier,
-                MESSAGES.not_whitelisted
-            )
+            return buildResult(false, Method.DENIED, Reason.IDENTIFIER_NO_MATCH, stableIdentifier, MESSAGES.not_whitelisted)
         end
 
         if mode == 'discord' then
@@ -306,13 +232,7 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
             -- "and": fail fast on the cheap local check before spending a
             -- Discord API request.
             if not match then
-                return buildResult(
-                    false,
-                    Method.DENIED,
-                    Reason.COMBINATION_UNMET,
-                    stableIdentifier,
-                    MESSAGES.not_whitelisted
-                )
+                return buildResult(false, Method.DENIED, Reason.COMBINATION_UNMET, stableIdentifier, MESSAGES.not_whitelisted)
             end
 
             local discordResult = checkDiscord(identifiers, progress, context)
@@ -334,22 +254,15 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
         local snapshot = RuntimeConfig:Get()
         local startedAt = GetGameTimer()
         local ok, result = pcall(checkConnection, rawIdentifiers, progress, context)
+
         latency:Observe(GetGameTimer() - startedAt)
 
         if not ok then
             error(result)
         end
 
-        if
-            result.allowed and (snapshot ~= RuntimeConfig:Get() or (context and context.cancelled))
-        then
-            return buildResult(
-                false,
-                Method.DENIED,
-                Reason.ERROR,
-                result.identifier,
-                MESSAGES.error
-            )
+        if result.allowed and (snapshot ~= RuntimeConfig:Get() or (context and context.cancelled)) then
+            return buildResult(false, Method.DENIED, Reason.ERROR, result.identifier, MESSAGES.error)
         end
 
         return result
@@ -367,7 +280,6 @@ return function(Util, Enum, RuntimeConfig, Identifier, AdminCache, Discord, Log)
         end
 
         local rawIdentifiers = GetPlayerIdentifiers(playerId)
-
         return self:CheckConnection(rawIdentifiers)
     end
 

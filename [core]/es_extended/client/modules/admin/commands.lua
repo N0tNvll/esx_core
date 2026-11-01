@@ -1,11 +1,11 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-RegisterNetEvent("esx:killPlayer", function()
+RegisterNetEvent('esx:killPlayer', function()
     SetEntityHealth(ESX.PlayerData.ped, 0)
 end)
 
-RegisterNetEvent("esx:repairPedVehicle", function()
+RegisterNetEvent('esx:repairPedVehicle', function()
     local ped = ESX.PlayerData.ped
 
     if not ped or ped == 0 or not DoesEntityExist(ped) then
@@ -24,12 +24,12 @@ RegisterNetEvent("esx:repairPedVehicle", function()
     SetVehicleDirtLevel(vehicle, 0)
 end)
 
-RegisterNetEvent("esx:freezePlayer", function(input)
-    if input == "freeze" then
+RegisterNetEvent('esx:freezePlayer', function(input)
+    if input == 'freeze' then
         SetEntityCollision(ESX.PlayerData.ped, false, false)
         FreezeEntityPosition(ESX.PlayerData.ped, true)
         SetPlayerInvincible(ESX.playerId, true)
-    elseif input == "unfreeze" then
+    elseif input == 'unfreeze' then
         SetEntityCollision(ESX.PlayerData.ped, true, true)
         FreezeEntityPosition(ESX.PlayerData.ped, false)
         SetPlayerInvincible(ESX.playerId, false)
@@ -37,8 +37,8 @@ RegisterNetEvent("esx:freezePlayer", function(input)
 end)
 
 ---@param command string
-ESX.SecureNetEvent("esx:executeCommand", function(command)
-    if type(command) ~= "string" or not command:find("%S") then
+ESX.SecureNetEvent('esx:executeCommand', function(command)
+    if type(command) ~= 'string' or not command:find('%S') then
         return
     end
 

@@ -19,9 +19,9 @@ client_scripts {
 }
 
 files {
-    'index.html'
+    'index.html',
 }
 
 dependencies {
-    'es_extended'
+    'es_extended',
 }

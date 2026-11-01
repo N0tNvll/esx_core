@@ -11,23 +11,20 @@ version '1.16.3'
 
 shared_script '@esx_lib/imports.lua'
 client_scripts {
-	'@es_extended/imports.lua',
-	'@es_extended/client/modules/wrapper.lua',
-	'client/main.lua'
+    '@es_extended/imports.lua',
+    '@es_extended/client/modules/wrapper.lua',
+    'client/main.lua',
 }
 
 ui_page 'html/ui.html'
 
 files {
-	'html/ui.html',
-
-	'html/css/app.css',
-
-	'html/js/mustache.min.js',
-	'html/js/app.js',
-
-	'html/fonts/pdown.ttf',
-	'html/fonts/bankgothic.ttf'
+    'html/ui.html',
+    'html/css/app.css',
+    'html/js/mustache.min.js',
+    'html/js/app.js',
+    'html/fonts/pdown.ttf',
+    'html/fonts/bankgothic.ttf',
 }
 
 dependency 'es_extended'

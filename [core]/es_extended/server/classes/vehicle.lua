@@ -23,5 +23,5 @@
 ---@field setOwner fun(self:CExtendedVehicle, newOwner:string):boolean
 ---@field delete fun(self:CExtendedVehicle, garageName:string?, isImpound:boolean?):nil
 Core.vehicleClass = {
-    plate = "",
+    plate = '',
 }

@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
----@class xClass 
+---@class xClass
 ---@field new function
 ---@field constructor function?
 
@@ -17,9 +17,9 @@ function xLib.class(copy)
     class._isClass = true
 
     setmetatable(class, {
-        __newindex = function (_, k,v)
+        __newindex = function(_, k, v)
             rawset(class, k, v)
-        end
+        end,
     })
 
     function class:new(...)

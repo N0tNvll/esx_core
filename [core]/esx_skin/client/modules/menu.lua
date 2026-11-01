@@ -16,6 +16,7 @@ end
 
 local function normalizeNumber(value, fallback)
     value = tonumber(value)
+
     if not value or value ~= value or value == math.huge or value == -math.huge then
         return fallback
     end
@@ -51,6 +52,7 @@ end
 
 local function safeMax(max)
     max = normalizeNumber(max, 0)
+
     if max < 0 then
         return 0
     end
@@ -83,6 +85,7 @@ local function blockInputThread()
             DisableControlAction(1, control, true)
             DisableControlAction(2, control, true)
         end
+
         Wait(0)
     end
 end
@@ -148,6 +151,7 @@ function Menu:InsertElements()
     local currentSkin = exports['skinchanger']:GetSkin()
 
     self.elements = {}
+
     for i = 1, #self.components, 1 do
         local component = self.components[i]
         local value = currentSkin[component.name]
@@ -161,6 +165,7 @@ function Menu:InsertElements()
         end
 
         local data = table.clone(component)
+
         data.value = round(value)
         data.type = 'slider'
         data.min = normalizeNumber(data.min, 0)
@@ -206,6 +211,7 @@ end
 
 function Menu:UpdateElement(name, element)
     local index = self:FindElementIndex(name)
+
     if not index then
         return
     end
@@ -229,9 +235,7 @@ function Menu:Submit(data)
         return
     end
 
-    local current = self:GetElement(type(data) == 'table' and data.name or nil)
-        or self.elements[self.focusIndex]
-        or self.elements[1]
+    local current = self:GetElement(type(data) == 'table' and data.name or nil) or self.elements[self.focusIndex] or self.elements[1]
     local payload = {
         current = current,
         elements = self.elements,
@@ -251,9 +255,7 @@ function Menu:Cancel(data)
         return
     end
 
-    local current = self:GetElement(type(data) == 'table' and data.name or nil)
-        or self.elements[self.focusIndex]
-        or self.elements[1]
+    local current = self:GetElement(type(data) == 'table' and data.name or nil) or self.elements[self.focusIndex] or self.elements[1]
     local payload = {
         current = current,
         elements = self.elements,
@@ -277,9 +279,11 @@ function Menu:RebuildAfterModelChange(activeName)
         end
 
         self.components, self.maxValues = exports['skinchanger']:GetData()
+
         if self.restricted then
             self.components = self:Restrict()
         end
+
         self:InsertElements()
         self:Refresh(activeName)
     end)
@@ -298,12 +302,7 @@ function Menu:UpdateTextureLimits(changedName, skin)
 
             local current = element.value
 
-            if
-                current == nil
-                or current < (element.min or 0)
-                or current > element.max
-                or (element.max or 0) < (element.min or 0)
-            then
+            if current == nil or current < (element.min or 0) or current > element.max or (element.max or 0) < (element.min or 0) then
                 current = wrapValue(element.min or 0, element.min or 0, element.max or 0)
             end
 
@@ -317,12 +316,15 @@ end
 function Menu:Focus(data)
     local name = normalizeString(type(data) == 'table' and data.name or nil)
     local index = self:FindElementIndex(name)
+
     if not index then
         return
     end
 
     self.focusIndex = index
+
     local element = self.elements[index]
+
     Skin.zoomOffset = normalizeNumber(element.zoomOffset, Skin.zoomOffset)
     Skin.camOffset = normalizeNumber(element.camOffset, Skin.camOffset)
 end
@@ -341,6 +343,7 @@ function Menu:Apply(values)
 
             if element then
                 local normalized = wrapValue(value, element.min or 0, element.max or 0)
+
                 element.value = normalized
 
                 if skin[name] ~= normalized then
@@ -357,6 +360,7 @@ function Menu:Apply(values)
     end
 
     local changedSex = false
+
     for i = 1, #changedNames, 1 do
         if changedNames[i] == 'sex' then
             changedSex = true
@@ -386,16 +390,19 @@ function Menu:Change(data)
 
     local name = normalizeString(data.name)
     local element = self:GetElement(name)
+
     if not element then
         return
     end
 
     local value = wrapValue(data.value, element.min or 0, element.max or 0)
+
     element.value = value
 
     self:Focus({ name = name })
 
     local skin = exports['skinchanger']:GetSkin()
+
     if skin[name] ~= value then
         exports['skinchanger']:Change(name, value)
         skin[name] = value
@@ -421,9 +428,11 @@ function Menu:Reset()
 
     TriggerEvent('skinchanger:loadSkin', Skin.Last, function()
         self.components, self.maxValues = exports['skinchanger']:GetData()
+
         if self.restricted then
             self.components = self:Restrict()
         end
+
         self:InsertElements()
         self:Refresh(self.elements[1] and self.elements[1].name or nil)
     end)
@@ -443,6 +452,7 @@ end
 ---@param delta number
 function Menu:Drag(delta)
     delta = normalizeNumber(delta, 0)
+
     if not self.isOpen or delta == 0 then
         return
     end
@@ -484,6 +494,7 @@ function Menu:Open(submit, cancel, restrict)
     Skin.Last = exports['skinchanger']:GetSkin()
 
     self.components, self.maxValues = exports['skinchanger']:GetData()
+
     if restrict then
         self.components = self:Restrict()
     end
@@ -509,6 +520,7 @@ function Menu:Saveable(submitCb, cancelCb, restrict, creating)
 
     self:Open(function(data, menu)
         local skin = exports['skinchanger']:GetSkin()
+
         self.saving = true
 
         xLib.callback('esx_skin:save', false, function(saved, reason)

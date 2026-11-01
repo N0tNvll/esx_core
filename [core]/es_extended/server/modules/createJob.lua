@@ -1,15 +1,15 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-
 local NOTIFY_TYPES = {
-    INFO = "^5[%s]^7-^6[INFO]^7 %s",
-    SUCCESS = "^5[%s]^7-^2[SUCCESS]^7 %s",
-    ERROR = "^5[%s]^7-^1[ERROR]^7 %s"
+    INFO = '^5[%s]^7-^6[INFO]^7 %s',
+    SUCCESS = '^5[%s]^7-^2[SUCCESS]^7 %s',
+    ERROR = '^5[%s]^7-^1[ERROR]^7 %s',
 }
 
 local function generateNewJobTable(name, label, grades, jobType)
     local job = ESX.Jobs[name] or { name = name, label = label, type = jobType, grades = {} }
+
     for _, v in pairs(grades) do
         job.grades[tostring(v.grade)] = { job_name = name, grade = v.grade, name = v.name, label = v.label, salary = v.salary, skin_male = v.skin_male, skin_female = v.skin_female }
     end
@@ -17,14 +17,14 @@ local function generateNewJobTable(name, label, grades, jobType)
     return job
 end
 
-local function notify(notifyType,resourceName,message,...)
+local function notify(notifyType, resourceName, message, ...)
     local formattedMessage = string.format(message, ...)
 
     if not NOTIFY_TYPES[notifyType] then
-        return print(NOTIFY_TYPES.INFO:format(resourceName,formattedMessage))
+        return print(NOTIFY_TYPES.INFO:format(resourceName, formattedMessage))
     end
 
-    return print(NOTIFY_TYPES[notifyType]:format(resourceName,formattedMessage))
+    return print(NOTIFY_TYPES[notifyType]:format(resourceName, formattedMessage))
 end
 
 --- Create Job at Runtime
@@ -37,22 +37,22 @@ function ESX.CreateJob(name, label, grades, jobType)
     local success = false
 
     if not name or name == '' then
-        notify("ERROR",currentResourceName, 'Missing argument `name`')
+        notify('ERROR', currentResourceName, 'Missing argument `name`')
         return success
     end
 
     if not label or label == '' then
-        notify("ERROR",currentResourceName, 'Missing argument `label`')
+        notify('ERROR', currentResourceName, 'Missing argument `label`')
         return success
     end
 
     if not grades or not next(grades) then
-        notify("ERROR",currentResourceName, 'Missing argument `grades`')
+        notify('ERROR', currentResourceName, 'Missing argument `grades`')
         return success
     end
 
-    if type(jobType) ~= "string" then
-        jobType = "civ"
+    if type(jobType) ~= 'string' then
+        jobType = 'civ'
     end
 
     local existingJob = MySQL.single.await('SELECT `label`, `type` FROM `jobs` WHERE `name` = ?', { name })
@@ -74,7 +74,7 @@ function ESX.CreateJob(name, label, grades, jobType)
     if not jobExists then
         queries[#queries + 1] = {
             query = 'INSERT INTO `jobs` (`name`, `label`, `type`) VALUES (?, ?, ?)',
-            values = { name, label, jobType }
+            values = { name, label, jobType },
         }
     end
 
@@ -88,26 +88,26 @@ function ESX.CreateJob(name, label, grades, jobType)
             newGrades[#newGrades + 1] = { grade = grade.grade, name = grade.name, label = grade.label, salary = grade.salary, skin_male = skinMale, skin_female = skinFemale }
             queries[#queries + 1] = {
                 query = 'INSERT INTO job_grades (job_name, grade, name, label, salary, skin_male, skin_female) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                values = { name, grade.grade, grade.name, grade.label, grade.salary, skinMale, skinFemale }
+                values = { name, grade.grade, grade.name, grade.label, grade.salary, skinMale, skinFemale },
             }
         end
     end
 
     if not queries[1] then
-        notify("ERROR",currentResourceName, 'Job or grades already exists: `%s`', name)
+        notify('ERROR', currentResourceName, 'Job or grades already exists: `%s`', name)
         return success
     end
 
     success = exports.oxmysql:transaction_async(queries)
 
     if not success then
-        notify("ERROR", currentResourceName, 'Failed to insert one or more grades for job: `%s`', name)
+        notify('ERROR', currentResourceName, 'Failed to insert one or more grades for job: `%s`', name)
         return success
     end
 
     ESX.Jobs[name] = generateNewJobTable(name, label, newGrades, jobType)
 
-    notify("SUCCESS", currentResourceName, 'Job created successfully: `%s`', name)
+    notify('SUCCESS', currentResourceName, 'Job created successfully: `%s`', name)
 
     TriggerEvent('esx:jobCreated', name, ESX.Jobs[name])
 

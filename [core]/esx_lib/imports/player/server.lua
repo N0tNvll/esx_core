@@ -17,15 +17,15 @@ end
 local function toVector3(coords)
     local coordsType = type(coords)
 
-    if coordsType == "vector3" then
+    if coordsType == 'vector3' then
         return coords
     end
 
-    if coordsType == "vector4" then
+    if coordsType == 'vector4' then
         return vector3(coords.x, coords.y, coords.z)
     end
 
-    if type(coords) ~= "table" then
+    if type(coords) ~= 'table' then
         return
     end
 
@@ -75,6 +75,7 @@ end
 ---@return number|nil distance
 function xLib.player.distanceToCoords(source, coords)
     local playerCoords = xLib.player.getCoords(source)
+
     coords = toVector3(coords)
 
     if not playerCoords or not coords then
@@ -97,7 +98,6 @@ function xLib.player.isNearCoords(source, coords, distance)
     end
 
     local actualDistance = xLib.player.distanceToCoords(source, coords)
-
     return actualDistance ~= nil and actualDistance <= distance, actualDistance
 end
 
@@ -139,7 +139,6 @@ function xLib.player.isNearPlayer(source, target, distance)
     end
 
     local actualDistance = xLib.player.distanceToPlayer(source, target)
-
     return actualDistance ~= nil and actualDistance <= distance, actualDistance
 end
 
@@ -150,7 +149,7 @@ end
 ---@return number|nil index
 ---@return number|nil actualDistance
 function xLib.player.findNearbyCoords(source, coordsList, distance)
-    if type(coordsList) ~= "table" then
+    if type(coordsList) ~= 'table' then
         return
     end
 
@@ -173,7 +172,6 @@ end
 ---@return number|nil actualDistance
 function xLib.player.isNearAnyCoords(source, coordsList, distance)
     local _, index, actualDistance = xLib.player.findNearbyCoords(source, coordsList, distance)
-
     return index ~= nil, index, actualDistance
 end
 

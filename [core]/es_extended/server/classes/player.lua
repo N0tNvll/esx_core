@@ -127,7 +127,6 @@
 ---@field executeCommand fun(command: string)    # Execute a server command.
 ---@field triggerEvent fun(eventName: string, ...) # Trigger client event for this player.
 
-
 ---@class xPlayer:StaticPlayer
 --- Properties
 ---@field accounts ESXAccount[]     # Array of the player's accounts.
@@ -187,30 +186,33 @@ function CreateExtendedPlayer(playerId, identifier, ssn, group, accounts, invent
     self.lastPlaytime = self.metadata.lastPlaytime or 0
     self.paycheckEnabled = true
     self.admin = Core.IsPlayerAdmin(playerId)
+
     if Config.Multichar then
-        local startIndex = identifier:find(":", 1)
+        local startIndex = identifier:find(':', 1)
+
         if startIndex then
-            self.license = ("%s%s"):format(Config.Identifier, identifier:sub(startIndex, identifier:len()))
+            self.license = ('%s%s'):format(Config.Identifier, identifier:sub(startIndex, identifier:len()))
         end
     else
-        self.license = ("%s:%s"):format(Config.Identifier, identifier)
+        self.license = ('%s:%s'):format(Config.Identifier, identifier)
     end
 
-    if type(self.metadata.jobDuty) ~= "boolean" then
-        self.metadata.jobDuty = self.job.name ~= "unemployed" and Config.DefaultJobDuty or false
+    if type(self.metadata.jobDuty) ~= 'boolean' then
+        self.metadata.jobDuty = self.job.name ~= 'unemployed' and Config.DefaultJobDuty or false
     end
+
     job.onDuty = self.metadata.jobDuty
 
-    ExecuteCommand(("add_principal identifier.%s group.%s"):format(self.license, self.group))
+    ExecuteCommand(('add_principal identifier.%s group.%s'):format(self.license, self.group))
 
     local stateBag = Player(self.source).state
-    stateBag:set("identifier", self.identifier, false)
-    stateBag:set("license", self.license, false)
-    stateBag:set("job", self.job, true)
-    stateBag:set("group", self.group, true)
-    stateBag:set("name", self.name, true)
-    stateBag:set("nationality", self.nationality, true)
 
+    stateBag:set('identifier', self.identifier, false)
+    stateBag:set('license', self.license, false)
+    stateBag:set('job', self.job, true)
+    stateBag:set('group', self.group, true)
+    stateBag:set('name', self.name, true)
+    stateBag:set('nationality', self.nationality, true)
 
     Core.PlayerClass.AttachBase(self)
     Core.PlayerClass.AttachAccounts(self)

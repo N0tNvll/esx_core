@@ -3,24 +3,24 @@
 
 Core.PlayerSession = Core.PlayerSession or {}
 Core.PlayerSession.loadingPlayers = {}
-Core.PlayerSession.oneSyncState = GetConvar("onesync", "off")
+Core.PlayerSession.oneSyncState = GetConvar('onesync', 'off')
 Core.PlayerSession.isEnhanced = xLib.isEnhanced()
-Core.PlayerSession.newPlayerQuery = "INSERT INTO `users` SET `accounts` = ?, `identifier` = ?, `ssn` = ?, `group` = ?"
-Core.PlayerSession.loadPlayerQuery = "SELECT `accounts`, `ssn`, `job`, `job_grade`, `group`, `position`, `inventory`, `skin`, `loadout`, `metadata`, `nationality`"
+Core.PlayerSession.newPlayerQuery = 'INSERT INTO `users` SET `accounts` = ?, `identifier` = ?, `ssn` = ?, `group` = ?'
+Core.PlayerSession.loadPlayerQuery = 'SELECT `accounts`, `ssn`, `job`, `job_grade`, `group`, `position`, `inventory`, `skin`, `loadout`, `metadata`, `nationality`'
 
 if Config.Multichar then
     Core.PlayerSession.newPlayerQuery = Core.PlayerSession.newPlayerQuery .. ", `firstname` = ?, `lastname` = ?, `dateofbirth` = ?, `sex` = ?, `height` = ?, `nationality` = NULLIF(?, '')"
 end
 
 if Config.StartingInventoryItems then
-    Core.PlayerSession.newPlayerQuery = Core.PlayerSession.newPlayerQuery .. ", `inventory` = ?"
+    Core.PlayerSession.newPlayerQuery = Core.PlayerSession.newPlayerQuery .. ', `inventory` = ?'
 end
 
 if Config.Multichar or Config.Identity then
-    Core.PlayerSession.loadPlayerQuery = Core.PlayerSession.loadPlayerQuery .. ", `firstname`, `lastname`, `dateofbirth`, `sex`, `height`"
+    Core.PlayerSession.loadPlayerQuery = Core.PlayerSession.loadPlayerQuery .. ', `firstname`, `lastname`, `dateofbirth`, `sex`, `height`'
 end
 
-Core.PlayerSession.loadPlayerQuery = Core.PlayerSession.loadPlayerQuery .. " FROM `users` WHERE identifier = ?"
+Core.PlayerSession.loadPlayerQuery = Core.PlayerSession.loadPlayerQuery .. ' FROM `users` WHERE identifier = ?'
 
 function Core.PlayerSession.WaitForJobs(playerId, loading)
     while not Core.JobsLoaded do
@@ -43,8 +43,7 @@ function Core.PlayerSession.IsPlayerLoadActive(playerId, loading)
         return true
     end
 
-    return Core.PlayerSession.loadingPlayers[playerId] == loading
-        and Core.PlayerSession.GetPlayerIdentifier(playerId) == loading.identifier
+    return Core.PlayerSession.loadingPlayers[playerId] == loading and Core.PlayerSession.GetPlayerIdentifier(playerId) == loading.identifier
 end
 
 function Core.PlayerSession.CancelPlayerLoad(playerId)
@@ -55,7 +54,7 @@ function Core.PlayerSession.SetJobCount(jobName, count)
     local normalizedCount = math.max(count or 0, 0)
 
     Core.JobsPlayerCount[jobName] = normalizedCount
-    GlobalState[("%s:count"):format(jobName)] = normalizedCount
+    GlobalState[('%s:count'):format(jobName)] = normalizedCount
 end
 
 function Core.PlayerSession.IncrementJobCount(jobName)

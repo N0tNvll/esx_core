@@ -18,6 +18,7 @@ function xLib.triggerClientEvent(eventName, targets, ...)
 
     local payload = pack(...)
     local length = #payload
+
     for i = 1, #targets do
         TriggerClientEventInternal(eventName, targets[i], payload, length)
     end

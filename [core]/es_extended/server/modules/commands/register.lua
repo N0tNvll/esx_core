@@ -7,7 +7,7 @@
 ---@param allowConsole? boolean
 ---@param suggestion? table
 function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
-    if type(name) == "table" then
+    if type(name) == 'table' then
         for _, v in ipairs(name) do
             ESX.RegisterCommand(v, group, cb, allowConsole, suggestion)
         end
@@ -18,7 +18,7 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
     local isOverride = previousCommand ~= nil
 
     local function forEachGroup(commandGroup, cbForGroup)
-        if type(commandGroup) == "table" then
+        if type(commandGroup) == 'table' then
             for _, v in ipairs(commandGroup) do
                 cbForGroup(v)
             end
@@ -31,25 +31,25 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
         print(('[^3WARNING^7] Command ^5"%s" ^7already registered, overriding command'):format(name))
 
         if previousCommand.suggestion then
-            TriggerClientEvent("chat:removeSuggestion", -1, ("/%s"):format(name))
+            TriggerClientEvent('chat:removeSuggestion', -1, ('/%s'):format(name))
         end
 
         forEachGroup(previousCommand.group, function(v)
-            ExecuteCommand(("remove_ace group.%s command.%s allow"):format(v, name))
+            ExecuteCommand(('remove_ace group.%s command.%s allow'):format(v, name))
         end)
     end
 
     if suggestion then
         suggestion.arguments = suggestion.arguments or {}
-        suggestion.help = suggestion.help or ""
+        suggestion.help = suggestion.help or ''
 
-        TriggerClientEvent("chat:addSuggestion", -1, ("/%s"):format(name), suggestion.help, suggestion.arguments)
+        TriggerClientEvent('chat:addSuggestion', -1, ('/%s'):format(name), suggestion.help, suggestion.arguments)
     end
 
     Core.RegisteredCommands[name] = { group = group, cb = cb, allowConsole = allowConsole, suggestion = suggestion }
 
     forEachGroup(group, function(v)
-        ExecuteCommand(("add_ace group.%s command.%s allow"):format(v, name))
+        ExecuteCommand(('add_ace group.%s command.%s allow'):format(v, name))
     end)
 
     if isOverride then
@@ -60,14 +60,14 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
         local command = Core.RegisteredCommands[name]
 
         if not command.allowConsole and playerId == 0 then
-            print(("[^3WARNING^7] ^5%s^0"):format(TranslateCap("commanderror_console")))
+            print(('[^3WARNING^7] ^5%s^0'):format(TranslateCap('commanderror_console')))
         else
             local xPlayer, err = ESX.Players[playerId], nil
 
             if command.suggestion then
                 if command.suggestion.validate then
                     if #args ~= #command.suggestion.arguments then
-                        err = TranslateCap("commanderror_argumentmismatch", #args, #command.suggestion.arguments)
+                        err = TranslateCap('commanderror_argumentmismatch', #args, #command.suggestion.arguments)
                     end
                 end
 
@@ -76,18 +76,18 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
 
                     for k, v in ipairs(command.suggestion.arguments) do
                         if v.type then
-                            if v.type == "number" then
+                            if v.type == 'number' then
                                 local newArg = tonumber(args[k])
 
                                 if newArg then
                                     newArgs[v.name] = newArg
                                 else
-                                    err = TranslateCap("commanderror_argumentmismatch_number", k)
+                                    err = TranslateCap('commanderror_argumentmismatch_number', k)
                                 end
-                            elseif v.type == "player" or v.type == "playerId" then
+                            elseif v.type == 'player' or v.type == 'playerId' then
                                 local targetPlayer = tonumber(args[k])
 
-                                if args[k] == "me" then
+                                if args[k] == 'me' then
                                     targetPlayer = playerId
                                 end
 
@@ -95,50 +95,54 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
                                     local xTargetPlayer = ESX.GetPlayerFromId(targetPlayer)
 
                                     if xTargetPlayer then
-                                        if v.type == "player" then
+                                        if v.type == 'player' then
                                             newArgs[v.name] = xTargetPlayer
                                         else
                                             newArgs[v.name] = targetPlayer
                                         end
                                     else
-                                        err = TranslateCap("commanderror_invalidplayerid")
+                                        err = TranslateCap('commanderror_invalidplayerid')
                                     end
                                 else
-                                    err = TranslateCap("commanderror_argumentmismatch_number", k)
+                                    err = TranslateCap('commanderror_argumentmismatch_number', k)
                                 end
-                            elseif v.type == "string" then
+                            elseif v.type == 'string' then
                                 local newArg = tonumber(args[k])
+
                                 if not newArg then
                                     newArgs[v.name] = args[k]
                                 else
-                                    err = TranslateCap("commanderror_argumentmismatch_string", k)
+                                    err = TranslateCap('commanderror_argumentmismatch_string', k)
                                 end
-                            elseif v.type == "item" then
+                            elseif v.type == 'item' then
                                 if ESX.Items[args[k]] then
                                     newArgs[v.name] = args[k]
                                 else
-                                    err = TranslateCap("commanderror_invaliditem")
+                                    err = TranslateCap('commanderror_invaliditem')
                                 end
-                            elseif v.type == "weapon" then
+                            elseif v.type == 'weapon' then
                                 if ESX.GetWeapon(args[k]) then
                                     newArgs[v.name] = string.upper(args[k])
                                 else
-                                    err = TranslateCap("commanderror_invalidweapon")
+                                    err = TranslateCap('commanderror_invalidweapon')
                                 end
-                            elseif v.type == "any" then
+                            elseif v.type == 'any' then
                                 newArgs[v.name] = args[k]
-                            elseif v.type == "merge" then
+                            elseif v.type == 'merge' then
                                 local length = 0
+
                                 for i = 1, k - 1 do
                                     length = length + string.len(args[i]) + 1
                                 end
-                                local merge = table.concat(args, " ")
+
+                                local merge = table.concat(args, ' ')
 
                                 newArgs[v.name] = string.sub(merge, length + 1)
-                            elseif v.type == "coordinate" then
-                                local coord = tonumber(args[k]:match("(-?%d+%.?%d*)"))
+                            elseif v.type == 'coordinate' then
+                                local coord = tonumber(args[k]:match('(-?%d+%.?%d*)'))
+
                                 if not coord then
-                                    err = TranslateCap("commanderror_argumentmismatch_number", k)
+                                    err = TranslateCap('commanderror_argumentmismatch_number', k)
                                 else
                                     newArgs[v.name] = coord
                                 end
@@ -148,8 +152,9 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
                         if ESX.IsFunctionReference(v.Validator?.validate) and not err then
                             local candidate = newArgs[v.name]
                             local ok, res = pcall(v.Validator.validate, candidate)
+
                             if not ok or res ~= true then
-                                err = v.Validator.err or TranslateCap("commanderror_argumentmismatch")
+                                err = v.Validator.err or TranslateCap('commanderror_argumentmismatch')
                             end
                         end
 
@@ -169,14 +174,14 @@ function ESX.RegisterCommand(name, group, cb, allowConsole, suggestion)
 
             if err then
                 if playerId == 0 then
-                    print(("[^3WARNING^7] %s^7"):format(err))
+                    print(('[^3WARNING^7] %s^7'):format(err))
                 else
                     xPlayer.showNotification(err)
                 end
             else
                 command.cb(xPlayer or false, args, function(msg)
                     if playerId == 0 then
-                        print(("[^3WARNING^7] %s^7"):format(msg))
+                        print(('[^3WARNING^7] %s^7'):format(msg))
                     else
                         xPlayer.showNotification(msg)
                     end

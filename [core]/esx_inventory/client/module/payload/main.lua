@@ -3,6 +3,10 @@
 
 local Inventory = ESXInventory
 
+if not Inventory then
+    return
+end
+
 local itemsBySlot = nil
 local ownedItems = nil
 local cachedInventory = nil
@@ -17,12 +21,7 @@ end
 local function ensureItems()
     local data = ESX.PlayerData
 
-    if
-        not itemsBySlot
-        or data.inventory ~= cachedInventory
-        or data.loadout ~= cachedLoadout
-        or data.accounts ~= cachedAccounts
-    then
+    if not itemsBySlot or data.inventory ~= cachedInventory or data.loadout ~= cachedLoadout or data.accounts ~= cachedAccounts then
         Inventory.buildItems()
     end
 end
@@ -37,7 +36,6 @@ function Inventory.getOwnedItem(itemType, name)
     ensureItems()
 
     local items = ownedItems[itemType]
-
     return items and items[name]
 end
 
@@ -90,9 +88,7 @@ function Inventory.buildItems()
 
         owned.item_weapon[weapon.name] = weapon
 
-        local label = weapon.ammo
-                and ('%s [%s %s]'):format(weapon.label, weapon.ammo, TranslateCap('ammo_rounds'))
-            or weapon.label
+        local label = weapon.ammo and ('%s [%s %s]'):format(weapon.label, weapon.ammo, TranslateCap('ammo_rounds')) or weapon.label
 
         items[#items + 1] = {
             type = 'item_weapon',

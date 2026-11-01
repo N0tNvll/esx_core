@@ -15,7 +15,8 @@ end
 
 local function getSociety(name)
     local society
-    TriggerEvent("esx_society:getSociety", name, function(result)
+
+    TriggerEvent('esx_society:getSociety', name, function(result)
         society = result
     end)
     return society
@@ -23,7 +24,8 @@ end
 
 local function getSharedAccount(name)
     local account
-    TriggerEvent("esx_addonaccount:getSharedAccount", name, function(result)
+
+    TriggerEvent('esx_addonaccount:getSharedAccount', name, function(result)
         account = result
     end)
     return account
@@ -45,6 +47,7 @@ local function resolveSocietyAccounts(xPlayers)
 
             if society then
                 local account = getSharedAccount(society.account)
+
                 accounts[jobName] = {
                     accountName = society.account,
                     account = account,
@@ -69,6 +72,7 @@ local function flushSocietyDebits(accounts)
             end
 
             local account = getSharedAccount(entry.accountName)
+
             if account then
                 entry.account = account
                 entry.available = account.money
@@ -82,10 +86,10 @@ local function logPaycheck(title, xPlayer, salary)
         return
     end
 
-    ESX.DiscordLogFields("Paycheck", title, "green", {
-        { name = "Player", value = xPlayer.name, inline = true },
-        { name = "ID", value = xPlayer.source, inline = true },
-        { name = "Amount", value = salary, inline = true },
+    ESX.DiscordLogFields('Paycheck', title, 'green', {
+        { name = 'Player', value = xPlayer.name, inline = true },
+        { name = 'ID', value = xPlayer.source, inline = true },
+        { name = 'Amount', value = salary, inline = true },
     })
 end
 
@@ -99,24 +103,16 @@ local function payPlayer(xPlayer, societyAccounts, bankTitle, receivedPaycheck)
     local jobLabel = xPlayer.job.label
     local job = xPlayer.job.grade_name
     local onDuty = xPlayer.job.onDuty
-    local salary = (job == "unemployed" or onDuty) and xPlayer.job.grade_salary or ESX.Math.Round(xPlayer.job.grade_salary * Config.OffDutyPaycheckMultiplier)
+    local salary = (job == 'unemployed' or onDuty) and xPlayer.job.grade_salary or ESX.Math.Round(xPlayer.job.grade_salary * Config.OffDutyPaycheckMultiplier)
 
     if not xPlayer.paycheckEnabled or salary <= 0 then
         return
     end
 
-    if job == "unemployed" then
-        xPlayer.addAccountMoney("bank", salary, "Welfare Check")
-        TriggerClientEvent(
-            "esx:showAdvancedNotification",
-            player,
-            bankTitle,
-            receivedPaycheck,
-            TranslateCap("received_help", salary),
-            "CHAR_BANK_MAZE",
-            9
-        )
-        logPaycheck("Paycheck - Unemployment Benefits", xPlayer, salary)
+    if job == 'unemployed' then
+        xPlayer.addAccountMoney('bank', salary, 'Welfare Check')
+        TriggerClientEvent('esx:showAdvancedNotification', player, bankTitle, receivedPaycheck, TranslateCap('received_help', salary), 'CHAR_BANK_MAZE', 9)
+        logPaycheck('Paycheck - Unemployment Benefits', xPlayer, salary)
         return
     end
 
@@ -127,57 +123,25 @@ local function payPlayer(xPlayer, societyAccounts, bankTitle, receivedPaycheck)
             if societyEntry.account and societyEntry.available >= salary then
                 societyEntry.available -= salary
                 societyEntry.pendingDebit += salary
-                xPlayer.addAccountMoney("bank", salary, "Paycheck")
-                TriggerClientEvent(
-                    "esx:showAdvancedNotification",
-                    player,
-                    bankTitle,
-                    receivedPaycheck,
-                    TranslateCap("received_salary", salary),
-                    "CHAR_BANK_MAZE",
-                    9
-                )
-                logPaycheck("Paycheck - " .. jobLabel, xPlayer, salary)
+                xPlayer.addAccountMoney('bank', salary, 'Paycheck')
+                TriggerClientEvent('esx:showAdvancedNotification', player, bankTitle, receivedPaycheck, TranslateCap('received_salary', salary), 'CHAR_BANK_MAZE', 9)
+                logPaycheck('Paycheck - ' .. jobLabel, xPlayer, salary)
             else
-                TriggerClientEvent(
-                    "esx:showAdvancedNotification",
-                    player,
-                    bankTitle,
-                    "",
-                    TranslateCap("company_nomoney"),
-                    "CHAR_BANK_MAZE",
-                    1
-                )
+                TriggerClientEvent('esx:showAdvancedNotification', player, bankTitle, '', TranslateCap('company_nomoney'), 'CHAR_BANK_MAZE', 1)
             end
 
             return
         end
 
-        xPlayer.addAccountMoney("bank", salary, "Paycheck")
-        TriggerClientEvent(
-            "esx:showAdvancedNotification",
-            player,
-            bankTitle,
-            receivedPaycheck,
-            TranslateCap("received_salary", salary),
-            "CHAR_BANK_MAZE",
-            9
-        )
-        logPaycheck("Paycheck - " .. jobLabel, xPlayer, salary)
+        xPlayer.addAccountMoney('bank', salary, 'Paycheck')
+        TriggerClientEvent('esx:showAdvancedNotification', player, bankTitle, receivedPaycheck, TranslateCap('received_salary', salary), 'CHAR_BANK_MAZE', 9)
+        logPaycheck('Paycheck - ' .. jobLabel, xPlayer, salary)
         return
     end
 
-    xPlayer.addAccountMoney("bank", salary, "Paycheck")
-    TriggerClientEvent(
-        "esx:showAdvancedNotification",
-        player,
-        bankTitle,
-        receivedPaycheck,
-        TranslateCap("received_salary", salary),
-        "CHAR_BANK_MAZE",
-        9
-    )
-    logPaycheck("Paycheck - Generic", xPlayer, salary)
+    xPlayer.addAccountMoney('bank', salary, 'Paycheck')
+    TriggerClientEvent('esx:showAdvancedNotification', player, bankTitle, receivedPaycheck, TranslateCap('received_salary', salary), 'CHAR_BANK_MAZE', 9)
+    logPaycheck('Paycheck - Generic', xPlayer, salary)
 end
 
 function StartPayCheck()
@@ -186,6 +150,7 @@ function StartPayCheck()
             Wait(Config.PaycheckInterval)
 
             local jitter = getPaycheckJitter()
+
             if jitter > 0 then
                 Wait(math.random(jitter))
             end
@@ -194,8 +159,8 @@ function StartPayCheck()
             local societyAccounts = resolveSocietyAccounts(xPlayers)
             local batchSize = getPaycheckBatchSize()
             local batchDelay = getPaycheckBatchDelay()
-            local bankTitle = TranslateCap("bank")
-            local receivedPaycheck = TranslateCap("received_paycheck")
+            local bankTitle = TranslateCap('bank')
+            local receivedPaycheck = TranslateCap('received_paycheck')
 
             for i = 1, #xPlayers do
                 payPlayer(xPlayers[i], societyAccounts, bankTitle, receivedPaycheck)

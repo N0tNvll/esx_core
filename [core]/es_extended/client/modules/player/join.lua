@@ -9,7 +9,7 @@ CreateThread(function()
             ESX.DisableSpawnManager()
             DoScreenFadeOut(0)
             Wait(500)
-            TriggerServerEvent("esx:onPlayerJoined")
+            TriggerServerEvent('esx:onPlayerJoined')
             break
         end
     end

@@ -1,8 +1,8 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-if not ESX.GetConfig("EnableDefaultInventory") then
-    error("ESX Default Inventory is disabled in config, please enable it to use this resource.")
+if not ESX.GetConfig('EnableDefaultInventory') then
+    return
 end
 
 ---@class NuiInventoryItem

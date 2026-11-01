@@ -1,13 +1,13 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Copyright (C) 2022-2026 ESX Framework
 
-local OpenedMenus, MenuType = {}, "dialog"
+local OpenedMenus, MenuType = {}, 'dialog'
 
 local function openMenu(namespace, name, data)
-    OpenedMenus[namespace .. "_" .. name] = true
+    OpenedMenus[namespace .. '_' .. name] = true
 
     xLib.nui.send({
-        action = "openMenu",
+        action = 'openMenu',
         namespace = namespace,
         name = name,
         data = data,
@@ -21,10 +21,10 @@ local function openMenu(namespace, name, data)
 end
 
 local function closeMenu(namespace, name)
-    OpenedMenus[namespace .. "_" .. name] = nil
+    OpenedMenus[namespace .. '_' .. name] = nil
 
     xLib.nui.send({
-        action = "closeMenu",
+        action = 'closeMenu',
         namespace = namespace,
         name = name,
     })
@@ -36,7 +36,7 @@ end
 
 ESX.UI.Menu.RegisterType(MenuType, openMenu, closeMenu)
 
-AddEventHandler("esx_menu_dialog:message:menu_submit", function(data)
+AddEventHandler('esx_menu_dialog:message:menu_submit', function(data)
     local menu = ESX.UI.Menu.GetOpened(MenuType, data._namespace, data._name)
     local cancel = false
 
@@ -47,6 +47,7 @@ AddEventHandler("esx_menu_dialog:message:menu_submit", function(data)
     if menu.submit then
         -- is the submitted data a number?
         local value = tonumber(data.value)
+
         if value then
             data.value = ESX.Math.Round(value)
 
@@ -60,14 +61,14 @@ AddEventHandler("esx_menu_dialog:message:menu_submit", function(data)
 
         -- don't submit if the value is negative or if it's 0
         if cancel then
-            ESX.ShowNotification("That input is not allowed!")
+            ESX.ShowNotification('That input is not allowed!')
         else
             menu.submit(data, menu)
         end
     end
 end)
 
-AddEventHandler("esx_menu_dialog:message:menu_cancel", function(data)
+AddEventHandler('esx_menu_dialog:message:menu_cancel', function(data)
     local menu = ESX.UI.Menu.GetOpened(MenuType, data._namespace, data._name)
 
     if not menu then
@@ -79,7 +80,7 @@ AddEventHandler("esx_menu_dialog:message:menu_cancel", function(data)
     end
 end)
 
-AddEventHandler("esx_menu_dialog:message:menu_change", function(data)
+AddEventHandler('esx_menu_dialog:message:menu_change', function(data)
     local menu = ESX.UI.Menu.GetOpened(MenuType, data._namespace, data._name)
 
     if not menu then

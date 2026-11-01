@@ -30,7 +30,8 @@ end
 ---@param timestamp number
 function OnTime(timestamp)
     local function scheduledAt(job, dayOffset)
-        local dateTable = os.date("*t", timestamp)
+        local dateTable = os.date('*t', timestamp)
+
         dateTable.hour = job.h
         dateTable.min = job.m
         dateTable.sec = 0
@@ -48,17 +49,10 @@ function OnTime(timestamp)
 
         if not lastTimestamp or lastTimestamp < scheduledTimestamp then
             local d = os.date('*t', scheduledTimestamp).wday
-
             local ok, err = pcall(cronJobs[i].cb, d, cronJobs[i].h, cronJobs[i].m)
 
             if not ok then
-                print(
-                    ("[^1ERROR^7] cron job at ^5%02d:%02d^7 errored, skipping it: %s"):format(
-                        cronJobs[i].h,
-                        cronJobs[i].m,
-                        tostring(err)
-                    )
-                )
+                print(('[^1ERROR^7] cron job at ^5%02d:%02d^7 errored, skipping it: %s'):format(cronJobs[i].h, cronJobs[i].m, tostring(err)))
             end
         end
     end
@@ -68,12 +62,12 @@ end
 function Tick()
     local timestamp = GetUnixTimestamp()
 
-    if not lastTimestamp or os.date("%M", timestamp) ~= os.date("%M", lastTimestamp) then
+    if not lastTimestamp or os.date('%M', timestamp) ~= os.date('%M', lastTimestamp) then
         OnTime(timestamp)
         lastTimestamp = timestamp
     end
 
-    local seconds = tonumber(os.date("%S", timestamp)) or 0
+    local seconds = tonumber(os.date('%S', timestamp)) or 0
     local msToNextMinute = math.max(1000, (60 - seconds) * 1000)
 
     SetTimeout(msToNextMinute, Tick)
@@ -85,15 +79,15 @@ Tick()
 ---@param h number
 ---@param m number
 ---@param cb function|table
-AddEventHandler("cron:runAt", function(h, m, cb)
-    local invokingResource = GetInvokingResource() or "Unknown"
+AddEventHandler('cron:runAt', function(h, m, cb)
+    local invokingResource = GetInvokingResource() or 'Unknown'
     local typeH = type(h)
     local typeM = type(m)
     local typeCb = type(cb)
 
-    assert(typeH == "number", ("Expected number for h, got %s. Invoking Resource: '%s'"):format(typeH, invokingResource))
-    assert(typeM == "number", ("Expected number for m, got %s. Invoking Resource: '%s'"):format(typeM, invokingResource))
-    assert(typeCb == "function" or (typeCb == "table" and type(getmetatable(cb)?.__call) == "function"), ("Expected function for cb, got %s. Invoking Resource: '%s'"):format(typeCb, invokingResource))
+    assert(typeH == 'number', ("Expected number for h, got %s. Invoking Resource: '%s'"):format(typeH, invokingResource))
+    assert(typeM == 'number', ("Expected number for m, got %s. Invoking Resource: '%s'"):format(typeM, invokingResource))
+    assert(typeCb == 'function' or (typeCb == 'table' and type(getmetatable(cb)?.__call) == 'function'), ("Expected function for cb, got %s. Invoking Resource: '%s'"):format(typeCb, invokingResource))
 
     RunAt(h, m, cb)
 end)

@@ -4,19 +4,22 @@
 local Lifecycle = {}
 local playerIdentity = IdentityModules.state.playerIdentity
 local alreadyRegistered = IdentityModules.state.alreadyRegistered
-
 local multichar
 
 ---@param xPlayer StaticPlayer
 local function setIdentity(xPlayer)
     local playerIdentifier = xPlayer.getIdentifier()
+
     if not alreadyRegistered[playerIdentifier] then
         return
     end
+
     local currentIdentity = playerIdentity[playerIdentifier]
+
     IdentityModules.Identity.SetPlayerData(xPlayer, currentIdentity)
 
-    TriggerClientEvent("esx_identity:setPlayerData", xPlayer.src, currentIdentity)
+    TriggerClientEvent('esx_identity:setPlayerData', xPlayer.src, currentIdentity)
+
     if currentIdentity.saveToDatabase then
         IdentityModules.Database.SaveIdentity(playerIdentifier, currentIdentity)
     end
@@ -27,14 +30,16 @@ end
 ---@param xPlayer StaticPlayer
 local function checkIdentity(xPlayer)
     local playerIdentifier = xPlayer.getIdentifier()
+
     IdentityModules.Database.GetIdentity(playerIdentifier, function(result)
         if not result then
-            return TriggerClientEvent("esx_identity:showRegisterIdentity", xPlayer.src)
+            return TriggerClientEvent('esx_identity:showRegisterIdentity', xPlayer.src)
         end
+
         if not result.firstname then
             playerIdentity[playerIdentifier] = nil
             alreadyRegistered[playerIdentifier] = false
-            return TriggerClientEvent("esx_identity:showRegisterIdentity", xPlayer.src)
+            return TriggerClientEvent('esx_identity:showRegisterIdentity', xPlayer.src)
         end
 
         playerIdentity[playerIdentifier] = {
@@ -53,11 +58,15 @@ end
 
 function Lifecycle.RegisterHandlers()
     multichar = ESX.GetConfig().Multichar
-    if multichar then return end
-    AddEventHandler("playerConnecting", function(_, _, deferrals)
-        deferrals.defer()
-        local _, identifier = source, nil
 
+    if multichar then
+        return
+    end
+
+    AddEventHandler('playerConnecting', function(_, _, deferrals)
+        deferrals.defer()
+
+        local _, identifier = source, nil
         local correctLicense, _ = pcall(function()
             identifier = ESX.GetIdentifier(source)
         end)
@@ -65,14 +74,16 @@ function Lifecycle.RegisterHandlers()
         Wait(40)
 
         if not identifier or not correctLicense then
-            return deferrals.done(TranslateCap("no_identifier"))
+            return deferrals.done(TranslateCap('no_identifier'))
         end
+
         IdentityModules.Database.GetIdentity(identifier, function(result)
             if not result then
                 playerIdentity[identifier] = nil
                 alreadyRegistered[identifier] = false
                 return deferrals.done()
             end
+
             if not result.firstname then
                 playerIdentity[identifier] = nil
                 alreadyRegistered[identifier] = false
@@ -94,10 +105,11 @@ function Lifecycle.RegisterHandlers()
         end)
     end)
 
-    AddEventHandler("onResourceStart", function(resource)
+    AddEventHandler('onResourceStart', function(resource)
         if resource ~= GetCurrentResourceName() then
             return
         end
+
         Wait(300)
 
         while not ESX do
@@ -113,24 +125,25 @@ function Lifecycle.RegisterHandlers()
         end
     end)
 
-    AddEventHandler("esx:playerLoaded", function(_, xPlayer)
+    AddEventHandler('esx:playerLoaded', function(_, xPlayer)
         local currentIdentity = playerIdentity[xPlayer.identifier]
 
         if currentIdentity and alreadyRegistered[xPlayer.identifier] then
             IdentityModules.Identity.SetPlayerData(xPlayer, currentIdentity)
 
-            TriggerClientEvent("esx_identity:setPlayerData", xPlayer.source, currentIdentity)
+            TriggerClientEvent('esx_identity:setPlayerData', xPlayer.source, currentIdentity)
+
             if currentIdentity.saveToDatabase then
                 IdentityModules.Database.SaveIdentity(xPlayer.identifier, currentIdentity)
             end
 
             Wait(0)
 
-            TriggerClientEvent("esx_identity:alreadyRegistered", xPlayer.source)
+            TriggerClientEvent('esx_identity:alreadyRegistered', xPlayer.source)
 
             playerIdentity[xPlayer.identifier] = nil
         else
-            TriggerClientEvent("esx_identity:showRegisterIdentity", xPlayer.source)
+            TriggerClientEvent('esx_identity:showRegisterIdentity', xPlayer.source)
         end
     end)
 end

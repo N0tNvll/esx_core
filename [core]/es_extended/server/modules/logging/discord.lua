@@ -8,7 +8,6 @@
 local function resolveLegacyConfig(name, color)
     local webhooks = Config.DiscordLogs.Webhooks
     local colors = Config.DiscordLogs.Colors
-
     return webhooks[name] or webhooks.default, colors[color] or colors.default
 end
 

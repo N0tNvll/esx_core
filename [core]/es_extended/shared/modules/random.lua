@@ -19,11 +19,11 @@ end
 ---@return string
 function ESX.GetRandomString(length)
     if not (length > 0) then
-        return ""
+        return ''
     end
 
     if length == math.huge then
-        error("length must be finite", 2)
+        error('length must be finite', 2)
     end
 
     local characterCount = math.ceil(length)

@@ -5,16 +5,16 @@ if Config.CustomInventory then
     return
 end
 
-RegisterNetEvent("esx:useItem", function(itemName)
+RegisterNetEvent('esx:useItem', function(itemName)
     local playerId = source
 
-    if not Core.InventoryEvents.ConsumeRate("use", playerId) then
+    if not Core.InventoryEvents.ConsumeRate('use', playerId) then
         return
     end
 
     local xPlayer = ESX.GetPlayerFromId(playerId)
 
-    if not xPlayer or type(itemName) ~= "string" then
+    if not xPlayer or type(itemName) ~= 'string' then
         return
     end
 
@@ -25,7 +25,7 @@ RegisterNetEvent("esx:useItem", function(itemName)
     end
 
     if item.count < 1 then
-        return xPlayer.showNotification(TranslateCap("act_imp"))
+        return xPlayer.showNotification(TranslateCap('act_imp'))
     end
 
     ESX.UseItem(playerId, itemName)

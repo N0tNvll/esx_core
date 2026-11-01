@@ -3,6 +3,10 @@
 
 local Inventory = ESXInventory
 
+if not Inventory then
+    return
+end
+
 local lastCounts = {} ---@type table<string, number>
 local itemLabels = {} ---@type table<string, string>
 local hasCountSnapshot = false

@@ -8,7 +8,6 @@
 
 local DEFAULT_TTL <const> = 30000
 local DEFAULT_MAX_ENTRIES <const> = 4096
-
 local tokens = {}
 local tokensBySource = {}
 local tokenCount = 0
@@ -23,7 +22,8 @@ local function normalizeSource(source)
     end
 
     local sourceType = type(source)
-    if sourceType ~= "number" and sourceType ~= "string" then
+
+    if sourceType ~= 'number' and sourceType ~= 'string' then
         return nil
     end
 
@@ -40,6 +40,7 @@ local function unindexSource(id, sourceKey)
     end
 
     local index = tokensBySource[sourceKey]
+
     if not index then
         return
     end
@@ -77,7 +78,7 @@ local function createTokenId()
     local id
 
     repeat
-        id = ("%s:%s:%s"):format(GetCurrentResourceName(), nowMs(), xLib.string.randomHex(32))
+        id = ('%s:%s:%s'):format(GetCurrentResourceName(), nowMs(), xLib.string.randomHex(32))
     until not tokens[id]
 
     return id
@@ -95,17 +96,19 @@ local token = {}
 ---@param options TokenOptions
 ---@return string?
 function token.create(options)
-    if type(options) ~= "table" then
-        error("[xLib] token.create requires an options table", 2)
+    if type(options) ~= 'table' then
+        error('[xLib] token.create requires an options table', 2)
     end
 
     local ttl = math.floor(tonumber(options.ttl) or DEFAULT_TTL)
+
     if ttl <= 0 then
-        error("[xLib] token ttl must be a positive number", 2)
+        error('[xLib] token ttl must be a positive number', 2)
     end
 
     local now = nowMs()
-    local maxEntries = math.floor(GetConvarInt("xLib:tokenMaxEntries", DEFAULT_MAX_ENTRIES))
+    local maxEntries = math.floor(GetConvarInt('xLib:tokenMaxEntries', DEFAULT_MAX_ENTRIES))
+
     if maxEntries <= 0 then
         maxEntries = DEFAULT_MAX_ENTRIES
     end
@@ -144,11 +147,12 @@ end
 ---@param source? string|number
 ---@return any
 function token.consume(id, source)
-    if type(id) ~= "string" then
+    if type(id) ~= 'string' then
         return nil
     end
 
     local entry = tokens[id]
+
     if not entry then
         return nil
     end
@@ -159,6 +163,7 @@ function token.consume(id, source)
     end
 
     local sourceKey = normalizeSource(source)
+
     if entry.source and entry.source ~= sourceKey then
         return nil
     end
@@ -175,7 +180,7 @@ end
 ---@param id string
 ---@return boolean
 function token.remove(id)
-    if type(id) ~= "string" then
+    if type(id) ~= 'string' then
         return false
     end
 
@@ -192,6 +197,7 @@ function token.reset(source)
     end
 
     local index = tokensBySource[sourceKey]
+
     if not index then
         return 0
     end
@@ -219,7 +225,7 @@ function token.size()
     return tokenCount
 end
 
-AddEventHandler("playerDropped", function()
+AddEventHandler('playerDropped', function()
     token.reset(source)
 end)
 

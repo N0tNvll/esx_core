@@ -7,15 +7,15 @@
 ---@return nil
 function ESX.UI.ShowInventoryItemNotification(add, item, count)
     xLib.nui.send({
-        action = "inventoryNotification",
+        action = 'inventoryNotification',
         add = add,
         item = item,
         count = count,
     })
 end
 
-ESX.SecureNetEvent("esx:showInventoryItemNotification", function(add, item, count)
-    if type(add) ~= "boolean" or type(item) ~= "string" then
+ESX.SecureNetEvent('esx:showInventoryItemNotification', function(add, item, count)
+    if type(add) ~= 'boolean' or type(item) ~= 'string' then
         return
     end
 

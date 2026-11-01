@@ -4,7 +4,7 @@
 ---@diagnostic disable: lowercase-global
 xLib = setmetatable({
     name = 'esx_lib',
-    side = IsDuplicityVersion() and 'server' or 'client'
+    side = IsDuplicityVersion() and 'server' or 'client',
 }, {
     __newindex = function(self, key, fn)
         rawset(self, key, fn)
@@ -13,11 +13,9 @@ xLib = setmetatable({
             exports(key, fn)
         end
     end,
-
     __index = function(self, key)
         local dir = ('imports/%s'):format(key)
         local chunk = LoadResourceFile(self.name, ('%s/%s.lua'):format(dir, self.side))
-
         local shared = LoadResourceFile(self.name, ('%s/shared.lua'):format(dir))
 
         if shared then
@@ -35,7 +33,7 @@ xLib = setmetatable({
 
             return self[key]
         end
-    end
+    end,
 })
 
 require = xLib.require

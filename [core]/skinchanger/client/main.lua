@@ -42,6 +42,7 @@ function SkinChanger:DefaultModel(male, cb)
     if not IsModelInCdimage(characterModel) or not IsModelValid(characterModel) then
         return
     end
+
     local model = self:RequestModel(characterModel)
 
     SetPlayerModel(PlayerId(), model)
@@ -62,8 +63,8 @@ function SkinChanger:MaxValues()
 
     for i = 1, #self.components, 1 do
         local component = self.components[i]
-        local max = type(component.max) == 'function' and component.max(playerPed, self.character)
-            or component.max
+        local max = type(component.max) == 'function' and component.max(playerPed, self.character) or component.max
+
         data[component.name] = max
     end
 
@@ -88,6 +89,7 @@ function SkinChanger:LoadSkin(skin, cb)
     end
 
     local sex = skin['sex']
+
     if sex ~= self.lastSex then
         self.loadSkin = skin
         self:DefaultFromSex(sex, cb)
@@ -195,19 +197,7 @@ function SkinChanger:SetHead()
         self.character['grandparents'] = 0
     end
 
-    SetPedHeadBlendData(
-        self.playerPed,
-        self.character['mom'],
-        self.character['dad'],
-        self.character['grandparents'],
-        self.character['mom'],
-        self.character['dad'],
-        self.character['grandparents'],
-        face_weight,
-        skin_weight,
-        third_weight,
-        false
-    )
+    SetPedHeadBlendData(self.playerPed, self.character['mom'], self.character['dad'], self.character['grandparents'], self.character['mom'], self.character['dad'], self.character['grandparents'], face_weight, skin_weight, third_weight, false)
 end
 
 function SkinChanger:SetFace()
@@ -233,10 +223,13 @@ function SkinChanger:SetFace()
         'chin_4',
         'neck_thickness',
     }
+
     for i = 1, #features, 1 do
         local feature = features[i]
+
         SetPedFaceFeature(self.playerPed, i - 1, Normalise(self.character[feature], 10))
     end
+
     SetPedEyeColor(self.playerPed, self.character['eye_color']) -- Eyes color
 end
 
@@ -254,14 +247,11 @@ function SkinChanger:SetHeadOverlay()
         { 'moles_1', 'moles_2' },
         { 'chest_1', 'chest_2' },
     }
+
     for i = 1, #features, 1 do
         local feature = features[i]
-        SetPedHeadOverlay(
-            self.playerPed,
-            i - 1,
-            self.character[feature[1]],
-            Normalise(self.character[feature[2]], 10)
-        )
+
+        SetPedHeadOverlay(self.playerPed, i - 1, self.character[feature[1]], Normalise(self.character[feature[2]], 10))
     end
 end
 
@@ -274,46 +264,26 @@ function SkinChanger:SetHeadOverlayColour()
         [8] = { 'lipstick_3', 'lipstick_4' },
         [10] = { 'chest_3', 0 },
     }
+
     for i, feature in pairs(features) do
-        SetPedHeadOverlayColor(
-            self.playerPed,
-            i,
-            1,
-            self.character[feature[1]],
-            self.character[feature[2]]
-        )
+        SetPedHeadOverlayColor(self.playerPed, i, 1, self.character[feature[1]], self.character[feature[2]])
     end
+
     if self.character['bodyb_1'] == -1 then
         SetPedHeadOverlay(self.playerPed, 11, 255, (self.character['bodyb_2'] / 10) + 0.0) -- Body Blemishes + opacity
     else
-        SetPedHeadOverlay(
-            self.playerPed,
-            11,
-            self.character['bodyb_1'],
-            (self.character['bodyb_2'] / 10) + 0.0
-        )
+        SetPedHeadOverlay(self.playerPed, 11, self.character['bodyb_1'], (self.character['bodyb_2'] / 10) + 0.0)
     end
 
     if self.character['bodyb_3'] == -1 then
         SetPedHeadOverlay(self.playerPed, 12, 255, (self.character['bodyb_4'] / 10) + 0.0)
     else
-        SetPedHeadOverlay(
-            self.playerPed,
-            12,
-            self.character['bodyb_3'],
-            (self.character['bodyb_4'] / 10) + 0.0
-        ) -- Blemishes 'added body effect' + opacity
+        SetPedHeadOverlay(self.playerPed, 12, self.character['bodyb_3'], (self.character['bodyb_4'] / 10) + 0.0) -- Blemishes 'added body effect' + opacity
     end
 end
 
 function SkinChanger:SetHair()
-    SetPedComponentVariation(
-        self.playerPed,
-        2,
-        self.character['hair_1'],
-        self.character['hair_2'],
-        2
-    ) -- Hair
+    SetPedComponentVariation(self.playerPed, 2, self.character['hair_1'], self.character['hair_2'], 2) -- Hair
     SetPedHairColor(self.playerPed, self.character['hair_color_1'], self.character['hair_color_2']) -- Hair Color
 end
 
@@ -330,15 +300,11 @@ function SkinChanger:SetComponents()
         { 'chain_1', 'chain_2', 7 },
         { 'bags_1', 'bags_2', 5 },
     }
+
     for i = 1, #components, 1 do
         local component = components[i]
-        SetPedComponentVariation(
-            self.playerPed,
-            component[3],
-            self.character[component[1]],
-            self.character[component[2]],
-            2
-        )
+
+        SetPedComponentVariation(self.playerPed, component[3], self.character[component[1]], self.character[component[2]], 2)
     end
 end
 
@@ -350,9 +316,11 @@ function SkinChanger:SetProps()
         { 'watches_1', 'watches_2', 6 },
         { 'bracelets_1', 'bracelets_2', 7 },
     }
+
     for i = 1, #props, 1 do
         local prop = props[i]
         local propVal = self.character[prop[1]]
+
         if propVal == -1 then
             ClearPedProp(self.playerPed, prop[3])
         else
@@ -391,15 +359,12 @@ function SkinChanger:ApplySkin(skin, clothes)
 end
 
 function SkinChanger:LoadClothes(playerSkin, clothesSkin)
-    if
-        type(playerSkin) ~= 'table'
-        or (playerSkin.sex ~= 0 and playerSkin.sex ~= 1)
-        or type(clothesSkin) ~= 'table'
-    then
+    if type(playerSkin) ~= 'table' or (playerSkin.sex ~= 0 and playerSkin.sex ~= 1) or type(clothesSkin) ~= 'table' then
         return false
     end
 
     local sex = playerSkin['sex']
+
     if sex ~= self.lastSex then
         self.loadClothes = {
             playerSkin = playerSkin,
@@ -428,12 +393,14 @@ end
 function SkinChanger:Init()
     for i = 1, #self.components, 1 do
         local component = self.components[i]
+
         self.character[component.name] = component.value
     end
 end
 
 function SkinChanger:GetData(noMax)
     local components = SkinChanger.components
+
     for k, v in pairs(SkinChanger.character) do
         for i = 1, #components, 1 do
             if k == components[i].name then
@@ -450,6 +417,7 @@ function SkinChanger:GetSkin()
 
     for i = 1, #self.components do
         local name = self.components[i].name
+
         skin[name] = self.character[name]
     end
 

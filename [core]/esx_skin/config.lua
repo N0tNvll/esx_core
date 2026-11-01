@@ -129,14 +129,18 @@ Config.SkinEditFields.clothes.arms = true
 Config.SkinEditFields.clothes.arms_2 = true
 
 for _, name in ipairs({ 'beard', 'eyebrows', 'makeup', 'lipstick' }) do
-    for i = 1, 4 do Config.SkinEditFields.barber[name .. '_' .. i] = true end
+    for i = 1, 4 do
+        Config.SkinEditFields.barber[name .. '_' .. i] = true
+    end
 end
 
 for _, name in ipairs({ 'hair_1', 'hair_2', 'hair_color_1', 'hair_color_2', 'ears_1', 'ears_2' }) do
     Config.SkinEditFields.barber[name] = true
 end
 
-for name in pairs(Config.SkinEditFields.clothes) do Config.SkinEditFields.outfit[name] = true end
+for name in pairs(Config.SkinEditFields.clothes) do
+    Config.SkinEditFields.outfit[name] = true
+end
 
 for _, name in ipairs({ 'mask', 'bproof', 'bracelets', 'ears' }) do
     Config.SkinEditFields.outfit[name .. '_1'] = true

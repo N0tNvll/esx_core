@@ -2,7 +2,6 @@
 -- Copyright (C) 2022-2026 ESX Framework
 
 local EVENT_PREFIX <const> = 'esxwl:'
-
 return function()
     local Nui = {}
     local isOpen = false

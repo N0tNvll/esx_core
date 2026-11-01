@@ -6,7 +6,9 @@ xLib.getMedalConfig = function()
 end
 
 xLib.triggerMedalClip = function(publicKey, eventName, clipOptions)
-    if not publicKey or publicKey == '' then return end
+    if not publicKey or publicKey == '' then
+        return
+    end
 
     local message = {
         action = 'medalClip',
@@ -18,9 +20,9 @@ xLib.triggerMedalClip = function(publicKey, eventName, clipOptions)
             clipOptions = clipOptions or {
                 duration = 30,
                 captureDelayMs = 0,
-                alertType = 'Default'
-            }
-        }
+                alertType = 'Default',
+            },
+        },
     }
 
     xLib.nui.send(message)

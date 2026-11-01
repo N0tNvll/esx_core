@@ -18,6 +18,7 @@ local loopStarted = false
 ---@return integer handle
 function xLib.points.create(coords, distance, hidden, enter, leave, inside)
     handleCount = handleCount + 1
+
     local handle = handleCount
 
     points[handle] = {
@@ -27,7 +28,7 @@ function xLib.points.create(coords, distance, hidden, enter, leave, inside)
         enter = enter,
         leave = leave,
         inside = inside,
-        resource = GetInvokingResource()
+        resource = GetInvokingResource(),
     }
 
     xLib.points.startLoop()
@@ -65,11 +66,12 @@ function xLib.points.startLoop()
             for handle, point in pairs(insidePoints) do
                 if not pcall(point.inside, #(coords - point.coords)) then
                     insidePoints[handle] = nil
-                    print(("[^1ERROR^7] point ^5%s^7 from ^5%s^7 errored on inside"):format(handle, point.resource))
+                    print(('[^1ERROR^7] point ^5%s^7 from ^5%s^7 errored on inside'):format(handle, point.resource))
                 end
             end
 
             local now = GetGameTimer()
+
             if now - lastScan >= 500 then
                 lastScan = now
 
@@ -79,7 +81,7 @@ function xLib.points.startLoop()
                             point.nearby = true
 
                             if point.enter and not pcall(point.enter) then
-                                print(("[^1ERROR^7] point ^5%s^7 from ^5%s^7 errored on enter"):format(handle, point.resource))
+                                print(('[^1ERROR^7] point ^5%s^7 from ^5%s^7 errored on enter'):format(handle, point.resource))
                             end
 
                             if point.inside then
@@ -90,7 +92,7 @@ function xLib.points.startLoop()
                         point.nearby = false
 
                         if point.leave and not pcall(point.leave) then
-                            print(("[^1ERROR^7] point ^5%s^7 from ^5%s^7 errored on leave"):format(handle, point.resource))
+                            print(('[^1ERROR^7] point ^5%s^7 from ^5%s^7 errored on leave'):format(handle, point.resource))
                         end
 
                         insidePoints[handle] = nil
@@ -105,7 +107,7 @@ function xLib.points.startLoop()
     end)
 end
 
-AddEventHandler("onResourceStop", function(resource)
+AddEventHandler('onResourceStop', function(resource)
     for handle, point in pairs(points) do
         if point.resource == resource then
             points[handle] = nil
@@ -127,54 +129,78 @@ do
     local function invoke(point, name)
         if point[name] then
             local ok, err = pcall(point[name], point)
+
             if not ok then
-                print(("[^1ERROR^7] point ^5%s^7 from ^5%s^7 on %s: %s"):format(point.id, point.resource, name, err))
+                print(('[^1ERROR^7] point ^5%s^7 from ^5%s^7 on %s: %s'):format(point.id, point.resource, name, err))
             end
         end
     end
 
     local function removePoint(point)
-        if objectPoints[point.id] ~= point then return end
+        if objectPoints[point.id] ~= point then
+            return
+        end
+
         objectPoints[point.id] = nil
         xLib.grid.removeEntry(point)
-        if closestPoint == point then closestPoint = nil end
-        for i = #nearbyPoints, 1, -1 do
-            if nearbyPoints[i] == point then table.remove(nearbyPoints, i) end
+
+        if closestPoint == point then
+            closestPoint = nil
         end
+
+        for i = #nearbyPoints, 1, -1 do
+            if nearbyPoints[i] == point then
+                table.remove(nearbyPoints, i)
+            end
+        end
+
         point.inside, point.currentDistance, point.isClosest = nil, nil, nil
     end
 
     local function startObjectLoop()
-        if scanning then return end
+        if scanning then
+            return
+        end
+
         scanning = true
         CreateThread(function()
             while next(objectPoints) do
                 local coords = GetEntityCoords(PlayerPedId())
                 local previousPoints = { table.unpack(nearbyPoints) }
+
                 for _, point in ipairs(previousPoints) do
                     point.isClosest = nil
+
                     if point.inside and (point.hidden or #(coords - point.coords) > point.radius) then
                         point.inside, point.currentDistance = nil, nil
                         invoke(point, 'onExit')
                     end
                 end
+
                 table.wipe(nearbyPoints)
                 closestPoint = nil
+
                 local candidates = xLib.grid.getNearbyEntries(coords, function(point)
                     return objectPoints[point.id] == point and not point.hidden
                 end)
+
                 for i = 1, #candidates do
                     local point = candidates[i]
+
                     if objectPoints[point.id] == point then
                         local distance = #(coords - point.coords)
+
                         if distance <= point.radius then
                             point.currentDistance = distance
+
                             if not point.inside then
                                 point.inside = true
                                 invoke(point, 'onEnter')
                             end
+
                             if objectPoints[point.id] == point and not point.hidden then
                                 nearbyPoints[#nearbyPoints + 1] = point
+
                                 if not closestPoint or distance < closestPoint.currentDistance then
                                     closestPoint = point
                                 end
@@ -182,7 +208,11 @@ do
                         end
                     end
                 end
-                if closestPoint then closestPoint.isClosest = true end
+
+                if closestPoint then
+                    closestPoint.isClosest = true
+                end
+
                 if not ticking and #nearbyPoints > 0 then
                     ticking = true
                     CreateThread(function()
@@ -190,20 +220,29 @@ do
                             local currentCoords = GetEntityCoords(PlayerPedId())
                             -- A callback may remove another point from the live list.
                             local framePoints = { table.unpack(nearbyPoints) }
+
                             for i = #framePoints, 1, -1 do
                                 local point = framePoints[i]
+
                                 if point and objectPoints[point.id] == point and not point.hidden then
                                     point.currentDistance = #(currentCoords - point.coords)
-                                    if point.currentDistance <= point.radius then invoke(point, 'nearby') end
+
+                                    if point.currentDistance <= point.radius then
+                                        invoke(point, 'nearby')
+                                    end
                                 end
                             end
+
                             Wait(0)
                         end
+
                         ticking = false
                     end)
                 end
+
                 Wait(300)
             end
+
             scanning = false
         end)
     end
@@ -215,37 +254,61 @@ do
     ---@return table
     function xLib.points.new(coords, distance, data)
         local point = {}
+
         if type(coords) == 'table' and coords.coords then
-            for key, value in pairs(coords) do point[key] = value end
+            for key, value in pairs(coords) do
+                point[key] = value
+            end
         else
-            for key, value in pairs(data or {}) do point[key] = value end
+            for key, value in pairs(data or {}) do
+                point[key] = value
+            end
+
             point.coords = coords
             point.distance = distance
         end
+
         assert(type(point.distance) == 'number' and point.distance >= 0, 'point distance must be non-negative')
+
         local c = point.coords
+
         if type(c) ~= 'vector3' then
             assert(type(c) == 'table' or type(c) == 'vector4', 'point coords must be a vector or table')
             point.coords = vec3(c.x or c[1], c.y or c[2], c.z or c[3])
         end
+
         nextId = nextId + 1
         point.id, point.radius = nextId, point.distance
         point.resource = GetInvokingResource() or GetCurrentResourceName()
-        point.remove = function() removePoint(point) end
+        point.remove = function()
+            removePoint(point)
+        end
+
         objectPoints[point.id] = point
         xLib.grid.addEntry(point)
         startObjectLoop()
         return point
     end
 
-    function xLib.points.getAllPoints() return objectPoints end
-    function xLib.points.getNearbyPoints() return nearbyPoints end
-    function xLib.points.getClosestPoint() return closestPoint end
+    function xLib.points.getAllPoints()
+        return objectPoints
+    end
+
+    function xLib.points.getNearbyPoints()
+        return nearbyPoints
+    end
+
+    function xLib.points.getClosestPoint()
+        return closestPoint
+    end
+
     xLib.points.closest = xLib.points.getClosestPoint
 
     AddEventHandler('onResourceStop', function(resource)
         for _, point in pairs(objectPoints) do
-            if point.resource == resource then removePoint(point) end
+            if point.resource == resource then
+                removePoint(point)
+            end
         end
     end)
 end

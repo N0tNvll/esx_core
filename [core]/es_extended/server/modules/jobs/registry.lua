@@ -6,14 +6,14 @@ function ESX.RefreshJobs()
     Core.JobsLoaded = false
 
     local Jobs = {}
-    local jobs = MySQL.query.await("SELECT * FROM jobs") or {}
+    local jobs = MySQL.query.await('SELECT * FROM jobs') or {}
 
     for _, v in ipairs(jobs) do
         Jobs[v.name] = v
         Jobs[v.name].grades = {}
     end
 
-    local jobGrades = MySQL.query.await("SELECT * FROM job_grades") or {}
+    local jobGrades = MySQL.query.await('SELECT * FROM job_grades') or {}
 
     for _, v in ipairs(jobGrades) do
         if Jobs[v.job_name] then
@@ -30,27 +30,27 @@ function ESX.RefreshJobs()
         end
     end
 
-    local unemployed = Jobs["unemployed"]
+    local unemployed = Jobs['unemployed']
 
     if not unemployed then
         unemployed = {
-            name = "unemployed",
-            label = "Unemployed",
-            type = "civ",
+            name = 'unemployed',
+            label = 'Unemployed',
+            type = 'civ',
             whitelisted = false,
             grades = {},
         }
-        Jobs["unemployed"] = unemployed
+        Jobs['unemployed'] = unemployed
     end
 
-    if not unemployed.grades["0"] then
-        unemployed.grades["0"] = {
+    if not unemployed.grades['0'] then
+        unemployed.grades['0'] = {
             grade = 0,
-            name = "unemployed",
-            label = "Unemployed",
+            name = 'unemployed',
+            label = 'Unemployed',
             salary = 200,
-            skin_male = "{}",
-            skin_female = "{}",
+            skin_male = '{}',
+            skin_female = '{}',
         }
 
         print('[^3WARNING^7] Missing unemployed grade 0, using the default fallback')
@@ -58,7 +58,7 @@ function ESX.RefreshJobs()
 
     ESX.Jobs = Jobs
 
-    TriggerEvent("esx:jobsRefreshed")
+    TriggerEvent('esx:jobsRefreshed')
     Core.JobsLoaded = true
 end
 
@@ -66,37 +66,37 @@ local function removeStaleJob(jobName, reason)
     ESX.Jobs[jobName] = nil
     print(('[^3WARNING^7] Ignoring refresh of job ^5"%s"^0 due to %s'):format(jobName, reason))
 
-    if jobName == "unemployed" or not ESX.DoesJobExist("unemployed", 0) then
+    if jobName == 'unemployed' or not ESX.DoesJobExist('unemployed', 0) then
         return false
     end
 
     for _, xPlayer in pairs(ESX.Players) do
         if xPlayer.job.name == jobName then
-            xPlayer.setJob("unemployed", 0, false)
+            xPlayer.setJob('unemployed', 0, false)
         end
     end
 
-    TriggerEvent("esx:jobRemoved", jobName, reason)
+    TriggerEvent('esx:jobRemoved', jobName, reason)
     return false
 end
 
 ---@param jobName string
 ---@return boolean
 function ESX.RefreshJob(jobName)
-    if type(jobName) ~= "string" or jobName == "" then
+    if type(jobName) ~= 'string' or jobName == '' then
         return false
     end
 
-    local job = MySQL.single.await("SELECT * FROM jobs WHERE name = ?", { jobName })
+    local job = MySQL.single.await('SELECT * FROM jobs WHERE name = ?', { jobName })
 
     if not job then
-        return removeStaleJob(jobName, "missing job")
+        return removeStaleJob(jobName, 'missing job')
     end
 
-    local jobGrades = MySQL.query.await("SELECT * FROM job_grades WHERE job_name = ?", { jobName })
+    local jobGrades = MySQL.query.await('SELECT * FROM job_grades WHERE job_name = ?', { jobName })
 
     if #jobGrades == 0 then
-        return removeStaleJob(jobName, "no job grades found")
+        return removeStaleJob(jobName, 'no job grades found')
     end
 
     job.grades = {}
@@ -113,7 +113,7 @@ function ESX.RefreshJob(jobName)
         end
     end
 
-    TriggerEvent("esx:jobRefreshed", jobName, job)
+    TriggerEvent('esx:jobRefreshed', jobName, job)
 
     return true
 end
@@ -129,14 +129,16 @@ function ESX.GetJobs(jobType)
         return ESX.Jobs
     end
 
-    jobType = type(jobType) == "string" and { jobType } or jobType
+    jobType = type(jobType) == 'string' and { jobType } or jobType
 
     local jobTypeLookup = {}
+
     for i = 1, #jobType do
         jobTypeLookup[jobType[i]] = true
     end
 
     local filteredJobs = {}
+
     for jobName, jobObject in pairs(ESX.Jobs) do
         if jobTypeLookup[jobObject.type] then
             filteredJobs[jobName] = jobObject

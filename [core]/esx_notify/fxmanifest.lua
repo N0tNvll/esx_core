@@ -11,7 +11,7 @@ version '1.16.3'
 
 shared_script '@es_extended/imports.lua'
 
-client_scripts { 'Config.lua', 'Notify.lua'}
+client_scripts { 'Config.lua', 'Notify.lua' }
 
 ui_page 'nui/index.html'
 

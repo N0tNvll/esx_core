@@ -7,15 +7,15 @@ xLib.markerZone = {}
 local function toVector3(coords)
     local coordsType = type(coords)
 
-    if coordsType == "vector3" then
+    if coordsType == 'vector3' then
         return coords
     end
 
-    if coordsType == "vector4" then
+    if coordsType == 'vector4' then
         return vector3(coords.x, coords.y, coords.z)
     end
 
-    if type(coords) ~= "table" then
+    if type(coords) ~= 'table' then
         return
     end
 
@@ -31,12 +31,12 @@ local function toVector3(coords)
 end
 
 local function axis(value, key, fallback)
-    if type(value) == "vector3" then
+    if type(value) == 'vector3' then
         return value[key]
     end
 
-    if type(value) == "table" then
-        return value[key] or value[key == "x" and 1 or key == "y" and 2 or 3] or fallback
+    if type(value) == 'table' then
+        return value[key] or value[key == 'x' and 1 or key == 'y' and 2 or 3] or fallback
     end
 
     return fallback
@@ -49,32 +49,7 @@ local function drawMarker(marker, coords)
     local color = marker.color or {}
     local rotation = marker.rotation or marker.rot or {}
 
-    DrawMarker(
-        marker.type or marker.markerType or 1,
-        coords.x,
-        coords.y,
-        coords.z,
-        axis(marker.direction, "x", 0.0),
-        axis(marker.direction, "y", 0.0),
-        axis(marker.direction, "z", 0.0),
-        axis(rotation, "x", 0.0),
-        axis(rotation, "y", 0.0),
-        axis(rotation, "z", 0.0),
-        axis(size, "x", marker.sizeX or 1.5),
-        axis(size, "y", marker.sizeY or 1.5),
-        axis(size, "z", marker.sizeZ or 1.0),
-        color.r or color[1] or marker.r or 255,
-        color.g or color[2] or marker.g or 255,
-        color.b or color[3] or marker.b or 255,
-        color.a or color[4] or marker.a or 100,
-        marker.bobUpAndDown or false,
-        marker.faceCamera ~= false,
-        marker.p19 or 2,
-        marker.rotate or false,
-        marker.textureDict,
-        marker.textureName,
-        marker.drawOnEnts or false
-    )
+    DrawMarker(marker.type or marker.markerType or 1, coords.x, coords.y, coords.z, axis(marker.direction, 'x', 0.0), axis(marker.direction, 'y', 0.0), axis(marker.direction, 'z', 0.0), axis(rotation, 'x', 0.0), axis(rotation, 'y', 0.0), axis(rotation, 'z', 0.0), axis(size, 'x', marker.sizeX or 1.5), axis(size, 'y', marker.sizeY or 1.5), axis(size, 'z', marker.sizeZ or 1.0), color.r or color[1] or marker.r or 255, color.g or color[2] or marker.g or 255, color.b or color[3] or marker.b or 255, color.a or color[4] or marker.a or 100, marker.bobUpAndDown or false, marker.faceCamera ~= false, marker.p19 or 2, marker.rotate or false, marker.textureDict, marker.textureName, marker.drawOnEnts or false)
 end
 
 ---@class MarkerZoneOptions
@@ -96,11 +71,12 @@ end
 ---@param data MarkerZoneOptions
 ---@return table|nil zone
 function xLib.markerZone.create(data)
-    if type(data) ~= "table" then
+    if type(data) ~= 'table' then
         return
     end
 
     local coords = toVector3(data.coords)
+
     if not coords then
         return
     end
@@ -116,47 +92,57 @@ function xLib.markerZone.create(data)
     local function leave(distance)
         if inInteractionRange then
             inInteractionRange = false
-            if data.onExit then data.onExit(distance) end
+
+            if data.onExit then
+                data.onExit(distance)
+            end
         end
 
         if pointNearby then
             pointNearby = false
-            if data.onExitPoint then data.onExitPoint() end
+
+            if data.onExitPoint then
+                data.onExitPoint()
+            end
         end
     end
 
-    local handle = xLib.points.create(
-        coords,
-        drawDistance,
-        data.hidden,
-        function()
-            pointNearby = true
-            if data.onEnterPoint then data.onEnterPoint() end
-        end,
-        function()
-            leave(drawDistance)
-        end,
-        function(distance)
-            if marker ~= false and (not data.canDraw or data.canDraw(distance)) then
-                drawMarker(marker, coords)
+    local handle = xLib.points.create(coords, drawDistance, data.hidden, function()
+        pointNearby = true
+
+        if data.onEnterPoint then
+            data.onEnterPoint()
+        end
+    end, function()
+        leave(drawDistance)
+    end, function(distance)
+        if marker ~= false and (not data.canDraw or data.canDraw(distance)) then
+            drawMarker(marker, coords)
+        end
+
+        local activeDistance = inInteractionRange and exitDistance or interactDistance
+        local canInteract = distance <= activeDistance and (not data.canInteract or data.canInteract(distance))
+
+        if canInteract then
+            if not inInteractionRange then
+                inInteractionRange = true
+
+                if data.onEnter then
+                    data.onEnter(distance)
+                end
             end
 
-            local activeDistance = inInteractionRange and exitDistance or interactDistance
-            local canInteract = distance <= activeDistance and (not data.canInteract or data.canInteract(distance))
+            if data.onInside then
+                data.onInside(distance)
+            end
+        elseif inInteractionRange then
+            inInteractionRange = false
 
-            if canInteract then
-                if not inInteractionRange then
-                    inInteractionRange = true
-                    if data.onEnter then data.onEnter(distance) end
-                end
-
-                if data.onInside then data.onInside(distance) end
-            elseif inInteractionRange then
-                inInteractionRange = false
-                if data.onExit then data.onExit(distance) end
+            if data.onExit then
+                data.onExit(distance)
             end
         end
-    )
+    end)
 
     xLib.points.startLoop()
 
@@ -169,7 +155,7 @@ function xLib.markerZone.create(data)
                 local ok, err = pcall(leave, #(GetEntityCoords(PlayerPedId()) - coords))
 
                 if not ok then
-                    print(("[^1ERROR^7] markerZone ^5%s^7 errored on remove: %s"):format(handle, err))
+                    print(('[^1ERROR^7] markerZone ^5%s^7 errored on remove: %s'):format(handle, err))
                 end
             end
         end,
@@ -178,7 +164,7 @@ function xLib.markerZone.create(data)
         end,
         show = function()
             xLib.points.hide(handle, false)
-        end
+        end,
     }
 end
 

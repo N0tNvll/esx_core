@@ -11,10 +11,9 @@
 ]]
 
 -- Const Variables
-local CONTEXT<const> = IsDuplicityVersion() and 'server' or 'client'
+local CONTEXT <const> = IsDuplicityVersion() and 'server' or 'client'
 local LIB_NAME <const> = 'esx_lib'
 local IS_DEBUG <const> = GetConvar('xLib:debug', 'false') == 'true'
-
 
 ---@alias Module table | function
 ---@class xLib
@@ -39,7 +38,7 @@ local function loadModule(self, name)
     local shared_chunk = LoadResourceFile(LIB_NAME, ('%s/shared.lua'):format(directory))
 
     if shared_chunk then
-        chunk = chunk and ('%s\n%s'):format(shared_chunk, chunk) or shared_chunk 
+        chunk = chunk and ('%s\n%s'):format(shared_chunk, chunk) or shared_chunk
     end
 
     if not chunk then
@@ -51,8 +50,7 @@ local function loadModule(self, name)
 
     if not fn or err then
         if shared_chunk then
-            print(('[%s] Found an error while importing - %s! Try updating %s to the latest version!'):format(LIB_NAME,
-                name, LIB_NAME))
+            print(('[%s] Found an error while importing - %s! Try updating %s to the latest version!'):format(LIB_NAME, name, LIB_NAME))
 
             -- Tries to load only shared.lua
             fn, err = load(shared_chunk, ('@@%s/imports/%s/%s.lua'):format(LIB_NAME, name, 'shared'))
@@ -64,6 +62,7 @@ local function loadModule(self, name)
     end
 
     local result = fn()
+
     self[name] = result or Noop
 
     return self[name]
@@ -83,9 +82,9 @@ local function call(self, index, ...)
 
         if not module then
             local function method(...)
-               return exports[LIB_NAME][index](nil, ...)
+                return exports[LIB_NAME][index](nil, ...)
             end
-                
+
             if not ... then
                 -- Cache missing-module export proxies only after the real import failed.
                 self[index] = method
@@ -98,7 +97,6 @@ local function call(self, index, ...)
     return module
 end
 
-
 -------------------------------------------------
 --- Environment Setup
 -------------------------------------------------
@@ -108,7 +106,7 @@ end
 local xLib = setmetatable({
     name = LIB_NAME,
     side = CONTEXT,
-    debug = IS_DEBUG
+    debug = IS_DEBUG,
 }, {
     -- Lazy Loading - loads module only when accessed
     __index = call,
