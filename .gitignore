@@ -15,6 +15,13 @@ coverage/
 test-results/
 playwright-report/
 
+# Local test suites.
+tests/
+
+# Local tooling and documentation.
+docs/
+tools/
+
 # Logs and temporary editor files.
 *.log
 *.tmp
