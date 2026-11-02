@@ -18,11 +18,15 @@ function class:new(...)
     return instance
 end
 
-function Class(body, heritage)
+local function Class(body, heritage)
     local prototype = body or {}
 
     prototype.__index = prototype
     return setmetatable(prototype, heritage or class)
+end
+
+if rawget(_ENV, 'Class') == nil then
+    rawset(_ENV, 'Class', Class)
 end
 
 return Class
