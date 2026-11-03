@@ -67,6 +67,32 @@ local function isFiniteNumber(value)
     return type(value) == 'number' and value == value and value ~= math.huge and value ~= -math.huge
 end
 
+local function isWithinCoordinateLimit(x, y, z)
+    local limit = Config.PlayerCoordinateLimit
+
+    if not isFiniteNumber(limit) or limit <= 0 then
+        limit = 10000.0
+    end
+
+    return isFiniteNumber(x) and isFiniteNumber(y) and isFiniteNumber(z) and math.abs(x) <= limit and math.abs(y) <= limit and math.abs(z) <= limit
+end
+
+local function getHeadingFromCoords(coords, coordinateType)
+    if coordinateType == 'vector4' then
+        return coords.w
+    elseif coordinateType == 'table' then
+        if coords.w ~= nil then
+            return coords.w
+        end
+
+        if coords.heading ~= nil then
+            return coords.heading
+        end
+    end
+
+    return nil
+end
+
 xLib.callback.registerCompat('esx:spawnVehicle', function(source, cb, vehData)
     print('[^3WARNING^7] esx:spawnVehicle callback is deprecated and will be removed in a future update.')
 
@@ -90,8 +116,13 @@ xLib.callback.registerCompat('esx:spawnVehicle', function(source, cb, vehData)
 
     local coords = vehData.coords
     local coordinateType = type(coords)
+    local coordsValid = false
 
-    if (coordinateType ~= 'table' and coordinateType ~= 'vector3' and coordinateType ~= 'vector4') or not isFiniteNumber(coords.x) or not isFiniteNumber(coords.y) or not isFiniteNumber(coords.z) then
+    if (coordinateType == 'table' or coordinateType == 'vector3' or coordinateType == 'vector4') and isWithinCoordinateLimit(coords.x, coords.y, coords.z) then
+        coordsValid = true
+    end
+
+    if not coordsValid then
         coords = GetEntityCoords(ped)
         coordinateType = type(coords)
     end
@@ -99,11 +130,8 @@ xLib.callback.registerCompat('esx:spawnVehicle', function(source, cb, vehData)
     local heading = tonumber(vehData.heading)
 
     if not isFiniteNumber(heading) then
-        if coordinateType == 'vector4' then
-            heading = coords.w
-        elseif coordinateType == 'table' then
-            heading = tonumber(coords.w) or tonumber(coords.heading)
-        end
+        local headingFromCoords = getHeadingFromCoords(coords, coordinateType)
+        heading = tonumber(headingFromCoords)
     end
 
     if not isFiniteNumber(heading) then
