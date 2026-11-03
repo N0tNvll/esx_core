@@ -207,13 +207,13 @@ function Database:RemoveSlots(identifier)
 end
 
 function Database:EnableSlot(identifier, slot)
-    local selectedCharacter = ('char%s:%s'):format(slot, identifier)
+    local selectedCharacter = ('%s%s:%s'):format(Server.prefix, slot, identifier)
     local updated = MySQL.update.await('UPDATE `users` SET `disabled` = 0 WHERE identifier = ?', { selectedCharacter })
     return updated > 0
 end
 
 function Database:DisableSlot(identifier, slot)
-    local selectedCharacter = ('char%s:%s'):format(slot, identifier)
+    local selectedCharacter = ('%s%s:%s'):format(Server.prefix, slot, identifier)
     local updated = MySQL.update.await('UPDATE `users` SET `disabled` = 1 WHERE identifier = ?', { selectedCharacter })
     return updated > 0
 end

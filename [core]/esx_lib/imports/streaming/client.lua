@@ -157,8 +157,6 @@ end
 ---@param cb? function
 ---@return string | nil
 xLib.streaming.requestAudioBank = function(bankName, cb)
-    RequestAudioBank(bankName, false)
-
     if not waitForStreamingAsset(function() return RequestScriptAudioBank(bankName, false) end, 500) then
         return
     end
