@@ -3,22 +3,30 @@
 
 Core.PlayerClass = Core.PlayerClass or {}
 
-local function getCoordinateHeading(coordinates)
+local function getCoordinateHeadingOrNil(coordinates)
     local coordinateType = type(coordinates)
 
     if coordinateType == 'vector4' then
-        return coordinates.w
+        if isFiniteNumber(coordinates.w) then
+            return coordinates.w
+        end
+        return nil
     elseif coordinateType == 'table' then
-        if coordinates.w ~= nil then
+        if coordinates.w ~= nil and isFiniteNumber(coordinates.w) then
             return coordinates.w
         end
 
-        if coordinates.heading ~= nil then
+        if coordinates.heading ~= nil and isFiniteNumber(coordinates.heading) then
             return coordinates.heading
         end
     end
 
-    return 0.0
+    return nil
+end
+
+local function getCoordinateHeading(coordinates)
+    local heading = getCoordinateHeadingOrNil(coordinates)
+    return heading or 0.0
 end
 
 local function isFiniteNumber(value)
@@ -93,7 +101,14 @@ function Core.PlayerClass.AttachBase(self)
         lastValidCoordinates.x = coordinates.x
         lastValidCoordinates.y = coordinates.y
         lastValidCoordinates.z = coordinates.z
-        lastValidCoordinates.heading = getCoordinateHeading(coordinates)
+
+        local heading = getCoordinateHeadingOrNil(coordinates)
+
+        if isFiniteNumber(heading) then
+            lastValidCoordinates.heading = heading
+        elseif lastValidCoordinates.heading == nil then
+            lastValidCoordinates.heading = 0.0
+        end
     end
 
     if Core.PlayerClass.IsValidCoordinates(self.coords) then
