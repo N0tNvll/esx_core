@@ -49,15 +49,33 @@ function ESX.OneSync.SpawnVehicle(vehicleModel, coords, heading, vehicleProperti
     end
 
     CreateThread(function()
+        local configuredType = Core.GetConfiguredVehicleType(vehicleModel)
+        if vehicleType and not Core.IsValidVehicleType(vehicleType) then
+            return reject(('Invalid vehicle type for model ^5%s^7.'):format(vehicleModel))
+        end
+
+        if configuredType and vehicleType and vehicleType ~= configuredType then
+            return reject(('Vehicle type does not match the server configuration for model ^5%s^7.'):format(vehicleModel))
+        end
+
+        vehicleType = configuredType or vehicleType
         if not vehicleType then
             vehicleType = ESX.GetVehicleType(vehicleModel, next(ESX.Players))
         end
 
         if not vehicleType then
-            return reject(('Could not resolve the type of vehicle ^5%s^7! The model is unknown and no player is online to check it, you can also specify the vehicle type manually.'):format(vehicleModel))
+            return reject(('Could not confirm the type of vehicle ^5%s^7! Configure VehicleTypeOverrides, specify the type manually, or connect two players with distinct licenses to check it.'):format(vehicleModel))
         end
 
-        local createdVehicle = CreateVehicleServerSetter(vehicleModel, vehicleType, coords.x, coords.y, coords.z, heading)
+        if not Core.IsValidVehicleType(vehicleType) then
+            return reject(('Invalid resolved vehicle type for model ^5%s^7.'):format(vehicleModel))
+        end
+
+        local ok, createdVehicle = pcall(CreateVehicleServerSetter, vehicleModel, vehicleType, coords.x, coords.y, coords.z, heading)
+
+        if not ok then
+            return reject(('Could not spawn vehicle ^5%s^7 with type %s: %s'):format(vehicleModel, vehicleType, tostring(createdVehicle)))
+        end
 
         if not createdVehicle or createdVehicle == 0 then
             return reject(('Could not spawn vehicle - ^5%s^7!'):format(vehicleModel))

@@ -25,6 +25,7 @@ server_scripts {
     '@oxmysql/lib/MySQL.lua',
     '@esx_lib/imports/catalog/bootstrap.lua',
     'shared/config/logs.lua',
+    'server/config/vehicle_types.lua',
     'server/core.lua',
     'server/functions.lua',
     'server/modules/core/*.lua',

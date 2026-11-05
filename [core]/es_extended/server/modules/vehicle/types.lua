@@ -8,20 +8,40 @@ local PRELOAD_PAGE_SIZE <const> = 256
 local PRELOAD_MAX_MODELS <const> = 10000
 local PRELOAD_MAX_MODEL_LENGTH <const> = 64
 local PRELOAD_TIMEOUT <const> = 10000
-local validTypes <const> = {
-    automobile = true,
-    bike = true,
-    boat = true,
-    heli = true,
-    plane = true,
-    submarine = true,
-    trailer = true,
-    train = true,
-}
+local validTypes <const> = Config.ValidVehicleTypes
+assert(type(validTypes) == 'table', 'ValidVehicleTypes must be a table')
+
+for vehicleType, enabled in pairs(validTypes) do
+    assert(
+        type(vehicleType) == 'string' and #vehicleType > 0 and #vehicleType <= 64,
+        'ValidVehicleTypes requires type names between 1 and 64 characters'
+    )
+    assert(type(enabled) == 'boolean', 'ValidVehicleTypes requires boolean values')
+end
+
+---@param vehicleType any
+---@return boolean
+function Core.IsValidVehicleType(vehicleType)
+    return type(vehicleType) == 'string' and validTypes[vehicleType] == true
+end
+
+local configuredTypes = {}
+
+for model, vehicleType in pairs(Config.VehicleTypeOverrides or {}) do
+    assert(Core.IsValidVehicleType(vehicleType), ('Invalid configured vehicle type for %s'):format(model))
+    model = type(model) == 'string' and joaat(model) or model
+    assert(type(model) == 'number', 'Vehicle type overrides require a model name or hash')
+    configuredTypes[model] = vehicleType
+end
+
+function Core.GetConfiguredVehicleType(model)
+    return configuredTypes[model]
+end
 
 local storedTypes = {}
 local reports = {}
 local askedPlayers = {}
+local pendingLookups = {}
 local persistQueued = false
 local preloadReporters = {}
 local preloadReporterCount = 0
@@ -49,7 +69,7 @@ local function persistVehicleTypes()
 end
 
 local function getReporterKey(playerId)
-    return GetPlayerIdentifierByType(tostring(playerId), 'license') or ('source:%s'):format(playerId)
+    return GetPlayerIdentifierByType(tostring(playerId), 'license')
 end
 
 local function countVotes(modelReports, vehicleType)
@@ -64,40 +84,77 @@ local function countVotes(modelReports, vehicleType)
     return votes
 end
 
+local requestConfirmation
+
 local function askPlayer(model, playerId, cb)
     local player = ESX.Players[playerId]
     local reporter = getReporterKey(playerId)
     local asked = askedPlayers[model] or {}
 
+    if not player or not reporter then
+        if cb then
+            cb(false)
+        end
+        return
+    end
+
     askedPlayers[model] = asked
     asked[reporter] = true
 
-    xLib.callback('esx:GetVehicleType', playerId, function(vehicleType)
+    local completed = false
+    local function onReply(vehicleType)
+        if completed then
+            return
+        end
+        completed = true
+
+        if askedPlayers[model] ~= asked then
+            if cb then
+                cb(Core.vehicleTypesByModel[model] or false)
+            end
+            return
+        end
+
         if ESX.Players[playerId] ~= player or getReporterKey(playerId) ~= reporter then
             if cb then
                 cb(false)
             end
-
             return
         end
 
-        if askedPlayers[model] == asked then
-            Core.CacheVehicleType(model, vehicleType, playerId)
-        end
+        Core.CacheVehicleType(model, vehicleType, playerId, true)
+        requestConfirmation(model, cb)
+    end
 
-        if cb then
-            cb(validTypes[vehicleType] and vehicleType or false)
-        end
-    end, model)
+    SetTimeout(PRELOAD_TIMEOUT, function()
+        onReply(false)
+    end)
+    local ok = pcall(xLib.callback, 'esx:GetVehicleType', playerId, onReply, model)
+    if not ok then
+        onReply(false)
+    end
 end
 
-local function requestConfirmation(model)
+requestConfirmation = function(model, cb)
+    local confirmed = configuredTypes[model] or Core.vehicleTypesByModel[model]
+    if confirmed then
+        if cb then
+            cb(confirmed)
+        end
+        return
+    end
+
     local asked = askedPlayers[model] or {}
 
     for playerId in pairs(ESX.Players) do
-        if not asked[getReporterKey(playerId)] then
-            return askPlayer(model, playerId)
+        local reporter = getReporterKey(playerId)
+        if reporter and not asked[reporter] then
+            return askPlayer(model, playerId, cb)
         end
+    end
+
+    if cb then
+        cb(false)
     end
 end
 
@@ -112,7 +169,11 @@ function Core.CacheVehicleType(model, vehicleType, playerId, skipConfirmation)
         return
     end
 
-    if not validTypes[vehicleType] then
+    if configuredTypes[model] then
+        return
+    end
+
+    if not Core.IsValidVehicleType(vehicleType) then
         if playerId and not skipConfirmation and reports[model] then
             requestConfirmation(model)
         end
@@ -131,7 +192,11 @@ function Core.CacheVehicleType(model, vehicleType, playerId, skipConfirmation)
     reports[model] = modelReports
 
     if playerId then
-        modelReports[getReporterKey(playerId)] = vehicleType
+        local reporter = getReporterKey(playerId)
+        if not reporter then
+            return
+        end
+        modelReports[reporter] = vehicleType
     end
 
     local votes = countVotes(modelReports, vehicleType)
@@ -143,12 +208,6 @@ function Core.CacheVehicleType(model, vehicleType, playerId, skipConfirmation)
         Core.vehicleTypesByModel[model] = vehicleType
 
         return persistVehicleTypes()
-    end
-
-    local current = Core.vehicleTypesByModel[model]
-
-    if not current or votes > countVotes(modelReports, current) then
-        Core.vehicleTypesByModel[model] = vehicleType
     end
 
     if playerId and not skipConfirmation then
@@ -172,7 +231,7 @@ local function restoreVehicleTypes()
     for model, vehicleType in pairs(decoded.types) do
         model = tonumber(model)
 
-        if model and validTypes[vehicleType] then
+        if model and not configuredTypes[model] and Core.IsValidVehicleType(vehicleType) then
             Core.vehicleTypesByModel[model] = vehicleType
             storedTypes[tostring(model)] = vehicleType
         end
@@ -230,7 +289,7 @@ local function normalizePreloadPage(session, page)
     for modelName, vehicleType in pairs(page.types) do
         count = count + 1
 
-        if count > last - session.offset or type(modelName) ~= 'string' or #modelName == 0 or #modelName > PRELOAD_MAX_MODEL_LENGTH or not validTypes[vehicleType] then
+        if count > last - session.offset or type(modelName) ~= 'string' or #modelName == 0 or #modelName > PRELOAD_MAX_MODEL_LENGTH or not Core.IsValidVehicleType(vehicleType) then
             return
         end
 
@@ -375,23 +434,40 @@ function ESX.GetVehicleType(model, player, cb)
 
     model = type(model) == 'string' and joaat(model) or model
 
-    if Core.vehicleTypesByModel[model] then
-        if player and reports[model] then
-            local asked = askedPlayers[model]
-
-            if not (asked and asked[getReporterKey(player)]) then
-                askPlayer(model, player)
-            end
-        end
-
-        return resolve(Core.vehicleTypesByModel[model])
+    local confirmed = configuredTypes[model] or Core.vehicleTypesByModel[model]
+    if confirmed then
+        return resolve(confirmed)
     end
 
     if not player then
         return resolve(nil)
     end
 
-    askPlayer(model, player, resolve)
+    local waiters = pendingLookups[model]
+    if waiters then
+        waiters[#waiters + 1] = resolve
+    else
+        waiters = { resolve }
+        pendingLookups[model] = waiters
+
+        local function finish(result)
+            if pendingLookups[model] ~= waiters then
+                return
+            end
+            pendingLookups[model] = nil
+            for _, waiter in ipairs(waiters) do
+                waiter(result)
+            end
+        end
+
+        local reporter = getReporterKey(player)
+        local asked = askedPlayers[model]
+        if reporter and not (asked and asked[reporter]) then
+            askPlayer(model, player, finish)
+        else
+            requestConfirmation(model, finish)
+        end
+    end
 
     if promise then
         return Citizen.Await(promise)
@@ -414,6 +490,14 @@ RegisterCommand('clearvehicletypes', function(src)
     preloadGeneration = preloadGeneration + 1
     Core.vehicleTypesByModel = {}
     DeleteResourceKvp(KVP_KEY)
+
+    local cancelled = pendingLookups
+    pendingLookups = {}
+    for _, waiters in pairs(cancelled) do
+        for _, waiter in ipairs(waiters) do
+            waiter(false)
+        end
+    end
 
     print('^2[SUCCESS]^7 Cleared the vehicle type cache.')
 end, true)
