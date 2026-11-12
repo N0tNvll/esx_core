@@ -3,6 +3,10 @@
 
 Core.PlayerClass = Core.PlayerClass or {}
 
+local function isFiniteNumber(value)
+    return type(value) == 'number' and value == value and value ~= math.huge and value ~= -math.huge
+end
+
 local function getCoordinateHeadingOrNil(coordinates)
     local coordinateType = type(coordinates)
 
@@ -27,10 +31,6 @@ end
 local function getCoordinateHeading(coordinates)
     local heading = getCoordinateHeadingOrNil(coordinates)
     return heading or 0.0
-end
-
-local function isFiniteNumber(value)
-    return type(value) == 'number' and value == value and value ~= math.huge and value ~= -math.huge
 end
 
 local function areCoordinateComponentsValid(x, y, z, heading)
